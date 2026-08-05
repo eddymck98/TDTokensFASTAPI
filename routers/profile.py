@@ -1,15 +1,24 @@
-from fastapi import APIRouter, Request, Form, Depends, status
-from fastapi.responses import RedirectResponse, HTMLResponse
+from fastapi import APIRouter, Request, Depends, status
+from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from utils.database import get_supabase_client
 from utils.dependencies import require_auth
-from utils.helpers import contains_profanity, get_static_nfl_team_data
-from utils.badges_logic import sync_and_get_user_badges, AVAILABLE_TITLES, MASTER_BADGES
+from utils.helpers import get_static_nfl_team_data
 
-router = APIRouter(tags=["Profile"])
+router = APIRouter(tags=["Rules"])
 templates = Jinja2Templates(directory="templates")
 supabase = get_supabase_client()
 NFL_TEAM_DATA = get_static_nfl_team_data()
+
+@router.get("/rules", response_class=HTMLResponse)
+async def rules_page(request: Request, user=Depends(require_auth)):
+    """Renders the game rules, scoring breakdowns, and token mechanics info."""
+    profile = supabase.table("profiles").select("*").eq("id", user.id).single().execute().data
+    return templates.TemplateResponse(request=request, name="rules.html", context={
+        "request": request,
+        "profile": profile,
+        "team_data": NFL_TEAM_DATA
+    })
 
 @router.get("/profile", response_class=HTMLResponse)
 async def profile_page(request: Request, user=Depends(require_auth)):
