@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Touchdown Tokens - FastAPI</title>
+    <style>
+        body { background-color: #0f172a; color: #f8fafc; font-family: Arial, sans-serif; text-align: center; padding: 50px; }
+        h1 { color: #fbbf24; }
+        .card { background: rgba(30, 41, 59, 0.8); border: 1px solid rgba(255,255,255,0.1); padding: 20px; border-radius: 12px; max-width: 400px; margin: 20px auto; }
+    </style>
+</head>
+<body>
+    <h1>Touchdown Tokens 🏈</h1>
+    <p>Successfully running on FastAPI & Supabase!</p>
+    
+    <h2>Leaderboard Preview</h2>
+    {% for profile in profiles %}
+        <div class="card">
+            <h3>{{ profile.full_name }}</h3>
+            <p>Tokens: <b>{{ profile.tokens }} 🪙</b></p>
+            <p>Team: {{ profile.favorite_team }}</p>
+        </div>
+    {% endfor %}
+</body>
+</html>
