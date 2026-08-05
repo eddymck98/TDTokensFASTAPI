@@ -1,11 +1,12 @@
 {% extends "base.html" %}
 
 {% block content %}
+<!-- Hero Banner -->
 <div class="hero-banner">
     <div>
         <div style="font-size: 14px; letter-spacing: 2px; text-transform: uppercase; color: #93c5fd; font-weight: 600;">Available Balance</div>
-        <div class="hero-tokens-val">{{ profile.tokens }} 🪙</div>
-        <div style="font-size: 13px; color: #cbd5e1; margin-top: 4px;">True Global Bank Account</div>
+        <div class="hero-tokens-val">{{ active_tokens }} 🪙</div>
+        <div style="font-size: 13px; color: #cbd5e1; margin-top: 4px;">True Global Bank: <b>{{ true_global_tokens }} 🪙</b> (Active Wagers Deducted)</div>
     </div>
     <div style="text-align: right; border-left: 1px solid rgba(255,255,255,0.15); padding-left: 20px;">
         <div style="font-size: 12px; color: #94a3b8; text-transform: uppercase; font-weight: 700;">Welcome Back</div>
@@ -14,31 +15,37 @@
     </div>
 </div>
 
-<div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-    <h2>👁️ Your Week {{ latest_week }} Active Entries</h2>
-    <a href="/bets" class="secondary-btn">Configure / Edit Bets 🎯</a>
+<!-- MVP Banner (Only shows if a previous week is graded) -->
+{% if mvp %}
+<div class="mvp-banner">
+    <div style="font-size: 16px; letter-spacing: 2px; text-transform: uppercase; color: #f3e8ff;">🔥 Week {{ mvp.week_number }} League MVP 🔥</div>
+    <div style="font-size: 36px; font-weight: 900; margin: 5px 0; color: #ffffff;">{{ mvp.avatar_emoji }} {{ mvp.full_name }}</div>
+    <div style="font-size: 16px; color: #d8b4fe;">Dominated the slate with <b>+{{ mvp.net_tokens }} Net Tokens</b>! 🚀</div>
 </div>
+{% endif %}
 
-{% if bets %}
-    <div class="bets-grid">
-        {% for b in bets %}
-            <div class="matchup-card-item">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                    <span style="font-family: 'Bebas Neue'; font-size: 14px; color: #38bdf8; letter-spacing: 1px;">Q{{ b.weekly_questions.question_number }}</span>
-                    <span style="font-size: 11px; font-weight: 600; color: #fbbf24; background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 4px;">Active Wager</span>
-                </div>
-                <div style="font-size: 14px; font-weight: 600; color: #ffffff; margin-bottom: 8px; line-height: 1.4;">{{ b.weekly_questions.question_text }}</div>
-                <div style="display: flex; gap: 10px; font-size: 12px; color: #cbd5e1;">
-                    <span style="background: rgba(255,255,255,0.06); padding: 2px 8px; border-radius: 4px;">Pick: <b style="color: #fbbf24;">{{ b.pick }}</b></span>
-                    <span style="background: rgba(255,255,255,0.06); padding: 2px 8px; border-radius: 4px;">Wager: <b>{{ b.wager_amount }} 🪙</b></span>
-                </div>
-            </div>
-        {% endfor %}
+<h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: #fff; margin-top: 40px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">
+    👁️ Your Current Weekly Picks & Share Hub
+</h3>
+<p style="color: #94a3b8; font-size: 14px;">Review your active entries for the upcoming week and grab a quick share text for your group chat.</p>
+
+{% if active_bets %}
+    {% for bet in active_bets %}
+    <div class="matchup-card-item">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+            <span style="font-family: 'Bebas Neue'; font-size: 16px; color: #38bdf8; letter-spacing: 1px;">Q{{ bet.question_number }}</span>
+            <span style="font-size: 11px; font-weight: 600; color: #38bdf8; background: rgba(255,255,255,0.06); padding: 4px 8px; border-radius: 4px;">Pending ⏳</span>
+        </div>
+        <div style="font-size: 15px; font-weight: 600; color: #ffffff; margin-bottom: 10px;">{{ bet.question_text }}</div>
+        <div style="display: flex; gap: 12px; font-size: 13px; color: #cbd5e1;">
+            <span style="background: rgba(255,255,255,0.06); padding: 4px 10px; border-radius: 6px;">Pick: <b style="color: var(--team-color);">{{ bet.pick }}</b></span>
+            <span style="background: rgba(255,255,255,0.06); padding: 4px 10px; border-radius: 6px;">Wager: <b>{{ bet.wager_amount }} 🪙</b></span>
+        </div>
     </div>
+    {% endfor %}
 {% else %}
-    <div class="summary-box" style="text-align: center; padding: 30px;">
-        <p style="color: #cbd5e1; margin-bottom: 15px;">You haven't submitted any picks for Week {{ latest_week }} yet!</p>
-        <a href="/bets" class="auth-submit-btn" style="display: inline-block; width: auto; padding: 10px 24px; text-decoration: none;">Place Your Bets Now 🏈</a>
+    <div class="summary-box">
+        <p>You haven't submitted any picks for this week yet! Head over to the 'Bets' tab.</p>
     </div>
 {% endif %}
 {% endblock %}
