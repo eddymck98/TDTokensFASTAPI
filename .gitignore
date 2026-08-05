@@ -1,1 +1,14 @@
+# Python bytecode & cache
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+env/
+.env
 
+# OS temporary files
+.DS_Store
+Thumbs.db
+
+# Temporary exports / data
+temp_*.csv
