@@ -59,11 +59,12 @@ body {
 }
 
 /* ==========================================
-   NAVIGATION BAR (Streamlit Top Header Vibe)
+   RESPONSIVE GLASSMORPHIC NAVBAR
    ========================================== */
 
 .navbar {
-    background: rgba(15, 23, 42, 0.95);
+    background: rgba(15, 23, 42, 0.9);
+    backdrop-filter: blur(16px);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     padding: 14px 24px;
     display: flex;
@@ -72,19 +73,23 @@ body {
     position: sticky;
     top: 0;
     z-index: 1000;
-    backdrop-filter: blur(12px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
 .brand {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 24px;
+    font-size: 26px;
     color: #fbbf24;
     letter-spacing: 2px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .nav-links {
     display: flex;
-    gap: 20px;
+    gap: 18px;
     align-items: center;
 }
 
@@ -93,11 +98,62 @@ body {
     text-decoration: none;
     font-size: 14px;
     font-weight: 600;
-    transition: color 0.2s ease;
+    transition: color 0.2s ease, text-shadow 0.2s ease;
 }
 
 .nav-links a:hover, .nav-links a.active {
     color: #38bdf8;
+    text-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+}
+
+/* Mobile Hamburger Toggle Button (Hidden by default on desktop) */
+.mobile-menu-btn {
+    display: none;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #fbbf24;
+    font-size: 22px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.mobile-menu-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* Responsive Breakpoint for Mobile Devices */
+@media (max-width: 900px) {
+    .mobile-menu-btn {
+        display: block;
+    }
+
+    .nav-links {
+        display: none;
+        flex-direction: column;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background: rgba(11, 17, 32, 0.98);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+        padding: 20px 0;
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.7);
+        text-align: center;
+        gap: 16px;
+    }
+
+    .nav-links.active {
+        display: flex;
+    }
+
+    .nav-links a {
+        font-size: 16px;
+        padding: 8px 0;
+        width: 100%;
+    }
 }
 
 /* ==========================================
