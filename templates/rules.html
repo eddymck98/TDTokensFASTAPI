@@ -1,49 +1,93 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container">
-    <div class="hero-banner">
-        <div>
-            <h1 style="font-family: 'Bebas Neue', sans-serif; font-size: 42px; color: #fbbf24; margin: 0; letter-spacing: 2px;">Rules & Game Guide</h1>
-            <p style="color: #94a3b8; margin: 5px 0 0 0; font-size: 14px;">Master the gridiron strategy, token wagers, and mini-league mechanics.</p>
-        </div>
-        <div style="font-size: 48px;">📖</div>
+<div class="container" style="max-width: 900px; margin: 30px auto; padding: 0 20px;">
+    
+    <!-- Header -->
+    <div style="margin-bottom: 30px;">
+        <h1 style="font-family: 'Bebas Neue', sans-serif; font-size: 38px; color: #fbbf24; margin: 0; letter-spacing: 2px;">📖 Rules & Information Hub</h1>
+        <p style="color: #94a3b8; font-size: 15px; margin: 5px 0 0 0;">Everything you need to know about dominating Touchdown Tokens.</p>
     </div>
 
-    <!-- Section 1: Token Bank & Wagers -->
-    <div class="matchup-box">
-        <h3 style="color: #fbbf24; margin-top: 0; font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 1px;">🪙 Token Bank & Weekly Wagers</h3>
-        <p style="color: #cbd5e1; font-size: 14px; line-height: 1.6;">
-            Every player starts with a foundational bank of tokens. Each week, a fresh slate of matchup prediction questions goes live. Allocate your tokens strategically across your picks—the higher your confidence, the larger your potential return when outcomes lock in and grade out successfully.
-        </p>
-        <ul style="color: #94a3b8; font-size: 14px; padding-left: 20px; line-height: 1.6;">
-            <li><strong>Over-Wager Protection:</strong> The system prevents you from allocating more tokens than your available balance.</li>
-            <li><strong>Dynamic Recalculation:</strong> Once an administrator grades a week's matchups live, your bank updates automatically.</li>
+    <!-- Rule Card 01 -->
+    <div class="rule-card">
+        <div class="rule-step-num">01 / THE CORE PREMISE</div>
+        <div style="font-size: 18px; font-weight: 700; color: #ffffff; margin-bottom: 8px;">10 Scenarios. Cumulative Tokens. High Stakes.</div>
+        <p style="color: #cbd5e1; line-height: 1.6; margin: 0;">Each week brings 10 custom NFL scenarios. Every player starts with 10 tokens. When you win a bet, your wagered tokens double! Lose a bet, and those wagered tokens are lost. Your token bank is cumulative across the entire season—build a massive lead or claw your way back from zero.</p>
+    </div>
+
+    <!-- Rule Card 02 -->
+    {% set current_team = profile.favorite_team if profile and profile.favorite_team else "🏈 Free Agent / Neutral" %}
+    {% set team_color = team_data[current_team].color if current_team in team_data else "#fbbf24" %}
+    <div class="rule-card">
+        <div class="rule-step-num">02 / TOUCHDOWN SCORER BONUS</div>
+        <div style="font-size: 18px; font-weight: 700; color: #ffffff; margin-bottom: 8px;">The Free Weekly Scorer Pick (+5 Tokens)</div>
+        <p style="color: #cbd5e1; line-height: 1.6; margin: 0;">At the bottom of your weekly slate, you can name 1 player to score a touchdown. If your chosen player rushes or receives a touchdown, you instantly pocket <b style="color: {{ team_color }};">+5 bonus tokens</b> for the next week! <i>Note: Passing touchdowns do not count.</i></p>
+    </div>
+
+    <!-- Rule Card 03 -->
+    <div class="rule-card">
+        <div class="rule-step-num">03 / SCHEDULE & CUTOFFS</div>
+        <div style="font-size: 18px; font-weight: 700; color: #ffffff; margin-bottom: 8px;">Sunday & Monday Slates Only</div>
+        <p style="color: #cbd5e1; line-height: 1.6; margin: 0;">All scenarios feature Sunday or Monday games (no Thursday night fixtures). Submissions automatically lock down precisely <b style="color: #38bdf8;">15 minutes before the first Sunday kickoff</b>. Make sure your lock-ins are saved before time expires!</p>
+    </div>
+
+    <!-- Rule Card 04 -->
+    <div class="rule-card">
+        <div class="rule-step-num">04 / IMPORTANT LEAGUE POLICIES</div>
+        <div style="font-size: 18px; font-weight: 700; color: #ffffff; margin-bottom: 8px;">Fair Play, Overrides & Inactive Scratches</div>
+        <ul style="color: #cbd5e1; padding-left: 20px; line-height: 1.6; margin: 0;">
+            <li style="margin-bottom: 6px;"><b>Submissions & Overrides:</b> You can update your picks and wagers as many times as you like before the kickoff deadline. <b>Your final submit will be your real one and it will completely override your previous picks!</b></li>
+            <li style="margin-bottom: 6px;"><b>Submitting with 0 Wagers:</b> Even if you don't want to risk any tokens on a specific question, you can still submit your Yes/No answer with a <b>0 token wager</b> to test your predictions and see how you would have performed!</li>
+            <li style="margin-bottom: 6px;"><b>Late Scratches:</b> If a specific player mentioned in a scenario is ruled out before kickoff, bets on that scenario are fully refunded.</li>
+            <li style="margin-bottom: 6px;"><b>Missed Weeks:</b> Taking a week off is totally fine, though consistent consecutive absences may incur point deductions.</li>
+            <li><b>One Choice Per Question:</b> Lock in either Yes or No per matchup.</li>
         </ul>
     </div>
 
-    <!-- Section 2: Touchdown Scorer Bonus -->
-    <div class="matchup-box">
-        <h3 style="color: #fbbf24; margin-top: 0; font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 1px;">🏈 Touchdown Scorer Picks</h3>
-        <p style="color: #cbd5e1; font-size: 14px; line-height: 1.6;">
-            Alongside your weekly matchup predictions, you can lock in a designated Touchdown Scorer choice for extra point multipliers and community bragging rights. Make sure to input player names accurately before locking your weekly card!
-        </p>
+    <!-- Pro Tip Card -->
+    <div class="rule-card" style="border-top-color: #38bdf8;">
+        <div class="rule-step-num" style="color: #38bdf8;">📱 PRO TIP / MOBILE ACCESS</div>
+        <div style="font-size: 18px; font-weight: 700; color: #ffffff; margin-bottom: 8px;">Add Touchdown Tokens to Your Phone Home Screen</div>
+        <p style="color: #cbd5e1; line-height: 1.6; margin-bottom: 12px;">Treat this app like a native mobile app for instant access on game days:</p>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div style="background: rgba(15,23,42,0.6); padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08);">
+                <b style="color: #38bdf8;">🍎 iPhone (Safari):</b><br>Tap the <i>Share Button</i> at the bottom → Select <b>'Add to Home Screen'</b>.
+            </div>
+            <div style="background: rgba(15,23,42,0.6); padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08);">
+                <b style="color: #38bdf8;">🤖 Android (Chrome):</b><br>Tap the <i>3 Dots Menu</i> at top right → Select <b>'Install App'</b> or <b>'Add to Home Screen'</b>.
+            </div>
+        </div>
     </div>
 
-    <!-- Section 3: Mini-Leagues & Trash Talk -->
-    <div class="matchup-box">
-        <h3 style="color: #fbbf24; margin-top: 0; font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 1px;">🏆 Mini-Leagues & Standings</h3>
-        <p style="color: #cbd5e1; font-size: 14px; line-height: 1.6;">
-            Compete directly against friends by creating or joining custom mini-leagues using secure 6-character invite codes and optional passcodes. Use the built-in league trash talk feeds to keep the rivalry fierce throughout the season.
-        </p>
+    <!-- FAQ Section -->
+    <div class="rule-card" style="margin-top: 30px;">
+        <div class="rule-step-num">❓ FAQ</div>
+        <h3 style="color: #fbbf24; font-family: 'Bebas Neue', sans-serif; font-size: 24px; margin-top: 5px; letter-spacing: 1px;">Frequently Asked Questions</h3>
+        
+        <div style="color: #cbd5e1; font-size: 14px; line-height: 1.6;">
+            <p><strong>Q: What happens if an NFL game is postponed or canceled?</strong><br>
+            <em>A:</em> Any scenario connected to a game that is postponed or canceled is automatically voided, and all tokens wagered on that scenario are fully refunded to your bank.</p>
+            
+            <p><strong>Q: Can I submit my picks without wagering any tokens?</strong><br>
+            <em>A:</em> Yes! Even if you don't want to risk any tokens on a question, you can lock in your Yes/No pick with a <strong>0 token wager</strong>. This lets you participate, test your predictions, and track how well you would have done without risking your bank balance.</p>
+            
+            <p><strong>Q: Can I change my picks after submitting them?</strong><br>
+            <em>A:</em> Yes, you can submit new picks and wagers as many times as you like before the kickoff lockout. <strong>Your final submit will be your real one and it will completely override your previous picks.</strong></p>
+            
+            <p><strong>Q: How does the Touchdown Scorer bonus work?</strong><br>
+            <em>A:</em> You can name any player to score a rushing or receiving touchdown. Passing touchdowns do not count. If your selected player scores, you pocket <strong>+5 bonus tokens</strong> for the following week!</p>
+            
+            <p><strong>Q: What is a "Nemesis" on the leaderboard?</strong><br>
+            <em>A:</em> Your Nemesis is the player in your selected league whom you disagreed with the most on weekly bets where they ended up winning points at your expense!</p>
+            
+            <p><strong>Q: How do I unlock prestigious nametag titles?</strong><br>
+            <em>A:</em> Titles like <em>The Oracle</em>, <em>Token Tycoon</em>, and <em>Gridiron Prophet</em> unlock automatically as you achieve milestone records or unlock specific badges in your Virtual Trophy Cabinet. Once unlocked, you can select them from your <strong>Profile</strong> tab!</p>
+            
+            <p style="margin-bottom: 0;"><strong>Q: What happens if my token balance drops to 0?</strong><br>
+            <em>A:</em> Don't worry! Reaching 0 tokens unlocks the <em>Down Bad</em> badge and title, but you can always bounce back in future weeks through the Touchdown Scorer bonus or special league events.</p>
+        </div>
     </div>
 
-    <!-- Section 4: Customization & Profile -->
-    <div class="matchup-box">
-        <h3 style="color: #fbbf24; margin-top: 0; font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 1px;">🎨 Customization & Titles</h3>
-        <p style="color: #cbd5e1; font-size: 14px; line-height: 1.6;">
-            Head over to your <strong>Profile</strong> tab to customize your avatar emoji, border styles, nametags, and favorite NFL team. Your chosen team branding and assets will dynamically reflect across the dashboard experience.
-        </p>
-    </div>
 </div>
 {% endblock %}
