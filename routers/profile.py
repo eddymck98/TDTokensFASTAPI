@@ -1,11 +1,17 @@
 from fastapi import APIRouter, Request, Form, Depends, status
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from utils.database import get_supabase_client
 from utils.dependencies import require_auth
-from utils.helpers import get_static_nfl_team_data
+from utils.helpers import (
+    get_static_nfl_team_data,
+    sync_and_get_user_badges,
+    contains_profanity,
+    MASTER_BADGES,
+    AVAILABLE_TITLES
+)
 
-router = APIRouter(tags=["Rules"])
+router = APIRouter(tags=["Profile & Rules"])
 templates = Jinja2Templates(directory="templates")
 supabase = get_supabase_client()
 NFL_TEAM_DATA = get_static_nfl_team_data()
@@ -30,6 +36,7 @@ async def profile_page(request: Request, user=Depends(require_auth)):
         "request": request,
         "profile": profile,
         "teams": list(NFL_TEAM_DATA.keys()),
+        "team_data": NFL_TEAM_DATA,
         "unlocked_badges": unlocked_badges,
         "master_badges": MASTER_BADGES,
         "available_titles": AVAILABLE_TITLES
