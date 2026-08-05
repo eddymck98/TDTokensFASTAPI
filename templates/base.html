@@ -26,17 +26,12 @@
             <a href="/bets">Bets</a>
             <a href="/leagues">Leagues</a>            
             <a href="/settings">Settings</a>
-            {% if profile and profile.is_admin %}
+            {% if profile is defined and profile and profile.get('is_admin') %}
                 <a href="/admin" style="color: #fbbf24;">Admin</a>
             {% endif %}
             <a href="/logout" style="color: #fca5a5;">Logout</a>
         </div>
     </nav>
-
-    <!-- Main Content Container -->
-    <main>
-        {% block content %}{% endblock %}
-    </main>
 
     <!-- Main Content Container -->
     <main>
