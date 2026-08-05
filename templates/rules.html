@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="hero-banner">
+        <div>
+            <h1 style="font-family: 'Bebas Neue', sans-serif; font-size: 42px; color: #fbbf24; margin: 0; letter-spacing: 2px;">Rules & Game Guide</h1>
+            <p style="color: #94a3b8; margin: 5px 0 0 0; font-size: 14px;">Master the gridiron strategy, token wagers, and mini-league mechanics.</p>
+        </div>
+        <div style="font-size: 48px;">📖</div>
+    </div>
+
+    <!-- Section 1: Token Bank & Wagers -->
+    <div class="matchup-box">
+        <h3 style="color: #fbbf24; margin-top: 0; font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 1px;">🪙 Token Bank & Weekly Wagers</h3>
+        <p style="color: #cbd5e1; font-size: 14px; line-height: 1.6;">
+            Every player starts with a foundational bank of tokens. Each week, a fresh slate of matchup prediction questions goes live. Allocate your tokens strategically across your picks—the higher your confidence, the larger your potential return when outcomes lock in and grade out successfully.
+        </p>
+        <ul style="color: #94a3b8; font-size: 14px; padding-left: 20px; line-height: 1.6;">
+            <li><strong>Over-Wager Protection:</strong> The system prevents you from allocating more tokens than your available balance.</li>
+            <li><strong>Dynamic Recalculation:</strong> Once an administrator grades a week's matchups live, your bank updates automatically.</li>
+        </ul>
+    </div>
+
+    <!-- Section 2: Touchdown Scorer Bonus -->
+    <div class="matchup-box">
+        <h3 style="color: #fbbf24; margin-top: 0; font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 1px;">🏈 Touchdown Scorer Picks</h3>
+        <p style="color: #cbd5e1; font-size: 14px; line-height: 1.6;">
+            Alongside your weekly matchup predictions, you can lock in a designated Touchdown Scorer choice for extra point multipliers and community bragging rights. Make sure to input player names accurately before locking your weekly card!
+        </p>
+    </div>
+
+    <!-- Section 3: Mini-Leagues & Trash Talk -->
+    <div class="matchup-box">
+        <h3 style="color: #fbbf24; margin-top: 0; font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 1px;">🏆 Mini-Leagues & Standings</h3>
+        <p style="color: #cbd5e1; font-size: 14px; line-height: 1.6;">
+            Compete directly against friends by creating or joining custom mini-leagues using secure 6-character invite codes and optional passcodes. Use the built-in league trash talk feeds to keep the rivalry fierce throughout the season.
+        </p>
+    </div>
+
+    <!-- Section 4: Customization & Profile -->
+    <div class="matchup-box">
+        <h3 style="color: #fbbf24; margin-top: 0; font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 1px;">🎨 Customization & Titles</h3>
+        <p style="color: #cbd5e1; font-size: 14px; line-height: 1.6;">
+            Head over to your <strong>Profile</strong> tab to customize your avatar emoji, border styles, nametags, and favorite NFL team. Your chosen team branding and assets will dynamically reflect across the dashboard experience.
+        </p>
+    </div>
+</div>
+{% endblock %}
