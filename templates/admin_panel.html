@@ -1,34 +1,74 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div style="margin-bottom: 25px;">
-    <h2 style="font-family: 'Bebas Neue', sans-serif; font-size: 38px; color: #ffffff; letter-spacing: 2px; margin: 0;">SYSTEM ADMIN MANAGEMENT PORTAL</h2>
-    <p style="color: #94a3b8; font-size: 14px; margin: 0;">Publish weekly question slates, configure matchups, and grade outcomes live.</p>
+<div class="hero-banner" style="border-top-color: #ef4444; background: linear-gradient(135deg, #7f1d1d 0%, rgba(15, 23, 42, 0.95) 100%);">
+    <div>
+        <h2 style="font-family: 'Bebas Neue', sans-serif; font-size: 42px; color: #fca5a5; margin: 0; letter-spacing: 2px;">GLOBAL ADMIN PANEL</h2>
+        <div style="font-size: 13px; color: #f87171; text-transform: uppercase; font-weight: 600;">Restricted Access: Super Admins Only</div>
+    </div>
 </div>
 
-<!-- Publish Questions Form -->
-<div class="matchup-box" style="margin-bottom: 30px; border-left-color: #fbbf24;">
-    <h3 style="font-family: 'Bebas Neue'; color: #fbbf24; font-size: 24px; margin-top: 0;">📋 Publish Weekly Questions (Week {{ next_week }})</h3>
-    <form action="/admin/questions/publish" method="POST">
-        <input type="hidden" name="week_number" value="{{ next_week }}">
-        
-        <div style="margin-bottom: 15px;">
-            <label style="display: block; color: #cbd5e1; font-size: 13px; font-weight: 600; margin-bottom: 6px;">Question 1 Prompt</label>
-            <input type="text" name="q1_prompt" required placeholder="e.g., Will QB 1 throw for over 250+ passing yards?" style="width: 100%; background: #0f172a; color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 10px; border-radius: 8px; box-sizing: border-box;">
-        </div>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-            <div>
-                <label style="display: block; color: #cbd5e1; font-size: 13px; font-weight: 600; margin-bottom: 6px;">Away Team</label>
-                <input type="text" name="q1_away" value="🏈 Free Agent / Neutral" style="width: 100%; background: #0f172a; color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 10px; border-radius: 8px; box-sizing: border-box;">
+<div class="admin-grid">
+    <!-- Add New Matchup -->
+    <div class="matchup-box" style="border-left-color: #ef4444;">
+        <h3 style="font-family: 'Bebas Neue', sans-serif; color: #ef4444; letter-spacing: 1px; margin-top: 0;">📝 ADD MATCHUP QUESTION</h3>
+        <form action="/admin/add_question" method="POST">
+            <div class="form-group">
+                <label>Week Number</label>
+                <input type="number" name="week_number" class="form-input" required>
             </div>
-            <div>
-                <label style="display: block; color: #cbd5e1; font-size: 13px; font-weight: 600; margin-bottom: 6px;">Home Team</label>
-                <input type="text" name="q1_home" value="🏈 Free Agent / Neutral" style="width: 100%; background: #0f172a; color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 10px; border-radius: 8px; box-sizing: border-box;">
+            <div class="form-group">
+                <label>Question Text</label>
+                <input type="text" name="question_text" class="form-input" placeholder="e.g. Will Mahomes throw 3+ TDs?" required>
             </div>
-        </div>
+            <div class="form-row">
+                <div class="form-group" style="flex: 1;">
+                    <label>Away Team</label>
+                    <input type="text" name="away_team" class="form-input" required>
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label>Home Team</label>
+                    <input type="text" name="home_team" class="form-input" required>
+                </div>
+            </div>
+            <button type="submit" class="btn-primary" style="background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); color: #fff;">Post Question</button>
+        </form>
+    </div>
 
-        <button type="submit" class="submit-btn">Publish Questions for Week {{ next_week }} 💾</button>
-    </form>
+    <!-- Grade Existing Matchups -->
+    <div class="summary-box">
+        <h3 style="font-family: 'Bebas Neue', sans-serif; color: #fbbf24; letter-spacing: 1px; margin-top: 0;">⚖️ GRADE PENDING MATCHUPS</h3>
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Q#</th>
+                        <th>Matchup / Question</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for q in pending_questions %}
+                    <tr>
+                        <td>{{ q.id }}</td>
+                        <td>{{ q.question_text }}<br><span style="font-size: 11px; color: #94a3b8;">{{ q.away_team }} @ {{ q.home_team }}</span></td>
+                        <td>
+                            <form action="/admin/grade/{{ q.id }}" method="POST" style="display: flex; gap: 5px;">
+                                <select name="result" class="form-input" style="padding: 5px; width: 80px;">
+                                    <option value="Yes">Yes</option>
+                                    <option value="No">No</option>
+                                    <option value="Push">Push</option>
+                                </select>
+                                <button type="submit" class="secondary-btn">Grade</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="3" style="text-align: center; color: #94a3b8;">No pending questions to grade.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 {% endblock %}
