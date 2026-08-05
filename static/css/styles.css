@@ -352,25 +352,100 @@ body {
     font-weight: 600;
 }
 /* ==========================================
-   RULES & INFO HUB COMPONENT STYLING
+   MODERN GLOSSY RULES HUB STYLING
    ========================================== */
 
-.rule-card {
-    background: rgba(15, 23, 42, 0.85);
+.rules-hero {
+    background: linear-gradient(135deg, rgba(30, 58, 138, 0.4) 0%, rgba(15, 23, 42, 0.8) 100%);
+    backdrop-filter: blur(16px);
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-top: 4px solid #fbbf24;
-    border-radius: 14px;
-    padding: 24px;
+    border-radius: 20px;
+    padding: 32px;
+    margin-bottom: 30px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.rule-card-glossy {
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.6) 100%);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 3px solid #fbbf24;
+    border-radius: 16px;
+    padding: 26px;
     margin-bottom: 20px;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.rule-card-glossy:hover {
+    transform: translateY(-2px);
+    border-color: rgba(251, 191, 36, 0.4);
 }
 
 .rule-step-num {
     font-family: 'Bebas Neue', sans-serif;
     color: #fbbf24;
-    font-size: 14px;
+    font-size: 15px;
     letter-spacing: 2px;
     text-transform: uppercase;
-    margin-bottom: 6px;
-    font-weight: 600;
+    margin-bottom: 8px;
+    opacity: 0.9;
+}
+
+/* Collapsible FAQ Accordion Styles */
+.faq-accordion {
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.6) 100%);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-left: 4px solid #38bdf8;
+    border-radius: 16px;
+    padding: 22px 26px;
+    margin-top: 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.faq-accordion details {
+    cursor: pointer;
+}
+
+.faq-accordion summary {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 24px;
+    color: #fbbf24;
+    letter-spacing: 1.5px;
+    outline: none;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.faq-accordion summary::-webkit-details-marker {
+    display: none;
+}
+
+.faq-accordion summary::after {
+    content: '+';
+    font-size: 24px;
+    color: #38bdf8;
+    transition: transform 0.2s ease;
+}
+
+.faq-accordion details[open] summary::after {
+    transform: rotate(45deg);
+}
+
+.faq-item {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    color: #cbd5e1;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.faq-item p strong {
+    color: #ffffff;
+    font-size: 15px;
 }
