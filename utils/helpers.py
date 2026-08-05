@@ -49,3 +49,29 @@ def get_static_nfl_team_data():
         "🔵 Tennessee Titans": {"logo": "https://a.espncdn.com/i/teamlogos/nfl/500/ten.png", "color": "#4B92DB"},
         "🔴 Washington Commanders": {"logo": "https://a.espncdn.com/i/teamlogos/nfl/500/was.png", "color": "#5A1414"}
     }
+
+MASTER_BADGES = {
+    "token_tycoon": {"name": "Token Tycoon", "icon": "🪙", "desc": "Accumulate 50+ total tokens."},
+    "gridiron_prophet": {"name": "Gridiron Prophet", "icon": "🔮", "desc": "Maintain a high prediction accuracy."},
+    "down_bad": {"name": "Down Bad", "icon": "📉", "desc": "Hit 0 token balance and live to tell the tale."},
+    "touchdown_machine": {"name": "Touchdown Machine", "icon": "🏈", "desc": "Successfully hit multiple TD scorer bonuses."}
+}
+
+AVAILABLE_TITLES = [
+    "Rookie Predictor",
+    "The Oracle",
+    "Token Tycoon",
+    "Gridiron Prophet",
+    "Underdog Whisperer",
+    "Down Bad Survivor"
+]
+
+def sync_and_get_user_badges(user_id: str):
+    """Fetches or checks unlocked badges for the user from Supabase."""
+    from utils.database import get_supabase_client
+    supabase = get_supabase_client()
+    try:
+        res = supabase.table("user_badges").select("badge_key").eq("user_id", user_id).execute()
+        return [r["badge_key"] for r in res.data] if res.data else []
+    except Exception:
+        return []
