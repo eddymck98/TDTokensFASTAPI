@@ -45,9 +45,57 @@
     <main>
         {% block content %}{% endblock %}
     </main>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Touchdown Tokens</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
 
-    <!-- Global Glossy Footer -->
-    <footer style="margin-top: 60px; margin-bottom: 30px; padding: 30px 20px; background: rgba(15, 23, 42, 0.85); border-top: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px; text-align: center; backdrop-filter: blur(14px); box-shadow: 0 -10px 30px rgba(0,0,0,0.5);">
+    {% set current_team = profile.favorite_team if profile and profile.favorite_team else "🏈 Free Agent / Neutral" %}
+    {% set t_color = team_data[current_team].color if team_data and current_team in team_data else "#fbbf24" %}
+    {% set t_logo = team_data[current_team].logo if team_data and current_team in team_data else "https://github.com/eddymck98/TD-Tokens-Render-/blob/main/TD%20Tokens%207.png?raw=true" %}
+
+    <!-- Premium Glossy Navbar -->
+    <nav class="navbar" style="--team-color: {{ t_color }};">
+        <a href="/dashboard" class="brand-container">
+            <div class="brand-logo-wrapper">
+                <img src="{{ t_logo }}" alt="Logo" class="brand-logo">
+            </div>
+            <h1 class="brand-text">TOUCHDOWN <span>TOKENS</span></h1>
+        </a>
+        
+        <!-- Mobile Hamburger Toggle -->
+        <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle navigation">
+            ☰
+        </button>
+
+        <!-- Navigation Links -->
+        <div class="nav-links" id="navLinks">
+            <a href="/dashboard">Home</a>
+            <a href="/bets">Bets</a>
+            <a href="/leagues">Leagues</a>
+            <a href="/rules">Rules/Info</a>
+            <a href="/profile">Profile</a>
+            <a href="/settings">Settings</a>
+            {% if profile is defined and profile and profile.get('is_admin') %}
+                <a href="/admin" class="nav-admin-btn">Admin Portal</a>
+            {% endif %}
+            <a href="/logout" class="nav-logout-btn">Logout</a>
+        </div>
+    </nav>
+
+    <!-- Main Content Container -->
+    <main style="min-height: 80vh;">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Global Footer -->
+    <footer style="margin-top: 60px; margin-bottom: 30px; padding: 35px 20px; background: rgba(15, 23, 42, 0.9); border-top: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; text-align: center; backdrop-filter: blur(16px); box-shadow: 0 -10px 30px rgba(0,0,0,0.5);">
         <div style="display: flex; justify-content: center; align-items: center; gap: 20px; margin-bottom: 15px; flex-wrap: wrap;">
             <a href="https://www.nfl.com" target="_blank" style="color: #94a3b8; font-size: 13px; text-decoration: none;">NFL Official Site</a>
             <span style="color: #475569;">•</span>
