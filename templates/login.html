@@ -1,1 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Touchdown Tokens - Login & Signup</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="login-body">
+    <div class="login-container">
+        <div class="logo-area">
+            <img src="https://github.com/eddymck98/TD-Tokens-Render-/blob/main/TD%20Tokens%207.png?raw=true" alt="Touchdown Tokens Logo" class="auth-logo">
+            <h1>TOUCHDOWN TOKENS</h1>
+            <p>Weekly NFL Predictions & Wagers</p>
+        </div>
 
+        {% if error %}
+            <div class="alert-box error">{{ error }}</div>
+        {% endif %}
+        {% if msg %}
+            <div class="alert-box success">{{ msg }}</div>
+        {% endif %}
+
+        <!-- Tabs Container -->
+        <div class="auth-tabs">
+            <button class="tab-btn active" onclick="switchTab('login')">Log In</button>
+            <button class="tab-btn" onclick="switchTab('signup')">Sign Up</button>
+        </div>
+
+        <!-- Login Form -->
+        <form id="login-form" action="/login" method="POST" class="auth-form">
+            <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" name="email" required placeholder="Enter your email">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" name="password" required placeholder="Enter your password">
+            </div>
+            <button type="submit" class="auth-submit-btn">Login 🚀</button>
+        </form>
+
+        <!-- Signup Form -->
+        <form id="signup-form" action="/signup" method="POST" class="auth-form" style="display: none;">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>First Name</label>
+                    <input type="text" name="first_name" required placeholder="First name">
+                </div>
+                <div class="form-group">
+                    <label>Surname</label>
+                    <input type="text" name="surname" required placeholder="Surname">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" name="email" required placeholder="Your email address">
+            </div>
+            <div class="form-group">
+                <label>Password (min 6 chars)</label>
+                <input type="password" name="password" required placeholder="Create a secure password">
+            </div>
+            <div class="terms-box">
+                <input type="checkbox" required id="tc">
+                <label for="tc">I agree to the Touchdown Tokens Terms of Service & User Agreement.</label>
+            </div>
+            <button type="submit" class="auth-submit-btn">Create Account & Get 10 Free Tokens 🏈</button>
+        </form>
+    </div>
+
+    <script>
+        function switchTab(tab) {
+            document.getElementById('login-form').style.display = tab === 'login' ? 'block' : 'none';
+            document.getElementById('signup-form').style.display = tab === 'signup' ? 'block' : 'none';
+            let buttons = document.querySelectorAll('.tab-btn');
+            buttons[0].classList.toggle('active', tab === 'login');
+            buttons[1].classList.toggle('active', tab === 'signup');
+        }
+    </script>
+</body>
+</html>
