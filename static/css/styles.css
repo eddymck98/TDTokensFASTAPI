@@ -1,3 +1,18 @@
+/* ==========================================
+   STREAMLIT-AUTHENTIC CORE STYLING
+   ========================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Bebas+Neue&display=swap');
+
+body {
+    background: radial-gradient(circle at 50% 10%, #0f172a 0%, #070d19 100%);
+    color: #f8fafc;
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+}
+
 .login-body {
     background: radial-gradient(circle at 50% 20%, rgba(15, 23, 42, 0.90), rgba(7, 13, 25, 0.99));
     min-height: 100vh;
@@ -42,14 +57,10 @@
     letter-spacing: 2px;
     margin: 5px 0 0 0;
 }
-body {
-    background: radial-gradient(circle at 50% 10%, #0f172a 0%, #070d19 100%);
-    color: #f8fafc;
-    font-family: 'Inter', sans-serif;
-    margin: 0;
-    padding: 0;
-    min-height: 100vh;
-}
+
+/* ==========================================
+   NAVIGATION BAR (Streamlit Top Header Vibe)
+   ========================================== */
 
 .navbar {
     background: rgba(15, 23, 42, 0.95);
@@ -85,9 +96,13 @@ body {
     transition: color 0.2s ease;
 }
 
-.nav-links a:hover {
+.nav-links a:hover, .nav-links a.active {
     color: #38bdf8;
 }
+
+/* ==========================================
+   LAYOUT CONTAINERS & CARDS
+   ========================================== */
 
 .container {
     max-width: 900px;
@@ -95,7 +110,7 @@ body {
     padding: 0 20px;
 }
 
-.matchup-box {
+.matchup-box, .matchup-card-item {
     background: rgba(15, 23, 42, 0.85);
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-left: 4px solid #fbbf24;
@@ -104,6 +119,44 @@ body {
     margin-bottom: 16px;
     box-shadow: 0 8px 25px rgba(0,0,0,0.4);
 }
+
+.summary-box {
+    background-color: rgba(15, 23, 42, 0.88);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-left: 4px solid #fbbf24;
+    padding: 20px;
+    border-radius: 14px;
+    color: #f8fafc;
+    margin-top: 16px;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.35);
+}
+
+.hero-banner {
+    background: linear-gradient(135deg, rgba(30, 58, 138, 0.85) 0%, rgba(15, 23, 42, 0.95) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-top: 4px solid #fbbf24;
+    border-radius: 20px;
+    padding: 28px;
+    margin-bottom: 25px;
+    box-shadow: 0 12px 35px rgba(0,0,0,0.6);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.hero-tokens-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 54px;
+    color: #fbbf24;
+    letter-spacing: 2px;
+    line-height: 1;
+    margin: 0;
+}
+
+/* ==========================================
+   FORMS & INPUT FIELDS (Streamlit Native Look)
+   ========================================== */
+
 .auth-tabs {
     display: flex;
     gap: 10px;
@@ -129,7 +182,7 @@ body {
 }
 
 .form-group {
-    margin-bottom: 15px;
+    margin-bottom: 16px;
 }
 
 .form-row {
@@ -145,7 +198,7 @@ body {
     margin-bottom: 6px;
 }
 
-.form-group input {
+.form-group input, .form-group select, .form-group textarea {
     width: 100%;
     background: rgba(15, 23, 42, 0.9);
     border: 1px solid rgba(255, 255, 255, 0.15);
@@ -153,6 +206,14 @@ body {
     padding: 10px 14px;
     color: #ffffff;
     box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-group input:focus, .form-group select:focus {
+    outline: none;
+    border-color: #fbbf24;
+    box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.2);
 }
 
 .terms-box {
@@ -164,69 +225,29 @@ body {
     margin-bottom: 20px;
 }
 
-.auth-submit-btn {
+/* ==========================================
+   BUTTONS & ACTIONS
+   ========================================== */
+
+.submit-btn, .auth-submit-btn {
     background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
     color: #000000;
-    width: 100%;
-    padding: 12px;
-    border: none;
-    border-radius: 8px;
-    font-weight: bold;
-    font-size: 16px;
-    cursor: pointer;
-    box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3);
-}
-
-.alert-box {
-    padding: 10px 14px;
-    border-radius: 8px;
-    font-size: 13px;
-    margin-bottom: 15px;
-}
-.alert-box.error { background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #fca5a5; }
-.alert-box.success { background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #6ee7b7; }
-
-.hero-banner {
-    background: linear-gradient(135deg, rgba(30, 58, 138, 0.85) 0%, rgba(15, 23, 42, 0.95) 100%);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-top: 4px solid #fbbf24;
-    border-radius: 20px;
-    padding: 28px;
-    margin-bottom: 25px;
-    box-shadow: 0 12px 35px rgba(0,0,0,0.6);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.hero-tokens-val {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 54px;
-    color: #fbbf24;
+    font-size: 22px;
     letter-spacing: 2px;
-    line-height: 1;
-    margin: 0;
+    text-transform: uppercase;
+    border-radius: 10px;
+    border: none;
+    padding: 12px;
+    width: 100%;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+    transition: transform 0.2s ease, filter 0.2s ease;
 }
 
-.matchup-card-item {
-    background: rgba(15, 23, 42, 0.85);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-left: 4px solid #fbbf24;
-    border-radius: 14px;
-    padding: 16px 20px;
-    margin-bottom: 12px;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.35);
-}
-
-.summary-box {
-    background-color: rgba(15, 23, 42, 0.88);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-left: 4px solid #fbbf24;
-    padding: 20px;
-    border-radius: 14px;
-    color: #f8fafc;
-    margin-top: 16px;
-    box-shadow: 0 8px 28px rgba(0,0,0,0.35);
+.submit-btn:hover, .auth-submit-btn:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.1);
 }
 
 .secondary-btn {
@@ -239,30 +260,39 @@ body {
     font-weight: 600;
     text-decoration: none;
     transition: all 0.2s ease;
+    display: inline-block;
 }
+
 .secondary-btn:hover {
     border-color: #38bdf8;
     color: #38bdf8;
 }
-.submit-btn {
-    background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
-    color: #000000;
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 24px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    border-radius: 12px;
-    border: none;
-    padding: 14px;
-    width: 100%;
-    cursor: pointer;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.5);
-    transition: transform 0.2s ease;
+
+/* ==========================================
+   ALERTS & NOTIFICATIONS
+   ========================================== */
+
+.alert-box {
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    margin-bottom: 15px;
+}
+.alert-box.error { 
+    background: rgba(239, 68, 68, 0.2); 
+    border: 1px solid #ef4444; 
+    color: #fca5a5; 
+}
+.alert-box.success { 
+    background: rgba(16, 185, 129, 0.2); 
+    border: 1px solid #10b981; 
+    color: #6ee7b7; 
 }
 
-.submit-btn:hover {
-    transform: translateY(-2px);
-}
+/* ==========================================
+   LEADERBOARD ROWS & PODIUMS
+   ========================================== */
+
 .leaderboard-row {
     background: rgba(15, 23, 42, 0.85);
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -298,4 +328,26 @@ body {
     border: 1px solid rgba(180, 83, 9, 0.6) !important;
     border-left: 4px solid #b45309 !important;
     background: linear-gradient(135deg, rgba(180, 83, 9, 0.15) 0%, rgba(15, 23, 42, 0.90) 100%) !important;
+}
+/* ==========================================
+   GLOBAL FOOTER (Streamlit Vibe)
+   ========================================== */
+
+.footer {
+    text-align: center;
+    padding: 30px 20px;
+    margin-top: 60px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    color: #94a3b8;
+    font-size: 13px;
+    background: rgba(7, 13, 25, 0.6);
+}
+
+.footer p {
+    margin: 4px 0;
+}
+
+.footer span {
+    color: #fbbf24;
+    font-weight: 600;
 }
