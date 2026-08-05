@@ -1,1 +1,51 @@
+{% extends "base.html" %}
 
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <div>
+        <h2 style="font-family: 'Bebas Neue', sans-serif; font-size: 38px; color: #ffffff; letter-spacing: 2px; margin: 0;">WEEK {{ week_number }} PREDICTIONS & WAGERS</h2>
+        <p style="color: #94a3b8; font-size: 14px; margin: 0;">Review matchups, lock in your predictions, and assign your token stakes.</p>
+    </div>
+    <div>
+        <a href="https://www.espn.com/nfl/schedule" target="_blank" class="secondary-btn">🏈 ESPN Scoreboard ↗</a>
+    </div>
+</div>
+
+<form action="/bets/submit" method="POST">
+    <input type="hidden" name="week_number" value="{{ week_number }}">
+    
+    {% for q in questions %}
+        {% set existing = existing_bets.get(q.id) %}
+        <div class="matchup-box">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <span style="font-family: 'Bebas Neue'; font-size: 18px; color: #fbbf24; letter-spacing: 1px;">QUESTION {{ q.question_number }}</span>
+            </div>
+            <div style="font-size: 15px; font-weight: 600; color: #ffffff; margin-bottom: 14px; line-height: 1.4;">
+                {{ q.question_text.split(' | MATCHUP: ')[0] }}
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; background: rgba(30, 41, 59, 0.4); padding: 12px; border-radius: 10px;">
+                <div>
+                    <label style="display: block; color: #94a3b8; font-size: 12px; margin-bottom: 4px;">YOUR PICK</label>
+                    <select name="pick_{{ q.id }}" style="width: 100%; background: #0f172a; color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 8px; border-radius: 8px;">
+                        <option value="Yes" {% if existing and existing.pick == 'Yes' %}selected{% endif %}>Yes</option>
+                        <option value="No" {% if existing and existing.pick == 'No' %}selected{% endif %}>No</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="display: block; color: #94a3b8; font-size: 12px; margin-bottom: 4px;">TOKEN WAGER (Max: {{ profile.tokens }})</label>
+                    <input type="number" name="wager_{{ q.id }}" min="0" max="{{ profile.tokens }}" value="{{ existing.wager_amount if existing else 0 }}" style="width: 100%; background: #0f172a; color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 8px; border-radius: 8px; box-sizing: border-box;">
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+
+    <div class="matchup-box" style="border-left-color: #38bdf8; margin-top: 25px;">
+        <h4 style="color: #38bdf8; font-family: 'Bebas Neue'; font-size: 20px; letter-spacing: 1px; margin-top: 0;">🏈 BONUS TOUCHDOWN SCORER</h4>
+        <p style="color: #94a3b8; font-size: 13px; margin-bottom: 10px;">Name 1 player to score a touchdown this week (rushing/receiving only). Correct pick yields +5 bonus tokens!</p>
+        <input type="text" name="td_player" value="{{ default_td }}" placeholder="Player Name (e.g., Patrick Mahomes)" style="width: 100%; background: #0f172a; color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 10px; border-radius: 8px; box-sizing: border-box;">
+    </div>
+
+    <button type="submit" class="submit-btn" style="margin-top: 20px;">Submit Weekly Bets 🚀</button>
+</form>
+{% endblock %}
