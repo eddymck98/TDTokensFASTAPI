@@ -1,1 +1,33 @@
+{% extends "base.html" %}
 
+{% block content %}
+<div style="margin-bottom: 25px;">
+    <h2 style="font-family: 'Bebas Neue', sans-serif; font-size: 38px; color: #ffffff; letter-spacing: 2px; margin: 0;">GLOBAL LEADERBOARD</h2>
+    <p style="color: #94a3b8; font-size: 14px; margin: 0;">Track player rankings, token banks, win rates, and championship standings.</p>
+</div>
+
+<div class="leaderboard-container">
+    {% for p in leaderboard %}
+        {% set rank = loop.index %}
+        <div class="leaderboard-row {% if rank == 1 %}podium-rank-1{% elif rank == 2 %}podium-rank-2{% elif rank == 3 %}podium-rank-3{% endif %}">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <span style="font-family: 'Bebas Neue'; font-size: 20px; color: #fbbf24; min-width: 30px;">
+                    {% if rank == 1 %}🥇 1{% elif rank == 2 %}🥈 2{% elif rank == 3 %}🥉 3{% else %}#{{ rank }}{% endif %}
+                </span>
+                <div style="border: 2px solid {{ p.avatar_color or '#1e3a8a' }}; border-radius: 8px; padding: 2px 6px; background: {{ p.avatar_color or '#1e3a8a' }};">
+                    <span style="font-size: 20px;">{{ p.avatar_emoji or '🏈' }}</span>
+                </div>
+                <div>
+                    <b style="font-size: 15px; color: #ffffff;">{{ p.full_name }}</b>
+                    <span style="font-size: 11px; color: #38bdf8; margin-left: 6px;">[{{ p.selected_title or 'Gridiron Contender' }}]</span>
+                    <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase;">{{ p.favorite_team }}</div>
+                </div>
+            </div>
+            <div style="text-align: right;">
+                <span style="font-family: 'Bebas Neue'; font-size: 24px; color: #38bdf8;">{{ p.tokens }} 🪙</span>
+                <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase;">Tokens</div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}
