@@ -1,52 +1,75 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div style="margin-bottom: 25px;">
-    <h2 style="font-family: 'Bebas Neue', sans-serif; font-size: 38px; color: #ffffff; letter-spacing: 2px; margin: 0;">LEAGUES & STANDINGS</h2>
-    <p style="color: #94a3b8; font-size: 14px; margin: 0;">Create or join custom mini-leagues, track peer standings, and share messages in the chat feed.</p>
+<div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 30px;">
+    <div>
+        <h2 style="font-family: 'Bebas Neue', sans-serif; font-size: 38px; color: #ffffff; letter-spacing: 2px; margin: 0;">LEAGUES & LEADERBOARDS</h2>
+        <p style="color: #94a3b8; font-size: 14px; margin: 0;">Compete with friends, join private groups, and claim the top spot.</p>
+    </div>
 </div>
 
-<!-- Create / Join Forms Grid -->
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
-    <div class="matchup-box" style="margin: 0;">
-        <h3 style="font-family: 'Bebas Neue'; color: #fbbf24; font-size: 22px; margin-top: 0;">Create a Mini-League</h3>
+<div class="admin-grid">
+    <!-- Create League -->
+    <div class="matchup-box" style="border-left-color: #10b981;">
+        <h3 style="font-family: 'Bebas Neue', sans-serif; color: #10b981; letter-spacing: 1px; margin-top: 0;">➕ CREATE A LEAGUE</h3>
         <form action="/leagues/create" method="POST">
-            <div style="margin-bottom: 12px;">
-                <label style="display: block; color: #cbd5e1; font-size: 12px; margin-bottom: 4px;">League Name</label>
-                <input type="text" name="league_name" required placeholder="e.g., Office Chumps" style="width: 100%; background: #0f172a; color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 8px; border-radius: 8px; box-sizing: border-box;">
+            <div class="form-group">
+                <label>League Name</label>
+                <input type="text" name="league_name" class="form-input" required placeholder="e.g. The Office Pool">
             </div>
-            <div style="margin-bottom: 15px;">
-                <label style="display: block; color: #cbd5e1; font-size: 12px; margin-bottom: 4px;">League Password (Optional)</label>
-                <input type="password" name="league_password" placeholder="Secure code" style="width: 100%; background: #0f172a; color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 8px; border-radius: 8px; box-sizing: border-box;">
-            </div>
-            <button type="submit" class="submit-btn" style="font-size: 18px; padding: 10px;">Create League 🚀</button>
+            <button type="submit" class="btn-primary" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">Create League</button>
         </form>
     </div>
 
-    <div class="matchup-box" style="margin: 0;">
-        <h3 style="font-family: 'Bebas Neue'; color: #38bdf8; font-size: 22px; margin-top: 0;">Join a Mini-League</h3>
+    <!-- Join League -->
+    <div class="matchup-box" style="border-left-color: #38bdf8;">
+        <h3 style="font-family: 'Bebas Neue', sans-serif; color: #38bdf8; letter-spacing: 1px; margin-top: 0;">🤝 JOIN A LEAGUE</h3>
         <form action="/leagues/join" method="POST">
-            <div style="margin-bottom: 12px;">
-                <label style="display: block; color: #cbd5e1; font-size: 12px; margin-bottom: 4px;">6-Character Invite Code</label>
-                <input type="text" name="invite_code" required placeholder="e.g., A7X9P2" style="width: 100%; background: #0f172a; color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 8px; border-radius: 8px; box-sizing: border-box; text-transform: uppercase;">
+            <div class="form-group">
+                <label>Invite Code</label>
+                <input type="text" name="invite_code" class="form-input" required placeholder="Enter 6-digit code">
             </div>
-            <div style="margin-bottom: 15px;">
-                <label style="display: block; color: #cbd5e1; font-size: 12px; margin-bottom: 4px;">League Password (If required)</label>
-                <input type="password" name="league_password" placeholder="Enter password" style="width: 100%; background: #0f172a; color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 8px; border-radius: 8px; box-sizing: border-box;">
-            </div>
-            <button type="submit" class="submit-btn" style="font-size: 18px; padding: 10px; background: linear-gradient(135deg, #38bdf8 0%, #0369a1 100%);">Join League 🤝</button>
+            <button type="submit" class="btn-primary" style="background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);">Join League</button>
         </form>
     </div>
 </div>
 
-<h3 style="font-family: 'Bebas Neue'; font-size: 28px; color: #fbbf24; letter-spacing: 1px; margin-bottom: 15px;">🛡️ Your Joined Leagues & Rosters</h3>
-{% for mem in my_leagues %}
-    {% set l = mem.leagues %}
-    <div class="summary-box" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-        <div>
-            <h4 style="margin: 0; color: #ffffff; font-size: 18px;">🛡️ {{ l.league_name }}</h4>
-            <p style="margin: 4px 0 0 0; color: #94a3b8; font-size: 13px;">Invite Code: <b style="color: #38bdf8; letter-spacing: 1px;">{{ l.invite_code }}</b></p>
+<h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: #fff; margin-top: 40px;">🏆 My Leagues</h3>
+
+{% if my_leagues %}
+    {% for league in my_leagues %}
+    <details class="summary-box" style="margin-bottom: 20px;" open>
+        <summary style="font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: var(--team-color); cursor: pointer; outline: none; list-style: none;">
+            {{ league.name }} 
+            <span style="font-family: 'Inter', sans-serif; font-size: 12px; color: #94a3b8; float: right; margin-top: 6px;">Invite Code: <b>{{ league.invite_code }}</b></span>
+        </summary>
+        
+        <div class="table-responsive" style="margin-top: 15px;">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Player</th>
+                        <th>Total Tokens</th>
+                        <th>Win Rate</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for player in league.leaderboard %}
+                    <tr class="{% if loop.index == 1 %}podium-rank-1{% elif loop.index == 2 %}podium-rank-2{% elif loop.index == 3 %}podium-rank-3{% endif %}">
+                        <td style="font-weight: bold;">#{{ loop.index }}</td>
+                        <td>{{ player.avatar_emoji }} {{ player.full_name }}</td>
+                        <td style="color: var(--team-color); font-weight: bold;">{{ player.total_tokens }} 🪙</td>
+                        <td>{{ player.win_rate }}%</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
-    </div>
-{% endfor %}
+    </details>
+    {% endfor %}
+{% else %}
+    <p style="color: #94a3b8;">You aren't in any leagues yet. Create or join one above!</p>
+{% endif %}
+{% endblock %}
 {% endblock %}
