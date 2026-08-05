@@ -9,17 +9,20 @@
 </head>
 <body>
     <nav class="navbar">
-        <div class="brand">🏈 TOUCHDOWN TOKENS</div>
-        <div class="nav-links">
-            <a href="/dashboard">Home</a>
-            <a href="/bets">Place Bets</a>
-            <a href="/leaderboard">Leaderboard</a>
-            <a href="/profile">Profile</a>
-            <a href="/leagues">Leagues</a>
-            <a href="/admin">Admin</a>
-            <a href="/logout" class="logout-btn" style="color: #fca5a5 !important;">Logout</a>
-        </div>
-    </nav>
+    <div class="brand">🏈 Touchdown Tokens</div>
+    <div class="nav-links">
+        <a href="/dashboard">Home</a>
+        <a href="/rules">Rules/Info</a>
+        <a href="/profile">Profile</a>
+        <a href="/bets">Bets</a>
+        <a href="/leagues">Leagues</a>
+        <a href="/settings">Settings</a>
+        {% if profile.is_admin %}
+            <a href="/admin" style="color: #fbbf24;">Admin</a>
+        {% endif %}
+        <a href="/logout" style="color: #fca5a5;">Logout</a>
+    </div>
+</nav>
     <main class="container">
         {% block content %}{% endblock %}
     </main>
