@@ -14,7 +14,7 @@ NFL_TEAM_DATA = get_static_nfl_team_data()
 
 @router.get("/leagues", response_class=HTMLResponse)
 async def leagues_page(request: Request, user=Depends(require_auth)):
-    """Renders mini-league standings, join/create forms, and trash talk feeds."""
+    """Renders mini-league standings, join/create forms, trash talk feeds, and global rankings."""
     profile = supabase.table("profiles").select("*").eq("id", user.id).single().execute().data
     
     # Fetch user memberships
@@ -28,7 +28,8 @@ async def leagues_page(request: Request, user=Depends(require_auth)):
         "request": request,
         "profile": profile,
         "my_leagues": all_my_leagues,
-        "leaderboard": profiles_res.data if profiles_res.data else []
+        "leaderboard": profiles_res.data if profiles_res.data else [],
+        "team_data": NFL_TEAM_DATA
     })
 
 @router.post("/leagues/create")
