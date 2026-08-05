@@ -1,126 +1,44 @@
-.login-body {
-    background: radial-gradient(circle at 50% 20%, rgba(15, 23, 42, 0.90), rgba(7, 13, 25, 0.99));
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
+{% extends "base.html" %}
 
-.login-container {
-    background: rgba(15, 23, 42, 0.95);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-top: 4px solid #fbbf24;
-    border-radius: 16px;
-    padding: 40px;
-    width: 100%;
-    max-width: 450px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.7);
-}
+{% block content %}
+<div class="hero-banner">
+    <div>
+        <div style="font-size: 14px; letter-spacing: 2px; text-transform: uppercase; color: #93c5fd; font-weight: 600;">Available Balance</div>
+        <div class="hero-tokens-val">{{ profile.tokens }} 🪙</div>
+        <div style="font-size: 13px; color: #cbd5e1; margin-top: 4px;">True Global Bank Account</div>
+    </div>
+    <div style="text-align: right; border-left: 1px solid rgba(255,255,255,0.15); padding-left: 20px;">
+        <div style="font-size: 12px; color: #94a3b8; text-transform: uppercase; font-weight: 700;">Welcome Back</div>
+        <div style="font-size: 18px; font-weight: bold; color: #ffffff;">{{ profile.full_name }}</div>
+        <div style="font-size: 11px; color: #38bdf8;">{{ profile.selected_title }}</div>
+    </div>
+</div>
 
-.logo-area {
-    text-align: center;
-    margin-bottom: 25px;
-}
+<div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+    <h2>👁️ Your Week {{ latest_week }} Active Entries</h2>
+    <a href="/bets" class="secondary-btn">Configure / Edit Bets 🎯</a>
+</div>
 
-.auth-logo {
-    width: 140px;
-    filter: drop-shadow(0px 6px 15px rgba(251, 191, 36, 0.4));
-}
-
-.logo-area h1 {
-    font-family: 'Bebas Neue', sans-serif;
-    color: #fbbf24;
-    font-size: 32px;
-    letter-spacing: 2px;
-    margin: 10px 0 0 0;
-}
-
-.logo-area p {
-    color: #93c5fd;
-    font-size: 13px;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    margin: 5px 0 0 0;
-}
-
-.auth-tabs {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 25px;
-}
-
-.tab-btn {
-    flex: 1;
-    background: rgba(30, 41, 59, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: #94a3b8;
-    padding: 10px;
-    border-radius: 8px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.tab-btn.active {
-    background: #1e3a8a;
-    color: #ffffff;
-    border-color: #38bdf8;
-}
-
-.form-group {
-    margin-bottom: 15px;
-}
-
-.form-row {
-    display: flex;
-    gap: 10px;
-}
-
-.form-group label {
-    display: block;
-    color: #cbd5e1;
-    font-size: 13px;
-    font-weight: 600;
-    margin-bottom: 6px;
-}
-
-.form-group input {
-    width: 100%;
-    background: rgba(15, 23, 42, 0.9);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 8px;
-    padding: 10px 14px;
-    color: #ffffff;
-    box-sizing: border-box;
-}
-
-.terms-box {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    font-size: 12px;
-    color: #94a3b8;
-    margin-bottom: 20px;
-}
-
-.auth-submit-btn {
-    background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
-    color: #000000;
-    width: 100%;
-    padding: 12px;
-    border: none;
-    border-radius: 8px;
-    font-weight: bold;
-    font-size: 16px;
-    cursor: pointer;
-    box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3);
-}
-
-.alert-box {
-    padding: 10px 14px;
-    border-radius: 8px;
-    font-size: 13px;
-    margin-bottom: 15px;
-}
-.alert-box.error { background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #fca5a5; }
-.alert-box.success { background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #6ee7b7; }
+{% if bets %}
+    <div class="bets-grid">
+        {% for b in bets %}
+            <div class="matchup-card-item">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <span style="font-family: 'Bebas Neue'; font-size: 14px; color: #38bdf8; letter-spacing: 1px;">Q{{ b.weekly_questions.question_number }}</span>
+                    <span style="font-size: 11px; font-weight: 600; color: #fbbf24; background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 4px;">Active Wager</span>
+                </div>
+                <div style="font-size: 14px; font-weight: 600; color: #ffffff; margin-bottom: 8px; line-height: 1.4;">{{ b.weekly_questions.question_text }}</div>
+                <div style="display: flex; gap: 10px; font-size: 12px; color: #cbd5e1;">
+                    <span style="background: rgba(255,255,255,0.06); padding: 2px 8px; border-radius: 4px;">Pick: <b style="color: #fbbf24;">{{ b.pick }}</b></span>
+                    <span style="background: rgba(255,255,255,0.06); padding: 2px 8px; border-radius: 4px;">Wager: <b>{{ b.wager_amount }} 🪙</b></span>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="summary-box" style="text-align: center; padding: 30px;">
+        <p style="color: #cbd5e1; margin-bottom: 15px;">You haven't submitted any picks for Week {{ latest_week }} yet!</p>
+        <a href="/bets" class="auth-submit-btn" style="display: inline-block; width: auto; padding: 10px 24px; text-decoration: none;">Place Your Bets Now 🏈</a>
+    </div>
+{% endif %}
+{% endblock %}
