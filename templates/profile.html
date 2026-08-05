@@ -1,72 +1,63 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div style="margin-bottom: 25px;">
-    <h2 style="font-family: 'Bebas Neue', sans-serif; font-size: 38px; color: #ffffff; letter-spacing: 2px; margin: 0;">PROFILE & CUSTOMIZATION HUB</h2>
-    <p style="color: #94a3b8; font-size: 14px; margin: 0;">Personalize your display avatar, title nametag, favorite team, and bio.</p>
+<div style="margin-bottom: 30px;">
+    <h2 style="font-family: 'Bebas Neue', sans-serif; font-size: 38px; color: #ffffff; letter-spacing: 2px; margin: 0;">PLAYER PROFILE</h2>
+    <p style="color: #94a3b8; font-size: 14px; margin: 0;">Customize your identity, select your team allegiance, and review your career stats.</p>
 </div>
 
-<div class="matchup-box" style="margin-bottom: 30px;">
-    <form action="/profile/update" method="POST">
-        <div style="margin-bottom: 15px;">
-            <label style="display: block; color: #cbd5e1; font-size: 13px; font-weight: 600; margin-bottom: 6px;">Display Name</label>
-            <input type="text" name="full_name" value="{{ profile.full_name }}" required style="width: 100%; background: #0f172a; color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 10px; border-radius: 8px; box-sizing: border-box;">
+<div class="admin-grid">
+    <!-- Career Stats Box -->
+    <div class="summary-box">
+        <h3 style="font-family: 'Bebas Neue', sans-serif; color: #38bdf8; letter-spacing: 1px; margin-top: 0;">CAREER STATS</h3>
+        <div style="display: flex; flex-direction: column; gap: 15px;">
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px;">
+                <span style="color: #94a3b8;">Total Net Tokens</span>
+                <b style="color: var(--team-color); font-size: 18px;">{{ stats.total_net_tokens }} 🪙</b>
+            </div>
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px;">
+                <span style="color: #94a3b8;">Hit Rate (All Time)</span>
+                <b style="color: #fff;">{{ stats.hit_rate }}%</b>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding-bottom: 8px;">
+                <span style="color: #94a3b8;">Leagues Won</span>
+                <b style="color: #fff;">{{ stats.leagues_won }} 🏆</b>
+            </div>
         </div>
+    </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-            <div>
-                <label style="display: block; color: #cbd5e1; font-size: 13px; font-weight: 600; margin-bottom: 6px;">Favorite NFL Team</label>
-                <select name="favorite_team" style="width: 100%; background: #0f172a; color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 10px; border-radius: 8px;">
-                    {% for team in teams %}
+    <!-- Customization Form -->
+    <div class="matchup-box">
+        <h3 style="font-family: 'Bebas Neue', sans-serif; color: var(--team-color); letter-spacing: 1px; margin-top: 0;">CUSTOMIZE LOCKER</h3>
+        <form action="/profile/update" method="POST">
+            <div class="form-group">
+                <label>Favorite NFL Team (Changes App Theme)</label>
+                <select name="favorite_team" class="form-input">
+                    {% for team in nfl_teams %}
                         <option value="{{ team }}" {% if profile.favorite_team == team %}selected{% endif %}>{{ team }}</option>
                     {% endfor %}
                 </select>
             </div>
-            <div>
-                <label style="display: block; color: #cbd5e1; font-size: 13px; font-weight: 600; margin-bottom: 6px;">Active Nametag Title</label>
-                <select name="selected_title" style="width: 100%; background: #0f172a; color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 10px; border-radius: 8px;">
-                    {% for title in available_titles.keys() %}
-                        <option value="{{ title }}" {% if profile.selected_title == title %}selected{% endif %}>{{ title }}</option>
+            
+            <div class="form-group">
+                <label>Player Title</label>
+                <input type="text" name="selected_title" class="form-input" value="{{ profile.selected_title }}" placeholder="e.g. Gridiron Contender">
+            </div>
+
+            <div class="form-group">
+                <label>Select Avatar</label>
+                <div class="avatar-grid">
+                    {% for emoji in ['🏈', '🦅', '🦁', '⚔️', '🏴‍☠️', '⚡', '🧀', '🐬'] %}
+                    <label class="avatar-option">
+                        <input type="radio" name="avatar_emoji" value="{{ emoji }}" {% if profile.avatar_emoji == emoji %}checked{% endif %}>
+                        <span>{{ emoji }}</span>
+                    </label>
                     {% endfor %}
-                </select>
+                </div>
             </div>
-        </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-            <div>
-                <label style="display: block; color: #cbd5e1; font-size: 13px; font-weight: 600; margin-bottom: 6px;">Avatar Emoji</label>
-                <input type="text" name="avatar_emoji" value="{{ profile.avatar_emoji }}" maxlength="2" style="width: 100%; background: #0f172a; color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 10px; border-radius: 8px; box-sizing: border-box;">
-            </div>
-            <div>
-                <label style="display: block; color: #cbd5e1; font-size: 13px; font-weight: 600; margin-bottom: 6px;">Avatar Box Color</label>
-                <input type="color" name="avatar_color" value="{{ profile.avatar_color or '#1e3a8a' }}" style="width: 100%; background: #0f172a; height: 40px; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; cursor: pointer;">
-            </div>
-        </div>
-
-        <div style="margin-bottom: 20px;">
-            <label style="display: block; color: #cbd5e1; font-size: 13px; font-weight: 600; margin-bottom: 6px;">Profile Catchphrase / Bio</label>
-            <input type="text" name="bio" value="{{ profile.bio }}" maxlength="100" style="width: 100%; background: #0f172a; color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 10px; border-radius: 8px; box-sizing: border-box;">
-        </div>
-
-        <input type="hidden" name="avatar_border" value="solid">
-        <button type="submit" class="submit-btn">Save Profile Settings 💾</button>
-    </form>
-</div>
-
-<h3 style="font-family: 'Bebas Neue'; font-size: 28px; color: #fbbf24; letter-spacing: 1px; margin-bottom: 15px;">🏆 Virtual Trophy Cabinet</h3>
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-    {% for b_name, b_desc in master_badges.items() %}
-        {% if b_name in unlocked_badges %}
-            <div style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.94) 100%); border: 1px solid rgba(255,255,255,0.12); border-left: 4px solid #fbbf24; padding: 14px; border-radius: 12px;">
-                <b style="color: #fff; font-size: 14px;">{{ b_name }}</b> <span style="color:#fbbf24; font-size: 12px; font-weight:bold;">(UNLOCKED)</span><br>
-                <small style="color:#cbd5e1; font-size: 12px;">{{ b_desc }}</small>
-            </div>
-        {% else %}
-            <div style="background: rgba(15, 23, 42, 0.55); border: 1px dashed rgba(255,255,255,0.18); padding: 14px; border-radius: 12px; opacity: 0.55;">
-                <b style="color: #94a3b8; font-size: 14px;">🔒 {{ b_name }}</b><br>
-                <small style="color: #64748b; font-size: 12px;">{{ b_desc }}</small>
-            </div>
-        {% endif %}
-    {% endfor %}
+            <button type="submit" class="btn-primary" style="margin-top: 15px;">Save Changes 💾</button>
+        </form>
+    </div>
 </div>
 {% endblock %}
