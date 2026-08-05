@@ -5,26 +5,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Touchdown Tokens</title>
     <link rel="stylesheet" href="/static/css/styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
+
+    <!-- Glossy Responsive Navbar -->
     <nav class="navbar">
-    <div class="brand">🏈 Touchdown Tokens</div>
-    <div class="nav-links">
-        <a href="/dashboard">Home</a>
-        <a href="/rules">Rules/Info</a>
-        <a href="/profile">Profile</a>
-        <a href="/bets">Bets</a>
-        <a href="/leagues">Leagues</a>
-        <a href="/settings">Settings</a>
-        {% if profile.is_admin %}
-            <a href="/admin" style="color: #fbbf24;">Admin</a>
-        {% endif %}
-        <a href="/logout" style="color: #fca5a5;">Logout</a>
-    </div>
-</nav>
-    <main class="container">
+        <a href="/dashboard" class="brand">🏈 Touchdown Tokens</a>
+        
+        <!-- Mobile Hamburger Toggle -->
+        <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle navigation">
+            ☰
+        </button>
+
+        <!-- Navigation Links -->
+        <div class="nav-links" id="navLinks">
+            <a href="/dashboard">Home</a>
+            <a href="/rules">Rules/Info</a>
+            <a href="/profile">Profile</a>
+            <a href="/bets">Bets</a>
+            <a href="/leagues">Leagues</a>            
+            <a href="/settings">Settings</a>
+            {% if profile and profile.is_admin %}
+                <a href="/admin" style="color: #fbbf24;">Admin</a>
+            {% endif %}
+            <a href="/logout" style="color: #fca5a5;">Logout</a>
+        </div>
+    </nav>
+
+    <!-- Main Content Container -->
+    <main>
         {% block content %}{% endblock %}
     </main>
+
+    <!-- Global Footer -->
+    <footer class="footer">
+        <p><strong>Touchdown Tokens</strong> &copy; 2026</p>
+        <p>Built for high-stakes gridiron strategy and prediction leagues.</p>
+    </footer>
+
+    <!-- Mobile Menu Script -->
+    <script>
+        function toggleMobileMenu() {
+            const navLinks = document.getElementById('navLinks');
+            navLinks.classList.toggle('active');
+        }
+    </script>
 </body>
 </html>
