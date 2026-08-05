@@ -11,56 +11,9 @@
 
     {% set current_team = profile.favorite_team if profile and profile.favorite_team else "🏈 Free Agent / Neutral" %}
     {% set t_color = team_data[current_team].color if team_data and current_team in team_data else "#fbbf24" %}
-    <!-- Fallback default logo or team logo -->
     {% set t_logo = team_data[current_team].logo if team_data and current_team in team_data else "https://github.com/eddymck98/TD-Tokens-Render-/blob/main/TD%20Tokens%207.png?raw=true" %}
 
-    <!-- Glossy Responsive Navbar with Team Neon Glow -->
-    <nav class="navbar" style="--team-color: {{ t_color }};">
-        <a href="/dashboard" class="brand-container">
-            <img src="{{ t_logo }}" alt="Logo" class="brand-logo">
-            <span class="brand-title">TOUCHDOWN <span>TOKENS</span></span>
-        </a>
-        
-        <!-- Mobile Hamburger Toggle -->
-        <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle navigation">
-            ☰
-        </button>
-
-        <!-- Navigation Links -->
-        <div class="nav-links" id="navLinks">
-            <a href="/dashboard">Home</a>
-            <a href="/rules">Rules/Info</a>
-            <a href="/profile">Profile</a>
-            <a href="/bets">Bets</a>
-            <a href="/leagues">Leagues</a>            
-            <a href="/settings">Settings</a>
-            {% if profile is defined and profile and profile.get('is_admin') %}
-                <a href="/admin" style="color: #fbbf24;">Admin</a>
-            {% endif %}
-            <a href="/logout" style="color: #fca5a5;">Logout</a>
-        </div>
-    </nav>
-
-    <!-- Main Content Container -->
-    <main>
-        {% block content %}{% endblock %}
-    </main>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Touchdown Tokens</title>
-    <link rel="stylesheet" href="/static/css/styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-</head>
-<body>
-
-    {% set current_team = profile.favorite_team if profile and profile.favorite_team else "🏈 Free Agent / Neutral" %}
-    {% set t_color = team_data[current_team].color if team_data and current_team in team_data else "#fbbf24" %}
-    {% set t_logo = team_data[current_team].logo if team_data and current_team in team_data else "https://github.com/eddymck98/TD-Tokens-Render-/blob/main/TD%20Tokens%207.png?raw=true" %}
-
-    <!-- Premium Glossy Navbar -->
+    <!-- Premium Glossy Navbar with Team Neon Glow -->
     <nav class="navbar" style="--team-color: {{ t_color }};">
         <a href="/dashboard" class="brand-container">
             <div class="brand-logo-wrapper">
