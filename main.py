@@ -76,6 +76,9 @@ async def render_dashboard_or_index(request: Request):
             "favorite_team": "🏈 Free Agent / Neutral"
         }
         
+        # Extract active tokens dynamically from profile data
+        active_tokens = current_profile.get("tokens", 10)
+        
         weeks_res = supabase.table("weekly_questions").select("week_number").neq("week_number", 999).neq("week_number", 998).neq("week_number", 997).neq("week_number", 96).execute()
         available_weeks = sorted(list(set([r["week_number"] for r in weeks_res.data]))) if weeks_res.data else []
         
@@ -104,6 +107,7 @@ async def render_dashboard_or_index(request: Request):
             "selected_title": "🏈 Gridiron Contender",
             "favorite_team": "🏈 New Orleans Saints"
         }
+        active_tokens = 10
         available_weeks = []
         current_user_bets = []
 
@@ -113,6 +117,7 @@ async def render_dashboard_or_index(request: Request):
         context={
             "request": request,
             "profile": current_profile,
+            "active_tokens": active_tokens,
             "available_weeks": available_weeks,
             "current_user_bets": current_user_bets
         }
