@@ -25,14 +25,22 @@ def recalculate_all_user_balances(supabase_client: Client):
         if not all_profiles: return
         for prof in all_profiles:
             uid = prof["id"]
-            u_bets = supabase_client.table("user_bets").select("week_number, wager_amount, pick, weekly_questions(winning_answer)").eq("user_id", uid).execute().data
+            # Fetch bets safely without relying on broken embedded resource joins
+            u_bets = supabase_client.table("user_bets").select("week_number, wager_amount, pick, question_id").eq("user_id", uid).execute().data
+            
+            # Fetch questions for winning answer matching independently
+            questions_res = supabase_client.table("weekly_questions").select("id, week_number, winning_answer").execute().data
+            q_winning_map = {q["id"]: q["winning_answer"] for q in questions_res} if questions_res else {}
+
             u_td = supabase_client.table("touchdown_picks").select("week_number, is_correct").eq("user_id", uid).eq("is_correct", True).execute().data
             td_wins_map = {td["week_number"]: 5 for td in u_td}
+            
             curr_tokens = 10
             if u_bets or td_wins_map:
                 for w in sorted(list(set([b["week_number"] for b in u_bets] + list(td_wins_map.keys())))):
                     for b in [b for b in u_bets if b["week_number"] == w]:
-                        w_ans = b.get("weekly_questions", {}).get("winning_answer")
+                        # Map winning answer safely via dictionary lookup using question_id
+                        w_ans = q_winning_map.get(b.get("question_id"))
                         if w_ans in ["Yes", "No"]:
                             curr_tokens += b["wager_amount"] if b["pick"] == w_ans else -b["wager_amount"]
                     if w in td_wins_map: curr_tokens += 5
