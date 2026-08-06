@@ -1,25 +1,150 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Touchdown Tokens - FastAPI</title>
-    <style>
-        body { background-color: #0f172a; color: #f8fafc; font-family: Arial, sans-serif; text-align: center; padding: 50px; }
-        h1 { color: #fbbf24; }
-        .card { background: rgba(30, 41, 59, 0.8); border: 1px solid rgba(255,255,255,0.1); padding: 20px; border-radius: 12px; max-width: 400px; margin: 20px auto; }
-    </style>
-</head>
-<body>
-    <h1>Touchdown Tokens 🏈</h1>
-    <p>Successfully running on FastAPI & Supabase!</p>
-    
-    <h2>Leaderboard Preview</h2>
-    {% for profile in profiles %}
-        <div class="card">
-            <h3>{{ profile.full_name }}</h3>
-            <p>Tokens: <b>{{ profile.tokens }} 🪙</b></p>
-            <p>Team: {{ profile.favorite_team }}</p>
+{% extends "base.html" %}
+
+{% block content %}
+<div class="index-container" style="max-width: 900px; margin: 0 auto; padding-bottom: 40px;">
+
+  <!-- Hero Welcome Banner -->
+  <div style="background: linear-gradient(135deg, rgba(30, 58, 138, 0.85) 0%, rgba(15, 23, 42, 0.95) 100%); border: 1px solid rgba(255, 255, 255, 0.15); border-top: 4px solid var(--team-color); border-radius: 20px; padding: 28px; margin-bottom: 25px; backdrop-filter: blur(16px); box-shadow: 0 12px 35px rgba(0,0,0,0.6); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+    <div>
+      <div style="font-size: 14px; letter-spacing: 2px; text-transform: uppercase; color: #93c5fd; font-weight: 600;">Available Balance</div>
+      <div style="font-family: 'Bebas Neue', sans-serif; font-size: 64px; color: var(--team-color); letter-spacing: 2px; line-height: 1; margin: 0; text-shadow: 0 4px 15px var(--team-color);">{{ active_tokens }} 🪙</div>
+      <div style="font-size: 13px; color: #cbd5e1; margin-top: 4px;">True Global Bank: <b>{{ true_tokens }} 🪙</b> (Active Wagers Deducted)</div>
+    </div>
+    <div style="text-align: right; border-left: 1px solid rgba(255,255,255,0.15); padding-left: 20px;">
+      <div style="font-size: 12px; color: #94a3b8; text-transform: uppercase; font-weight: 700;">Welcome Back</div>
+      <div style="font-size: 18px; font-weight: bold; color: #ffffff;">{{ profile.full_name }}</div>
+      <div style="font-size: 11px; color: #38bdf8;">{{ profile.selected_title | default('🏈 Gridiron Contender') }}</div>
+    </div>
+  </div>
+
+  <!-- Weekly Picks & Share Hub Section -->
+  <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-left: 4px solid var(--team-color); border-radius: 16px; padding: 24px; margin-bottom: 25px; box-shadow: 0 8px 25px rgba(0,0,0,0.4);">
+    <h2 style="font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: #ffffff; letter-spacing: 1px; margin: 0 0 6px 0;">👁️ YOUR CURRENT WEEKLY PICKS & SHARE HUB</h2>
+    <p style="color: #94a3b8; font-size: 14px; margin-bottom: 20px;">Review your active entries for the selected week and grab a quick share text for your group chat.</p>
+
+    {% if not available_weeks %}
+      <div style="background: rgba(30, 41, 59, 0.5); padding: 15px; border-radius: 10px; color: #cbd5e1; text-align: center;">No active weeks available.</div>
+    {% else %}
+      <!-- Week Selector Form -->
+      <form method="GET" action="/" style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+        <label style="font-weight: 600; font-size: 14px; color: #f8fafc;">Select Week to View:</label>
+        <select name="home_week" onchange="this.form.submit()" style="background: rgba(15,23,42,0.9); color: #fff; padding: 8px 12px; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; font-weight: 600;">
+          {% for w in available_weeks %}
+          <option value="{{ w }}" {% if w == selected_home_week %}selected{% endif %}>Week {{ w }}</option>
+          {% endfor %}
+        </select>
+      </form>
+
+      {% if not user_home_bets and not user_home_td %}
+        <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; padding: 15px; border-radius: 10px; color: #fca5a5;">
+          You haven't submitted any picks for Week {{ selected_home_week }} yet! Head over to the <a href="/bets" style="color: #38bdf8; text-decoration: underline;">Bets</a> tab.
         </div>
+      {% else %}
+        <!-- Active Bets Breakdown Cards -->
+        {% for b in user_home_bets %}
+          <div style="background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(255, 255, 255, 0.1); border-left: 3px solid {% if b.winning_answer == 'Yes' or b.winning_answer == 'No' %}{% if b.pick == b.winning_answer %}#10b981{% else %}#ef4444{% endif %}{% else %}#38bdf8{% endif %}; border-radius: 8px; padding: 10px 12px; margin-bottom: 8px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+              <span style="font-family: 'Bebas Neue'; font-size: 13px; color: #38bdf8; letter-spacing: 1px;">Q{{ b.question_number }}</span>
+              <span style="font-size: 11px; font-weight: 600; color: {% if b.winning_answer == 'Yes' or b.winning_answer == 'No' %}{% if b.pick == b.winning_answer %}#10b981{% else %}#ef4444{% endif %}{% else %}#38bdf8{% endif %}; background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 4px;">
+                {% if b.winning_answer == 'Yes' or b.winning_answer == 'No' %}
+                  {% if b.pick == b.winning_answer %}Won ✅{% else %}Lost ❌{% endif %}
+                {% else %}
+                  Pending ⏳
+                {% endif %}
+              </span>
+            </div>
+            <div style="font-size: 13px; font-weight: 600; color: #ffffff; margin-bottom: 6px; line-height: 1.3;">{{ b.question_clean }}</div>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px; font-size: 11px; color: #cbd5e1;">
+              <span style="background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 4px;">Pick: <b style="color: var(--team-color);">{{ b.pick }}</b></span>
+              <span style="background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 4px;">Wager: <b>{{ b.wager_amount }} 🪙</b></span>
+            </div>
+          </div>
+        {% endfor %}
+
+        <!-- Touchdown Scorer Card -->
+        <div style="background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(255, 255, 255, 0.1); border-left: 3px solid {% if user_home_td and user_home_td.is_correct is not none %}{% if user_home_td.is_correct %}#10b981{% else %}#ef4444{% endif %}{% else %}#38bdf8{% endif %}; border-radius: 8px; padding: 8px 12px; margin-top: 8px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-family: 'Bebas Neue'; font-size: 14px; color: {% if user_home_td and user_home_td.is_correct is not none %}{% if user_home_td.is_correct %}#10b981{% else %}#ef4444{% endif %}{% else %}#38bdf8{% endif %};">TD BONUS</span>
+            <span style="font-size: 12px; color: #ffffff;">{{ user_home_td.player_name if user_home_td else 'None Selected' }}</span>
+          </div>
+          <span style="font-size: 11px; font-weight: 600; color: {% if user_home_td and user_home_td.is_correct is not none %}{% if user_home_td.is_correct %}#10b981{% else %}#ef4444{% endif %}{% else %}#38bdf8{% endif %}; background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 4px;">
+            {% if user_home_td and user_home_td.is_correct is not none %}
+              {% if user_home_td.is_correct %}Won (+5 🪙){% else %}Missed ❌{% endif %}
+            {% else %}
+              Pending ⏳
+            {% endif %}
+          </span>
+        </div>
+
+        <!-- Share Text Box -->
+        <h4 style="font-family: 'Bebas Neue'; font-size: 20px; color: #38bdf8; margin: 20px 0 8px 0;">📋 Group Chat Share Text</h4>
+        <textarea readonly style="width: 100%; height: 120px; background: rgba(15, 23, 42, 0.95); color: #cbd5e1; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 10px; font-family: monospace; font-size: 12px;">{{ share_text_content }}</textarea>
+        <p style="color: #10b981; font-size: 12px; margin-top: 6px;">Copy the text box above to share your picks directly into WhatsApp or group chat!</p>
+      {% endif %}
+    {% endif %}
+  </div>
+
+  <!-- Weekly MVP Banner -->
+  {% if mvp_data %}
+  <div style="background: linear-gradient(135deg, rgba(147, 51, 234, 0.90) 0%, rgba(30, 58, 138, 0.94) 100%); border: 1px solid rgba(192, 132, 252, 0.4); border-top: 3px solid #c084fc; padding: 22px; border-radius: 16px; margin-bottom: 25px; text-align: center; backdrop-filter: blur(14px); box-shadow: 0 10px 30px rgba(192, 132, 252, 0.35);">
+    <div style="font-size: 16px; letter-spacing: 2px; text-transform: uppercase; color: #f3e8ff;">🔥 Week {{ mvp_week }} League MVP 🔥</div>
+    <div style="font-size: 36px; font-weight: 900; margin: 5px 0; color: #ffffff;">{{ mvp_data.emoji }} {{ mvp_data.name }}</div>
+    <div style="font-size: 16px; color: #d8b4fe;">Dominated the slate with <b>+{{ mvp_data.net_tokens }} Net Tokens</b>! 🚀</div>
+  </div>
+  {% endif %}
+
+  <!-- Heaviest Action Trends -->
+  {% if trend_items %}
+  <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-left: 4px solid var(--team-color); border-radius: 16px; padding: 20px; margin-bottom: 25px;">
+    <h3 style="font-family: 'Bebas Neue'; font-size: 24px; color: #ffffff; letter-spacing: 1px; margin: 0 0 10px 0;">📊 Current Weekly Community Trends</h3>
+    {% for item in trend_items %}
+    <div style="background-color: rgba(15, 23, 42, 0.88); border: 1px solid rgba(255, 255, 255, 0.1); border-left: 4px solid var(--team-color); padding: 16px; border-radius: 12px; margin-top: 10px;">
+      <b>🔥 Heaviest Action: {{ item.question }}</b><br>
+      • <b>League Consensus:</b> {{ item.consensus }} ({{ item.votes }} total player bets)<br>
+      • <b>Total Tokens Wagered on Matchup:</b> {{ item.total_wagered }} 🪙
+    </div>
     {% endfor %}
-</body>
-</html>
+  </div>
+  {% endif %}
+
+  <!-- Last Week's Performance Summary -->
+  <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px; padding: 20px; margin-bottom: 25px;">
+    <h3 style="font-family: 'Bebas Neue'; font-size: 24px; color: #ffffff; letter-spacing: 1px; margin: 0 0 10px 0;">📊 Last Week's Performance Summary</h3>
+    {% if not last_graded_week %}
+      <div style="color: #cbd5e1;">No weeks have been graded yet. Place your bets for Week 1 to get started!</div>
+    {% else %}
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 15px;">
+        <div style="background: rgba(30, 41, 59, 0.6); padding: 12px; border-radius: 10px; text-align: center;">
+          <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase;">Net Tokens</div>
+          <div style="font-family: 'Bebas Neue'; font-size: 26px; color: {% if lw_net_total >= 0 %}#10b981{% else %}#ef4444{% endif %};">{{ '+' if lw_net_total >= 0 else '' }}{{ lw_net_total }} 🪙</div>
+        </div>
+        <div style="background: rgba(30, 41, 59, 0.6); padding: 12px; border-radius: 10px; text-align: center;">
+          <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase;">Correct Qs</div>
+          <div style="font-family: 'Bebas Neue'; font-size: 26px; color: #38bdf8;">{{ lw_correct_count }} / {{ lw_total_bets }}</div>
+        </div>
+        <div style="background: rgba(30, 41, 59, 0.6); padding: 12px; border-radius: 10px; text-align: center;">
+          <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase;">TD Bonus</div>
+          <div style="font-family: 'Bebas Neue'; font-size: 26px; color: #fbbf24;">{{ '+' if lw_td_bonus > 0 else '' }}{{ lw_td_bonus }} 🪙</div>
+        </div>
+      </div>
+      <div style="background-color: rgba(15, 23, 42, 0.88); border: 1px solid rgba(255, 255, 255, 0.1); border-left: 4px solid var(--team-color); padding: 16px; border-radius: 12px;">
+        <b>Week {{ last_graded_week }} Breakdown:</b><br>
+        • <b>Question Wins:</b> +{{ lw_bet_gains }} Tokens (Net Profit)<br>
+        • <b>Question Losses:</b> -{{ lw_bet_losses }} Tokens<br>
+        • <b>Touchdown Scorer Pick:</b> '{{ lw_td_player }}' ({{ lw_td_display_status }})
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Token History Graph Container -->
+  <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px; padding: 20px;">
+    <h3 style="font-family: 'Bebas Neue'; font-size: 24px; color: #ffffff; letter-spacing: 1px; margin: 0 0 10px 0;">📊 Token History Graph</h3>
+    {% if chart_json %}
+      <div>{{ chart_json | safe }}</div>
+    {% else %}
+      <div style="color: #cbd5e1;">No token history data available yet.</div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}
