@@ -30,7 +30,7 @@ def send_verification_email(to_email: str, verification_link: str) -> bool:
     except Exception:
         return False
 
-@router.post("/auth/login")
+@router.post("/login")
 async def login_user(
     request: Request,
     email: str = Form(...),
@@ -63,7 +63,7 @@ async def login_user(
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@router.post("/auth/signup")
+@router.post("/signup")
 async def signup_user(
     request: Request,
     first_name: str = Form(...),
@@ -139,7 +139,7 @@ async def signup_user(
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@router.post("/auth/logout")
+@router.post("/logout")
 async def logout_user(request: Request, supabase: Client = Depends(get_supabase)):
     try:
         supabase.auth.sign_out()
@@ -149,7 +149,7 @@ async def logout_user(request: Request, supabase: Client = Depends(get_supabase)
     response.delete_cookie(key="td_tokens_session")
     return response
 
-@router.post("/auth/password-reset-request")
+@router.post("/password-reset-request")
 async def request_password_reset(
     request: Request,
     email: str = Form(...),
