@@ -3,124 +3,204 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Touchdown Tokens</title>
-    <link rel="stylesheet" href="/static/css/styles.css">
-    
-    <!-- Extract Team Info for Dynamic Styling -->
-    {% set current_team = profile.favorite_team if profile and profile.favorite_team else "🏈 Free Agent / Neutral" %}
-    {% set t_color = team_data[current_team].color if team_data and current_team in team_data else "#fbbf24" %}
-    {% set t_logo = team_data[current_team].logo if team_data and current_team in team_data else "https://github.com/eddymck98/TD-Tokens-Render-/blob/main/TD%20Tokens%207.png?raw=true" %}
-    {% set t_stadium = team_data[current_team].stadium if team_data and current_team in team_data and team_data[current_team].stadium else "https://images.unsplash.com/photo-1566577739112-5180d4bf9390?auto=format&fit=crop&w=1920&q=80" %}
-
-    <!-- Dynamic CSS Variables from backend profile -->
+    <title>Touchdown Tokens 🏈</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=Teko:wght@500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --team-color: {{ t_color }};
-            --team-color-glow: {{ t_color }}88;
+            --team-color: {{ profile.favorite_team_color | default('#fbbf24') }};
+            --team-logo: url("{{ profile.favorite_team_logo | default('https://github.com/eddymck98/TD-Tokens-Render-/blob/main/TD%20Tokens%207.png?raw=true') }}");
         }
-        .app-background {
-            position: fixed;
+
+        body {
+            background: radial-gradient(circle at 50% 20%, rgba(15, 23, 42, 0.90), rgba(7, 13, 25, 0.99)), var(--team-logo) center center / 28% no-repeat fixed, url('https://images.unsplash.com/photo-1566577739112-5180d4bf9390?auto=format&fit=crop&w=1920&q=80') center center / cover no-repeat fixed !important;
+            color: #f8fafc !important;
+            font-family: 'Inter', sans-serif !important;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        header, nav {
+            box-sizing: border-box;
+        }
+
+        .nfl-header {
+            text-align: center;
+            padding: 10px 0 4px 0;
+        }
+
+        .nfl-subtitle {
+            font-family: 'Teko', sans-serif;
+            font-size: 24px;
+            letter-spacing: 5px;
+            color: #93c5fd;
+            text-transform: uppercase;
+            margin-top: -4px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+        }
+
+        .header-logo {
+            width: 200px;
+            filter: drop-shadow(0px 10px 22px rgba(251, 191, 36, 0.4));
+            border-radius: 12px;
+        }
+
+        .sticky-balance-bar {
+            position: sticky;
             top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: -1;
-            background: radial-gradient(circle at 50% 20%, rgba(15, 23, 42, 0.90), rgba(7, 13, 25, 0.99)), 
-                        url('{{ t_logo }}') center center / 28% no-repeat fixed, 
-                        url('{{ t_stadium }}') center center / cover no-repeat fixed;
+            z-index: 999;
+            background: rgba(15, 23, 42, 0.94);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-bottom: 3px solid var(--team-color);
+            padding: 10px 22px;
+            margin-bottom: 20px;
+            border-radius: 0 0 16px 16px;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+        }
+
+        .nav-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            background-color: rgba(11, 15, 25, 0.8);
+            padding: 8px 16px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(14px);
+            margin: 0 auto 24px auto;
+            max-width: 900px;
+            justify-content: center;
+        }
+
+        .nav-tab {
+            background: rgba(15, 23, 42, 0.75);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            padding: 6px 14px;
+            color: #94a3b8;
+            font-family: 'Teko', sans-serif;
+            font-size: 19px;
+            letter-spacing: 1.2px;
+            text-decoration: none;
+            transition: all 0.25s ease;
+        }
+
+        .nav-tab:hover {
+            background: rgba(30, 41, 59, 0.9);
+            border-color: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            transform: translateY(-1px);
+        }
+
+        .nav-tab.active {
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-top: 3px solid var(--team-color);
+            color: #ffffff;
+            font-weight: 700;
+            box-shadow: 0 6px 20px rgba(251, 191, 36, 0.2);
+        }
+
+        .main-content {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 16px;
+        }
+
+        a { color: #38bdf8; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        .footer {
+            margin-top: 60px;
+            margin-bottom: 30px;
+            padding: 30px 20px;
+            background: rgba(15, 23, 42, 0.85);
+            border-top: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 16px;
+            text-align: center;
+            backdrop-filter: blur(14px);
+            box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
         }
     </style>
 </head>
 <body>
-    <div class="app-background"></div>
 
-    <!-- Premium Glossy Navbar -->
-    <nav class="navbar" style="--team-color: {{ t_color }};">
-        <a href="/dashboard" class="brand-container">
-            <div class="brand-logo-wrapper">
-                <img src="{{ t_logo }}" alt="Logo" class="brand-logo">
-            </div>
-            <h1 class="brand-text">TOUCHDOWN <span>TOKENS</span></h1>
-        </a>
-        
-        <!-- Mobile Hamburger Toggle -->
-        <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle navigation">
-            ☰
-        </button>
+    <!-- Header Logo Banner -->
+    <div class="nfl-header">
+        <img src="https://github.com/eddymck98/TD-Tokens-Render-/blob/main/TD%20Tokens%207.png?raw=true" class="header-logo" alt="Touchdown Tokens Logo" />
+        <div class="nfl-subtitle">Weekly NFL Predictions & Wagers</div>
+    </div>
 
-        <!-- Navigation Links -->
-        <div class="nav-links" id="navLinks">
-            <a href="/dashboard" class="{% if request.url.path == '/dashboard' %}active{% endif %}">🏠 Home</a>
-            <a href="/bets" class="{% if request.url.path == '/bets' %}active{% endif %}">🎯 Bets</a>
-            <a href="/history" class="{% if request.url.path == '/history' %}active{% endif %}">📜 History</a>
-            <a href="/leagues" class="{% if request.url.path == '/leagues' %}active{% endif %}">🛡️ Leagues</a>
-            <a href="/rules" class="{% if request.url.path == '/rules' %}active{% endif %}">📖 Rules</a>
-            <a href="/profile" class="{% if request.url.path == '/profile' %}active{% endif %}">👤 Profile</a>
-            <a href="/settings" class="{% if request.url.path == '/settings' %}active{% endif %}">⚙️ Settings</a>
-            
-            <!-- Commissioner Tab (Only shows if they created a league or are a global admin) -->
-            {% if is_commissioner or (profile and profile.is_admin) %}
-                <a href="/commish" style="color: #fbbf24;">⭐ Commish</a>
-            {% endif %}
-
-            <!-- Global Admin Tab (Only shows if they are a super admin) -->
-            {% if profile and profile.is_admin %}
-                <a href="/admin" class="nav-admin-btn">🛠️ Admin</a>
-            {% endif %}
-            
-            <a href="/logout" class="nav-logout-btn">🚪 Logout</a>
-        </div>
-    </nav>
-
-    <!-- Sticky Balance Bar (Only show if logged in) -->
     {% if profile %}
-    <div class="sticky-balance-bar container">
+    <!-- Sticky Balance & Profile Bar -->
+    <div class="sticky-balance-bar">
         <div style="display: flex; align-items: center; gap: 14px;">
             <div style="border: 3px {{ profile.avatar_border | default('solid') }} var(--team-color); border-radius: 10px; padding: 3px 8px; background: {{ profile.avatar_color | default('#1e3a8a') }};">
                 <span style="font-size: 26px;">{{ profile.avatar_emoji | default('🏈') }}</span>
             </div>
             <div>
-                <b style="font-size: 16px; color: #ffffff;">{{ profile.full_name }}</b> 
-                <span style="font-size:11px; color:#38bdf8; margin-left:6px;">({{ profile.selected_title | default('Gridiron Contender') }})</span>
+                <b style="font-size: 16px; color: #ffffff;">{{ profile.full_name }}</b>
+                <span style="font-size: 11px; color: #38bdf8; margin-left: 6px;">({{ profile.selected_title | default('🏈 Gridiron Contender') }})</span>
                 <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase; font-weight: 600;">{{ profile.favorite_team | default('🏈 Free Agent / Neutral') }}</div>
             </div>
         </div>
-        <div style="text-align: right;">
-            <span style="font-family: 'Bebas Neue'; font-size: 26px; color: var(--team-color);">{{ active_tokens | default(profile.tokens) }} 🪙</span>
-            <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase; font-weight: 600;">Available Tokens</div>
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <div style="text-align: right;">
+                <span style="font-family: 'Bebas Neue'; font-size: 26px; color: var(--team-color);">{{ profile.tokens | default(10) }} 🪙</span>
+                <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase; font-weight: 600;">Token Balance</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Hub Tabs -->
+    <nav class="nav-container">
+        <a href="/" class="nav-tab {% if request.path == '/' %}active{% endif %}">🏠 Home</a>
+        <a href="/profile" class="nav-tab {% if request.path.startswith('/profile') %}active{% endif %}">👤 Profile</a>
+        <a href="/rules" class="nav-tab {% if request.path.startswith('/rules') %}active{% endif %}">📖 Rules</a>
+        <a href="/bets" class="nav-tab {% if request.path.startswith('/bets') %}active{% endif %}">🎯 Bets</a>
+        <a href="/history" class="nav-tab {% if request.path.startswith('/history') %}active{% endif %}">📜 History</a>
+        <a href="/leagues" class="nav-tab {% if request.path.startswith('/leagues') %}active{% endif %}">🛡️ Leagues</a>
+        <a href="/settings" class="nav-tab {% if request.path.startswith('/settings') %}active{% endif %}">⚙️ Settings</a>
+        {% if profile.is_admin %}
+        <a href="/admin" class="nav-tab {% if request.path.startswith('/admin') %}active{% endif %}">🛠️ Admin</a>
+        {% endif %}
+    </nav>
+    {% endif %}
+
+    <!-- Main Flash Messages / Notifications if any -->
+    {% if msg %}
+    <div class="main-content" style="margin-bottom: 15px;">
+        <div style="background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #34d399; padding: 12px 18px; border-radius: 12px; font-weight: 600; text-align: center;">
+            {{ msg }}
         </div>
     </div>
     {% endif %}
 
-    <!-- Main Content Container -->
-    <main class="container">
+    <!-- Main Body Content Block -->
+    <main class="main-content">
         {% block content %}{% endblock %}
     </main>
 
-    <!-- Global Footer -->
-    <footer class="footer container">
+    <!-- Footer -->
+    <div class="footer">
         <div style="display: flex; justify-content: center; align-items: center; gap: 20px; margin-bottom: 15px; flex-wrap: wrap;">
-            <a href="https://www.nfl.com" target="_blank" style="color: #94a3b8; font-size: 13px; text-decoration: none;">NFL Official Site</a>
+            <a href="https://www.nfl.com" target="_blank" style="color: #94a3b8; font-size: 13px;">NFL Official Site</a>
             <span style="color: #475569;">•</span>
-            <a href="https://www.espn.com/nfl" target="_blank" style="color: #94a3b8; font-size: 13px; text-decoration: none;">ESPN NFL Scoreboard</a>
+            <a href="https://www.espn.com/nfl" target="_blank" style="color: #94a3b8; font-size: 13px;">ESPN NFL Scoreboard</a>
             <span style="color: #475569;">•</span>
-            <a href="https://buymeacoffee.com/ed.mckenna" target="_blank" style="color: #fbbf24; font-size: 13px; font-weight: bold; text-decoration: none;">☕ Support the App</a>
+            <a href="https://buymeacoffee.com/ed.mckenna" target="_blank" style="color: #fbbf24; font-size: 13px; font-weight: bold;">☕ Support the App</a>
         </div>
-        <p style="color: #64748b; font-size: 12px; line-height: 1.5; max-width: 600px; margin: 0 auto 15px auto;">
-            Touchdown Tokens is an independent, free-to-play recreational sports prediction platform built for community entertainment. All virtual tokens hold zero cash value. Not affiliated with or endorsed by the National Football League (NFL).
-        </p>
+        <p style="color: #64748b; font-size: 12px; line-height: 1.5; max-width: 600px; margin: 0 auto 15px auto;">Touchdown Tokens is an independent, free-to-play recreational sports prediction platform built for community entertainment. All virtual tokens hold zero cash value. Not affiliated with or endorsed by the National Football League (NFL).</p>
         <div style="color: #94a3b8; font-size: 12px; font-weight: 600;">&copy; 2026 Touchdown Tokens. All rights reserved. Designed & Engineered by Ed McKenna.</div>
-        <div style="margin-top: 20px;">
-            <a href="https://buymeacoffee.com/ed.mckenna" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000000; padding: 10px 22px; border-radius: 12px; font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 1px; font-weight: bold; text-decoration: none; box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3);">☕ Buy Me A Coffee</a>
-        </div>
-    </footer>
+    </div>
 
-    <!-- Mobile Menu Script -->
-    <script>
-        function toggleMobileMenu() {
-            const navLinks = document.getElementById('navLinks');
-            navLinks.classList.toggle('active');
-        }
-    </script>
 </body>
 </html>
