@@ -1,4 +1,5 @@
 import os
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
@@ -8,23 +9,23 @@ from supabase import create_client
 # Import your modular routers
 from routers import auth, bets, leagues, profile, admin
 
-app = FastAPI(
-    title="Touchdown Tokens",
-    description="Weekly NFL Predictions & Wagers Platform",
-    version="2.0.0"
-)
-
-# ==========================================
-# SUPABASE STARTUP STATE INITIALIZATION
-# ==========================================
-@app.on_event("startup")
-async def startup_event():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: Initialize and inject Supabase client into app state
     supabase_url = os.environ.get("SUPABASE_URL")
     supabase_key = os.environ.get("SUPABASE_KEY")
     if not supabase_url or not supabase_key:
         raise RuntimeError("Missing SUPABASE_URL or SUPABASE_KEY environment variables.")
-    # Store global client on app state for dependency injection across routers
     app.state.supabase = create_client(supabase_url, supabase_key)
+    yield
+    # Shutdown: Clean up resources if needed
+
+app = FastAPI(
+    title="Touchdown Tokens",
+    description="Weekly NFL Predictions & Wagers Platform",
+    version="2.0.0",
+    lifespan=lifespan
+)
 
 # Mount static directory for CSS and assets
 app.mount("/static", StaticFiles(directory="static"), name="static")
