@@ -43,7 +43,7 @@ async def get_leagues_page(request: Request, supabase: Client = Depends(get_supa
         all_my_leagues = []
         all_profiles = []
 
-    return templates.TemplateResponse("leagues.html", {
+    return templates.TemplateResponse(request=request, name="leagues.html", context={
         "request": request,
         "user": user,
         "profile": profile,
