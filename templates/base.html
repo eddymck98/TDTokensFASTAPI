@@ -74,9 +74,9 @@
         {% endif %}
     </nav>
 
-    <!-- Sticky Balance Bar (Global across tabs, hidden on login and admin pages) -->
+    <!-- Sticky Balance Bar -->
     {% if profile and profile.full_name and profile.full_name != "Error Loading Profile" and request.url.path != '/auth/login' and not request.url.path.startswith('/admin') %}
-    <div class="sticky-balance-bar container" style="position: sticky; top: 20px; z-index: 100; margin-bottom: 25px; background: rgba(15, 23, 42, 0.90); border: 1px solid rgba(255, 255, 255, 0.12); border-left: 4px solid var(--team-color); border-radius: 16px; padding: 16px 24px; backdrop-filter: blur(14px); box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+    <div class="sticky-balance-bar container" style="position: sticky; top: 85px; z-index: 90; margin-top: 15px; margin-bottom: 25px; background: rgba(15, 23, 42, 0.90); border: 1px solid rgba(255, 255, 255, 0.12); border-left: 4px solid var(--team-color); border-radius: 16px; padding: 16px 24px; backdrop-filter: blur(14px); box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
         <div style="display: flex; align-items: center; gap: 14px;">
             <div style="border: 3px {{ profile.avatar_border | default('solid') }} var(--team-color); border-radius: 10px; padding: 6px 10px; background: {{ profile.avatar_color | default('#1e3a8a') }};">
                 <span style="font-size: 26px;">{{ profile.avatar_emoji | default('🏈') }}</span>
