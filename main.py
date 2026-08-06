@@ -46,8 +46,8 @@ async def root(request: Request):
     session_cookie = request.cookies.get("td_tokens_session")
     if not session_cookie:
         return templates.TemplateResponse("index.html", {"request": request})
-    return templates.TemplateResponse("dashboard.html", {"request": request})
-
+        return templates.TemplateResponse(request=request, name="dashboard.html", context={"request": request})
+    
 @app.get("/auth/login", response_class=HTMLResponse)
 async def login_page(request: Request):
     """Renders the login template page."""
