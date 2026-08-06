@@ -3,6 +3,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from supabase import create_client
 
 # Import your modular routers
 from routers import auth, bets, leagues, profile, admin
@@ -12,6 +13,18 @@ app = FastAPI(
     description="Weekly NFL Predictions & Wagers Platform",
     version="2.0.0"
 )
+
+# ==========================================
+# SUPABASE STARTUP STATE INITIALIZATION
+# ==========================================
+@app.on_event("startup")
+async def startup_event():
+    supabase_url = os.environ.get("SUPABASE_URL")
+    supabase_key = os.environ.get("SUPABASE_KEY")
+    if not supabase_url or not supabase_key:
+        raise RuntimeError("Missing SUPABASE_URL or SUPABASE_KEY environment variables.")
+    # Store global client on app state for dependency injection across routers
+    app.state.supabase = create_client(supabase_url, supabase_key)
 
 # Mount static directory for CSS and assets
 app.mount("/static", StaticFiles(directory="static"), name="static")
