@@ -3,183 +3,222 @@
 {% block content %}
 <div class="profile-container" style="max-width: 900px; margin: 0 auto; padding-bottom: 40px;">
 
-  <!-- Profile Header Banner -->
+  <!-- Header Section -->
   <div style="margin-bottom: 25px;">
     <h2 style="font-family: 'Bebas Neue', sans-serif; font-size: 38px; color: #ffffff; letter-spacing: 2px; margin: 0;">PROFILE & CUSTOMIZATION HUB</h2>
-    <p style="color: #94a3b8; font-size: 14px; margin: 0;">Personalize your display avatar, title nametag, border style, avatar color, favorite player, favorite team, and featured badges!</p>
+    <p style="color: #94a3b8; font-size: 14px; margin: 0;">Personalize your display avatar, title nametag, border style, avatar color, favorite team, and featured badges!</p>
   </div>
 
-  <!-- Team Info Banner Card -->
-  <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-left: 4px solid var(--team-color); border-radius: 16px; padding: 22px; margin-bottom: 25px; display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
-    <img src="{{ selected_team_logo | default('https://github.com/eddymck98/TD-Tokens-Render-/blob/main/TD%20Tokens%207.png?raw=true') }}" style="width: 75px; height: 75px; object-fit: contain; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5));" alt="Team Logo" />
-    <div>
-      <div style="font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; color: #94a3b8; font-weight: 600;">Current Favorite Franchise</div>
-      <div style="font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: #ffffff; letter-spacing: 1px; margin-top: 2px;">{{ profile.favorite_team }}</div>
-    </div>
-  </div>
+  <!-- Profile Customization Card -->
+  <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-left: 4px solid var(--team-color); border-radius: 16px; padding: 24px; margin-bottom: 25px; backdrop-filter: blur(14px);">
+    <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: #ffffff; letter-spacing: 1px; margin-top: 0; margin-bottom: 20px;">Edit Profile Settings</h3>
 
-  <!-- Profile Customization Form Box -->
-  <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px; padding: 24px; margin-bottom: 30px;">
-    <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: #ffffff; letter-spacing: 1px; margin-top: 0; margin-bottom: 16px;">⚙️ Edit Profile Settings</h3>
-    
-    <form method="POST" action="/profile/update">
-      <!-- Favorite Team Selector -->
-      <div style="margin-bottom: 18px;">
-        <label style="display: block; font-size: 14px; font-weight: 600; color: #f8fafc; margin-bottom: 6px;">Favorite NFL Team</label>
-        <select name="favorite_team" style="width: 100%; background: rgba(15,23,42,0.9); color: #fff; padding: 12px 14px; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; font-weight: 600;">
-          {% for team in nfl_teams %}
-          <option value="{{ team }}" {% if team == profile.favorite_team %}selected{% endif %}>{{ team }}</option>
-          {% endfor %}
-        </select>
-      </div>
-
+    <form action="/profile/update" method="POST">
+      
       <!-- Display Name -->
-      <div style="margin-bottom: 18px;">
-        <label style="display: block; font-size: 14px; font-weight: 600; color: #f8fafc; margin-bottom: 6px;">Display Name</label>
-        <input type="text" name="full_name" value="{{ profile.full_name }}" required style="width: 100%; background: rgba(15, 23, 42, 0.92); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 12px; padding: 12px 14px;" />
+      <div style="margin-bottom: 15px;">
+        <label for="full_name" style="font-weight: 600; font-size: 14px; color: #f8fafc; display: block; margin-bottom: 6px;">Display Name:</label>
+        <input type="text" id="full_name" name="full_name" value="{{ profile.full_name | default('') }}" required style="width: 100%; padding: 12px; background: rgba(30, 41, 59, 0.9); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; font-size: 15px;">
       </div>
 
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 18px;">
-        <!-- Active Nametag Title -->
-        <div>
-          <label style="display: block; font-size: 14px; font-weight: 600; color: #f8fafc; margin-bottom: 6px;">Active Nametag Title</label>
-          <select name="selected_title" style="width: 100%; background: rgba(15,23,42,0.9); color: #fff; padding: 12px 14px; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; font-weight: 600;">
-            {% for title in unlocked_title_options %}
-            <option value="{{ title }}" {% if title == current_selected_title %}selected{% endif %}>{{ title }}</option>
-            {% endfor %}
-          </select>
-        </div>
-        <!-- Avatar Emoji -->
-        <div>
-          <label style="display: block; font-size: 14px; font-weight: 600; color: #f8fafc; margin-bottom: 6px;">Avatar Emoji</label>
-          <select name="avatar_emoji" style="width: 100%; background: rgba(15,23,42,0.9); color: #fff; padding: 12px 14px; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; font-weight: 600;">
-            {% for av in avatar_options %}
-            <option value="{{ av }}" {% if av == profile.avatar_emoji %}selected{% endif %}>{{ av }}</option>
-            {% endfor %}
-          </select>
-        </div>
-      </div>
-
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 18px;">
-        <!-- Avatar Border Style -->
-        <div>
-          <label style="display: block; font-size: 14px; font-weight: 600; color: #f8fafc; margin-bottom: 6px;">Avatar Border Style</label>
-          <select name="avatar_border" style="width: 100%; background: rgba(15,23,42,0.9); color: #fff; padding: 12px 14px; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; font-weight: 600;">
-            {% for label, val in border_style_options.items() %}
-            <option value="{{ val }}" {% if val == profile.avatar_border %}selected{% endif %}>{{ label }}</option>
-            {% endfor %}
-          </select>
-        </div>
-        <!-- Avatar Box Color -->
-        <div>
-          <label style="display: block; font-size: 14px; font-weight: 600; color: #f8fafc; margin-bottom: 6px;">Avatar Box Color</label>
-          <input type="color" name="avatar_color" value="{{ profile.avatar_color | default('#1e3a8a') }}" style="width: 100%; height: 46px; background: rgba(15, 23, 42, 0.92); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 12px; padding: 4px; cursor: pointer;" />
-        </div>
-      </div>
-
-      <!-- Favorite Player -->
-      <div style="margin-bottom: 18px;">
-        <label style="display: block; font-size: 14px; font-weight: 600; color: #f8fafc; margin-bottom: 6px;">Favorite NFL Player</label>
-        <input type="text" name="favorite_player" value="{{ profile.favorite_player }}" placeholder="e.g., Patrick Mahomes" style="width: 100%; background: rgba(15, 23, 42, 0.92); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 12px; padding: 12px 14px;" />
-      </div>
-
-      <!-- Bio / Catchphrase -->
-      <div style="margin-bottom: 22px;">
-        <label style="display: block; font-size: 14px; font-weight: 600; color: #f8fafc; margin-bottom: 6px;">Profile Catchphrase / Bio (max 100 chars)</label>
-        <input type="text" name="bio" value="{{ profile.bio }}" maxlength="100" placeholder="Ready for Kickoff!" style="width: 100%; background: rgba(15, 23, 42, 0.92); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 12px; padding: 12px 14px;" />
-      </div>
-
-      <button type="submit" style="width: 100%; background: linear-gradient(135deg, var(--team-color) 0%, #d97706 100%); color: #000; border: none; padding: 14px; border-radius: 12px; font-family: 'Teko', sans-serif; font-size: 26px; letter-spacing: 2px; font-weight: bold; cursor: pointer; box-shadow: 0 6px 20px rgba(0,0,0,0.5);">Save Profile Settings 💾</button>
-    </form>
-  </div>
-
-  {% if locked_title_info %}
-  <!-- Locked Titles Expander -->
-  <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px; padding: 16px; margin-bottom: 30px;">
-    <details>
-      <summary style="font-weight: 600; color: #38bdf8; cursor: pointer; font-size: 15px;">🔒 Locked Nametag Titles & How to Unlock Them</summary>
-      <p style="color: #94a3b8; font-size: 13px; margin: 10px 0 12px 0;">Complete achievements and unlock badges to add these titles to your selectable collection!</p>
-      <ul style="color: #cbd5e1; font-size: 13px; margin: 0; padding-left: 20px; line-height: 1.6;">
-        {% for l_title, l_req in locked_title_info %}
-        <li><b>{{ l_title }}</b> — <i>Requirement:</i> {{ l_req }}</li>
-        {% endfor %}
-      </ul>
-    </details>
-  </div>
-  {% endif %}
-
-  <!-- Featured Badge Showcase Box -->
-  <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px; padding: 24px; margin-bottom: 30px;">
-    <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: #ffffff; letter-spacing: 1px; margin-top: 0; margin-bottom: 6px;">⭐ Featured Badge Showcase</h3>
-    <p style="color: #94a3b8; font-size: 13px; margin-bottom: 18px;">Choose up to 3 unlocked badges to showcase on your leaderboard card.</p>
-    
-    <form method="POST" action="/profile/featured">
-      <div style="margin-bottom: 18px;">
-        <label style="display: block; font-size: 14px; font-weight: 600; color: #f8fafc; margin-bottom: 6px;">Select up to 3 Badges to Showcase</label>
-        <select name="featured_badges" multiple style="width: 100%; height: 120px; background: rgba(15,23,42,0.9); color: #fff; padding: 10px; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; font-size: 13px;">
-          {% for b in unlocked_badges %}
-          <option value="{{ b }}" {% if b in valid_current_featured %}selected{% endif %}>{{ b }}</option>
-          {% endfor %}
+      <!-- Favorite NFL Team -->
+      <div style="margin-bottom: 15px;">
+        <label for="favorite_team" style="font-weight: 600; font-size: 14px; color: #f8fafc; display: block; margin-bottom: 6px;">Favorite NFL Team:</label>
+        <select id="favorite_team" name="favorite_team" style="width: 100%; padding: 12px; background: rgba(30, 41, 59, 0.9); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; font-size: 15px;">
+          <option value="🏈 Free Agent / Neutral" {% if profile.favorite_team == '🏈 Free Agent / Neutral' %}selected{% endif %}>🏈 Free Agent / Neutral</option>
+          <option value="🔴 Arizona Cardinals" {% if profile.favorite_team == '🔴 Arizona Cardinals' %}selected{% endif %}>🔴 Arizona Cardinals</option>
+          <option value="🔴 Atlanta Falcons" {% if profile.favorite_team == '🔴 Atlanta Falcons' %}selected{% endif %}>🔴 Atlanta Falcons</option>
+          <option value="🟣 Baltimore Ravens" {% if profile.favorite_team == '🟣 Baltimore Ravens' %}selected{% endif %}>🟣 Baltimore Ravens</option>
+          <option value="🔴 Buffalo Bills" {% if profile.favorite_team == '🔴 Buffalo Bills' %}selected{% endif %}>🔴 Buffalo Bills</option>
+          <option value="🔵 Carolina Panthers" {% if profile.favorite_team == '🔵 Carolina Panthers' %}selected{% endif %}>🔵 Carolina Panthers</option>
+          <option value="🟠 Chicago Bears" {% if profile.favorite_team == '🟠 Chicago Bears' %}selected{% endif %}>🟠 Chicago Bears</option>
+          <option value="🟠 Cincinnati Bengals" {% if profile.favorite_team == '🟠 Cincinnati Bengals' %}selected{% endif %}>🟠 Cincinnati Bengals</option>
+          <option value="🟤 Cleveland Browns" {% if profile.favorite_team == '🟤 Cleveland Browns' %}selected{% endif %}>🟤 Cleveland Browns</option>
+          <option value="🔵 Dallas Cowboys" {% if profile.favorite_team == '🔵 Dallas Cowboys' %}selected{% endif %}>🔵 Dallas Cowboys</option>
+          <option value="🟠 Denver Broncos" {% if profile.favorite_team == '🟠 Denver Broncos' %}selected{% endif %}>🟠 Denver Broncos</option>
+          <option value="🔵 Detroit Lions" {% if profile.favorite_team == '🔵 Detroit Lions' %}selected{% endif %}>🔵 Detroit Lions</option>
+          <option value="🟢 Green Bay Packers" {% if profile.favorite_team == '🟢 Green Bay Packers' %}selected{% endif %}>🟢 Green Bay Packers</option>
+          <option value="🔴 Houston Texans" {% if profile.favorite_team == '🔴 Houston Texans' %}selected{% endif %}>🔴 Houston Texans</option>
+          <option value="🔵 Indianapolis Colts" {% if profile.favorite_team == '🔵 Indianapolis Colts' %}selected{% endif %}>🔵 Indianapolis Colts</option>
+          <option value="🐆 Jacksonville Jaguars" {% if profile.favorite_team == '🐆 Jacksonville Jaguars' %}selected{% endif %}>🐆 Jacksonville Jaguars</option>
+          <option value="🔴 Kansas City Chiefs" {% if profile.favorite_team == '🔴 Kansas City Chiefs' %}selected{% endif %}>🔴 Kansas City Chiefs</option>
+          <option value="🪙 Las Vegas Raiders" {% if profile.favorite_team == '🪙 Las Vegas Raiders' %}selected{% endif %}>🪙 Las Vegas Raiders</option>
+          <option value="⚡ Los Angeles Chargers" {% if profile.favorite_team == '⚡ Los Angeles Chargers' %}selected{% endif %}>⚡ Los Angeles Chargers</option>
+          <option value="🟡 Los Angeles Rams" {% if profile.favorite_team == '🟡 Los Angeles Rams' %}selected{% endif %}>🟡 Los Angeles Rams</option>
+          <option value="🐬 Miami Dolphins" {% if profile.favorite_team == '🐬 Miami Dolphins' %}selected{% endif %}>🐬 Miami Dolphins</option>
+          <option value="🟣 Minnesota Vikings" {% if profile.favorite_team == '🟣 Minnesota Vikings' %}selected{% endif %}>🟣 Minnesota Vikings</option>
+          <option value="🔵 New England Patriots" {% if profile.favorite_team == '🔵 New England Patriots' %}selected{% endif %}>🔵 New England Patriots</option>
+          <option value="⚜️ New Orleans Saints" {% if profile.favorite_team == '⚜️ New Orleans Saints' %}selected{% endif %}>⚜️ New Orleans Saints</option>
+          <option value="🔵 New York Giants" {% if profile.favorite_team == '🔵 New York Giants' %}selected{% endif %}>🔵 New York Giants</option>
+          <option value="🟢 New York Jets" {% if profile.favorite_team == '🟢 New York Jets' %}selected{% endif %}>🟢 New York Jets</option>
+          <option value="🦅 Philadelphia Eagles" {% if profile.favorite_team == '🦅 Philadelphia Eagles' %}selected{% endif %}>🦅 Philadelphia Eagles</option>
+          <option value="🟡 Pittsburgh Steelers" {% if profile.favorite_team == '🟡 Pittsburgh Steelers' %}selected{% endif %}>🟡 Pittsburgh Steelers</option>
+          <option value="🔴 San Francisco 49ers" {% if profile.favorite_team == '🔴 San Francisco 49ers' %}selected{% endif %}>🔴 San Francisco 49ers</option>
+          <option value="🟢 Seattle Seahawks" {% if profile.favorite_team == '🟢 Seattle Seahawks' %}selected{% endif %}>🟢 Seattle Seahawks</option>
+          <option value="🔴 Tampa Bay Buccaneers" {% if profile.favorite_team == '🔴 Tampa Bay Buccaneers' %}selected{% endif %}>🔴 Tampa Bay Buccaneers</option>
+          <option value="🔵 Tennessee Titans" {% if profile.favorite_team == '🔵 Tennessee Titans' %}selected{% endif %}>🔵 Tennessee Titans</option>
+          <option value="🔴 Washington Commanders" {% if profile.favorite_team == '🔴 Washington Commanders' %}selected{% endif %}>🔴 Washington Commanders</option>
         </select>
-        <p style="color: #64748b; font-size: 11px; margin-top: 4px;">Hold Ctrl/Cmd to select multiple badges (maximum 3).</p>
       </div>
-      <button type="submit" style="width: 100%; background: linear-gradient(135deg, var(--team-color) 0%, #d97706 100%); color: #000; border: none; padding: 12px; border-radius: 10px; font-family: 'Teko', sans-serif; font-size: 22px; letter-spacing: 1px; font-weight: bold; cursor: pointer;">Save Featured Badges 🌟</button>
+
+      <!-- Nametag Title & Avatar Emoji -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px;">
+        <div>
+          <label for="selected_title" style="font-weight: 600; font-size: 13px; color: #f8fafc; display: block; margin-bottom: 6px;">Active Nametag Title:</label>
+          <select id="selected_title" name="selected_title" style="width: 100%; padding: 12px; background: rgba(30, 41, 59, 0.9); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; font-size: 15px;">
+            <option value="🏈 Gridiron Contender" {% if profile.selected_title == '🏈 Gridiron Contender' %}selected{% endif %}>🏈 Gridiron Contender</option>
+            <option value="👑 League Champion" {% if profile.selected_title == '👑 League Champion' %}selected{% endif %}>👑 League Champion</option>
+            <option value="⭐ League Commissioner" {% if profile.selected_title == '⭐ League Commissioner' %}selected{% endif %}>⭐ League Commissioner</option>
+            <option value="🔮 The Oracle" {% if profile.selected_title == '🔮 The Oracle' %}selected{% endif %}>🔮 The Oracle</option>
+            <option value="💰 Token Tycoon" {% if profile.selected_title == '💰 Token Tycoon' %}selected{% endif %}>💰 Token Tycoon</option>
+            <option value="⚡ Gridiron Prophet" {% if profile.selected_title == '⚡ Gridiron Prophet' %}selected{% endif %}>⚡ Gridiron Prophet</option>
+            <option value="🎯 Sharp Shooter" {% if profile.selected_title == '🎯 Sharp Shooter' %}selected{% endif %}>🎯 Sharp Shooter</option>
+            <option value="🏈 TD Specialist" {% if profile.selected_title == '🏈 TD Specialist' %}selected{% endif %}>🏈 TD Specialist</option>
+            <option value="🛡️ Mini-League Monarch" {% if profile.selected_title == '🛡️ Mini-League Monarch' %}selected{% endif %}>🛡️ Mini-League Monarch</option>
+            <option value="📉 Bankrupt Gambler" {% if profile.selected_title == '📉 Bankrupt Gambler' %}selected{% endif %}>📉 Bankrupt Gambler</option>
+          </select>
+        </div>
+        <div>
+          <label for="avatar_emoji" style="font-weight: 600; font-size: 13px; color: #f8fafc; display: block; margin-bottom: 6px;">Avatar Emoji:</label>
+          <select id="avatar_emoji" name="avatar_emoji" style="width: 100%; padding: 12px; background: rgba(30, 41, 59, 0.9); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; font-size: 15px;">
+            {% set emojis = ["🏈", "🐐", "⚡", "👑", "🎯", "💣", "💎", "🔥", "🛡️", "🚀", "🦁", "🐯", "🐻", "🦅", "🐺", "🦈", "🐉", "💀", "👽", "🤖", "⭐", "🏆", "🥇", "💪", "🎲", "🎩", "🍻", "🍕", "🍔", "💥", "🔮", "🃏", "🥷", "🧙‍♂️", "🧛‍♂️", "🧟‍♂️", "🦸‍♂️", "🦹‍♂️"] %}
+            {% for em in emojis %}
+              <option value="{{ em }}" {% if profile.avatar_emoji == em %}selected{% endif %}>{{ em }} Avatar</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <!-- Avatar Border & Color Picker -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px;">
+        <div>
+          <label for="avatar_border" style="font-weight: 600; font-size: 13px; color: #f8fafc; display: block; margin-bottom: 6px;">Avatar Border Style:</label>
+          <select id="avatar_border" name="avatar_border" style="width: 100%; padding: 12px; background: rgba(30, 41, 59, 0.9); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; font-size: 15px;">
+            <option value="solid" {% if profile.avatar_border == 'solid' %}selected{% endif %}>Classic Solid</option>
+            <option value="double" {% if profile.avatar_border == 'double' %}selected{% endif %}>Double Neon Pulse</option>
+            <option value="dashed" {% if profile.avatar_border == 'dashed' %}selected{% endif %}>Dashed Gridiron</option>
+            <option value="dotted" {% if profile.avatar_border == 'dotted' %}selected{% endif %}>Stealth Dotted</option>
+            <option value="ridge" {% if profile.avatar_border == 'ridge' %}selected{% endif %}>Championship Ridge</option>
+            <option value="inset" {% if profile.avatar_border == 'inset' %}selected{% endif %}>Groove Outlined</option>
+          </select>
+        </div>
+        <div>
+          <label for="avatar_color" style="font-weight: 600; font-size: 13px; color: #f8fafc; display: block; margin-bottom: 6px;">Avatar Box Color:</label>
+          <input type="color" id="avatar_color" name="avatar_color" value="{{ profile.avatar_color | default('#1e3a8a') }}" style="width: 100%; height: 46px; padding: 4px; background: rgba(30, 41, 59, 0.9); border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; cursor: pointer;">
+        </div>
+      </div>
+
+      <!-- Favorite Player & Bio -->
+      <div style="margin-bottom: 15px;">
+        <label for="favorite_player" style="font-weight: 600; font-size: 14px; color: #f8fafc; display: block; margin-bottom: 6px;">Favorite NFL Player:</label>
+        <input type="text" id="favorite_player" name="favorite_player" value="{{ profile.favorite_player | default('') }}" placeholder="e.g., Patrick Mahomes" style="width: 100%; padding: 12px; background: rgba(30, 41, 59, 0.9); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; font-size: 15px;">
+      </div>
+
+      <div style="margin-bottom: 20px;">
+        <label for="bio" style="font-weight: 600; font-size: 14px; color: #f8fafc; display: block; margin-bottom: 6px;">Profile Catchphrase / Bio (max 100 chars):</label>
+        <input type="text" id="bio" name="bio" value="{{ profile.bio | default('Ready for Kickoff!') }}" maxlength="100" placeholder="Ready for Kickoff!" style="width: 100%; padding: 12px; background: rgba(30, 41, 59, 0.9); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; font-size: 15px;">
+      </div>
+
+      <button type="submit" style="background: linear-gradient(135deg, var(--team-color) 0%, #d97706 100%); color: #000; padding: 12px 24px; font-family: 'Teko', sans-serif; font-size: 22px; font-weight: bold; border-radius: 10px; border: none; cursor: pointer; width: 100%; box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3);">Save Profile Settings 💾</button>
     </form>
   </div>
 
-  <!-- Virtual Trophy Cabinet Section -->
-  <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-top: 4px solid var(--team-color); border-radius: 16px; padding: 24px;">
-    <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: #ffffff; letter-spacing: 1px; margin-top: 0; margin-bottom: 6px;">🏆 Virtual Trophy Cabinet</h3>
-    <p style="color: #94a3b8; font-size: 13px; margin-bottom: 20px;">Inspect badge showcases across any league member.</p>
+  <!-- Featured Badge Showcase -->
+  <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px; padding: 24px; margin-bottom: 25px; backdrop-filter: blur(14px);">
+    <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: #ffffff; letter-spacing: 1px; margin-top: 0; margin-bottom: 5px;">⭐ Featured Badge Showcase</h3>
+    <p style="color: #94a3b8; font-size: 14px; margin-bottom: 20px;">Choose up to 3 unlocked badges to showcase on your leaderboard card.</p>
 
-    <!-- Player Showcase Selector Form -->
-    <form method="GET" action="/profile" style="margin-bottom: 25px;">
-      <label style="display: block; font-size: 14px; font-weight: 600; color: #f8fafc; margin-bottom: 6px;">Select Player Trophy Showcase:</label>
-      <select name="trophy_player" onchange="this.form.submit()" style="width: 100%; background: rgba(15,23,42,0.9); color: #fff; padding: 10px 14px; border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; font-weight: 600;">
-        {% for name in user_name_map.keys() %}
-        <option value="{{ name }}" {% if name == selected_player_name %}selected{% endif %}>{{ name }}</option>
+    <form action="/profile/featured-badges" method="POST">
+      <div style="margin-bottom: 15px;">
+        <label style="font-weight: 600; font-size: 14px; color: #f8fafc; display: block; margin-bottom: 8px;">Select Unlocked Badges (Max 3):</label>
+        
+        {% set unlocked_list = profile.unlocked_badges | default([]) %}
+        {% set featured_list = profile.featured_badges | default([]) %}
+
+        {% if unlocked_list %}
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 15px;">
+            {% for badge in unlocked_list %}
+              <div style="background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; display: flex; align-items: center; gap: 10px;">
+                <input type="checkbox" id="badge_{{ loop.index }}" name="featured_badges" value="{{ badge }}" {% if badge in featured_list %}checked{% endif %} style="width: 18px; height: 18px;">
+                <label for="badge_{{ loop.index }}" style="font-size: 13px; color: #fff; cursor: pointer; margin: 0;">{{ badge }}</label>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p style="color: #94a3b8; font-size: 14px;">You haven't unlocked any badges yet. Complete predictions and achievements to earn trophies!</p>
+        {% endif %}
+      </div>
+
+      <button type="submit" style="background: linear-gradient(135deg, var(--team-color) 0%, #d97706 100%); color: #000; padding: 10px 20px; font-family: 'Teko', sans-serif; font-size: 20px; font-weight: bold; border-radius: 10px; border: none; cursor: pointer;">Save Featured Badges 🌟</button>
+    </form>
+  </div>
+
+  <!-- Virtual Trophy Cabinet Inspector -->
+  <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px; padding: 24px; backdrop-filter: blur(14px);">
+    <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: #ffffff; letter-spacing: 1px; margin-top: 0; margin-bottom: 5px;">🏆 Virtual Trophy Cabinet</h3>
+    <p style="color: #94a3b8; font-size: 14px; margin-bottom: 20px;">Inspect badge showcases across any league member.</p>
+
+    <!-- Player Selector Dropdown -->
+    <div style="margin-bottom: 25px;">
+      <label for="inspect-player-select" style="font-weight: 600; font-size: 15px; color: #f8fafc; display: block; margin-bottom: 8px;">Select Player Trophy Showcase:</label>
+      <select id="inspect-player-select" onchange="switchPlayerCabinet(this.value)" style="width: 100%; max-width: 350px; padding: 12px; background: rgba(15, 23, 42, 0.92); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; font-size: 15px;">
+        {% for p in all_profiles %}
+          <option value="{{ p.id }}" {% if p.id == profile.id %}selected{% endif %}>{{ p.full_name }}</option>
         {% endfor %}
       </select>
-    </form>
-
-    <!-- Selected Player Showcase Header -->
-    <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px; background: rgba(30, 41, 59, 0.5); padding: 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08);">
-      <img src="{{ selected_team_info.logo }}" style="width: 60px; height: 60px; object-fit: contain;" alt="Selected Team Logo" />
-      <div>
-        <h4 style="margin: 0; color: #ffffff; font-size: 18px;">{{ selected_player.avatar_emoji }} {{ selected_player.full_name }}'s Showcase</h4>
-        <p style="margin: 4px 0 0 0; color: #94a3b8; font-size: 13px;">Unlocked: <b>{{ selected_badges | length }}</b> / <b>{{ master_badges | length }}</b> Badges</p>
-      </div>
     </div>
 
-    <!-- Cabinet Progress Bar -->
-    <div style="margin-bottom: 25px;">
-      <div style="display: flex; justify-content: space-between; font-size: 12px; color: #94a3b8; margin-bottom: 4px;">
-        <span>Cabinet Completion</span>
-        <span><b>{{ progress_percentage }}%</b> Unlocked</span>
-      </div>
-      <div style="width: 100%; height: 10px; background: rgba(30, 41, 59, 0.9); border-radius: 5px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1);">
-        <div style="width: {{ progress_percentage }}%; height: 100%; background: linear-gradient(90deg, var(--team-color), #38bdf8);"></div>
-      </div>
-    </div>
+    <!-- Master Badges Reference Grid -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 15px;">
+      
+      {% set master_badges = {
+        "🚀 Token Tycoon": "Accumulate 50+ lifetime tokens earned across your career",
+        "🎯 High Roller": "Wager 10+ tokens on a single question",
+        "⚡ Double Down Legend": "Wager 15+ total tokens in a single week",
+        "💣 All-In Maverick": "Wager 100% of your remaining token balance on a slate",
+        "🏈 TD Guru": "Correctly predict 5+ Touchdown Scorers",
+        "🎯 Sniper": "Correctly predict 9+ Touchdown Scorers across the season",
+        "👑 Weekly High Scorer": "Win the most net tokens in a single week",
+        "🎯 Perfect 10/10": "Correctly answer all 10 scenarios in a single week",
+        "🧊 Clutch Gene": "Win a scenario where 75%+ of the league picked the wrong side",
+        "🛡️ Iron Defender": "Submit bets for 5 or more weeks without missing",
+        "💰 Century Club": "Accumulate 100+ total cumulative tokens won across history",
+        "📉 Wall Street Bets": "Take the largest token loss in a single week",
+        "📉 Down Bad": "Reach a token balance of 0 tokens",
+        "🏆 League Champion": "Be crowned the official end-of-season League Champion",
+        "⭐ League Commissioner": "Create or administer a custom mini-league",
+        "🔮 Oracle of Delphi": "Successfully call a 5+ token wager correctly 4 weeks in a row",
+        "🔥 Untouchable Run": "Gain 20+ net tokens in a single weekly slate",
+        "⚡ Gridiron Prophet": "Correctly predict 13+ Touchdown Scorers across the season",
+        "💎 Diamond Hands": "Survive with fewer than 3 tokens remaining and bounce back to 30+",
+        "🛡️ Mini-League Monarch": "Finish 1st place in any active mini-league standing",
+        "🌟 Gridiron General": "Maintain a 70%+ win rate across 20+ total bets in your mini-league",
+        "🎯 Pick Six Prodigy": "Correctly predict a Touchdown Scorer on 3 consecutive weeks",
+        "🎩 Commissioner's Right Hand": "Be an active member of 3+ custom mini-leagues"
+      } %}
 
-    <!-- Trophy Cards Grid -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px;">
       {% for b_name, b_desc in master_badges.items() %}
-        {% if b_name in selected_badges %}
-        <div style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.90) 0%, rgba(15, 23, 42, 0.94) 100%); border: 1px solid rgba(255, 255, 255, 0.12); border-left: 4px solid var(--team-color); padding: 16px; border-radius: 14px; box-shadow: 0 6px 18px rgba(0,0,0,0.4);">
-          <b style="color: #ffffff; font-size: 14px;">{{ b_name }}</b> <span style="color:#fbbf24; font-weight:bold; font-size: 12px;">(UNLOCKED)</span><br>
-          <small style="color:#cbd5e1; font-size: 12px; line-height: 1.4; display: block; margin-top: 4px;">{{ b_desc }}</small>
-        </div>
+        {% if b_name in unlocked_list %}
+          <div style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.90) 0%, rgba(15, 23, 42, 0.94) 100%); border: 1px solid rgba(255, 255, 255, 0.12); border-left: 4px solid var(--team-color); padding: 16px; border-radius: 14px;">
+            <b style="color: #fff; font-size: 15px;">{{ b_name }}</b> <span style="color: #fbbf24; font-weight: bold; font-size: 13px;">(UNLOCKED)</span><br>
+            <small style="color: #cbd5e1; font-size: 12px;">{{ b_desc }}</small>
+          </div>
         {% else %}
-        <div style="background: rgba(15, 23, 42, 0.55); border: 1px dashed rgba(255, 255, 255, 0.18); padding: 16px; border-radius: 14px; opacity: 0.55;">
-          <b style="color: #94a3b8; font-size: 14px;">🔒 {{ b_name }}</b><br>
-          <small style="color: #64748b; font-size: 12px; line-height: 1.4; display: block; margin-top: 4px;">{{ b_desc }}</small>
-        </div>
+          <div style="background: rgba(15, 23, 42, 0.55); border: 1px dashed rgba(255, 255, 255, 0.18); padding: 16px; border-radius: 14px; opacity: 0.55;">
+            <b style="color: #94a3b8; font-size: 15px;">🔒 {{ b_name }}</b><br>
+            <small style="color: #64748b; font-size: 12px;">{{ b_desc }}</small>
+          </div>
         {% endif %}
       {% endfor %}
-    </div>
 
+    </div>
   </div>
 
 </div>
+
+<script>
+  function switchPlayerCabinet(userId) {
+    // Optional: Fetch or filter cabinet view dynamically via AJAX if inspecting other users' cabinets
+  }
+</script>
 {% endblock %}
