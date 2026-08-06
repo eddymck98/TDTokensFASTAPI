@@ -12,7 +12,7 @@ templates = Jinja2Templates(directory="templates")
 def get_supabase(request: Request) -> Client:
     return request.app.state.supabase
 
-@router.get("/bets", response_class=HTMLResponse)
+@router.get("/", response_class=HTMLResponse)
 async def get_bets_page(request: Request, supabase: Client = Depends(get_supabase)):
     # Session verification logic matching main.py cookie management
     session_cookie = request.cookies.get("td_tokens_session")
@@ -47,7 +47,7 @@ async def get_bets_page(request: Request, supabase: Client = Depends(get_supabas
         "available_weeks": available_weeks
     })
 
-@router.post("/bets/submit")
+@router.post("/submit")
 async def submit_weekly_bets(
     request: Request,
     week_number: int = Form(...),
