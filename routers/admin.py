@@ -1,9 +1,12 @@
+import os
+import json
+import pandas as pd
+from contextlib import asynccontextmanager
 from fastapi import APIRouter, Depends, Form, Request, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from typing import Optional
-import os, pandas as pd
 from supabase import Client
 
 router = APIRouter()
@@ -48,9 +51,89 @@ def recalculate_all_user_balances(supabase_client: Client):
     except Exception: pass
 
 @router.get("/", response_class=HTMLResponse)
-async def admin_portal_landing(request: Request):
+async def admin_portal_landing(request: Request, week: int = 1):
     """Renders the central admin tab view or control hub."""
-    return templates.TemplateResponse(request=request, name="admin.html", context={"request": request})
+    session_cookie = request.cookies.get("td_tokens_session")
+    if not session_cookie:
+        return RedirectResponse(url="/auth/login", status_code=303)
+
+    supabase = request.app.state.supabase
+
+    # 1. Fetch Profile so base.html renders navbar & admin badges correctly
+    try:
+        token_data = json.loads(session_cookie)
+        access_token = token_data.get("access_token")
+        supabase.auth.set_session(access_token, token_data.get("refresh_token"))
+        user = supabase.auth.get_user(access_token).user
+        
+        if not user:
+            return RedirectResponse(url="/auth/login", status_code=303)
+
+        profile_res = supabase.table("profiles").select("*").eq("email", user.email).execute()
+        current_profile = profile_res.data[0] if profile_res.data else {
+            "full_name": user.email.split('@')[0],
+            "is_admin": False,
+            "tokens": 10
+        }
+        
+        # Verify Admin Privileges
+        if not current_profile.get("is_admin", False):
+            return RedirectResponse(url="/dashboard", status_code=303)
+
+    except Exception as e:
+        print(f"Admin Auth Error: {e}")
+        return RedirectResponse(url="/auth/login", status_code=303)
+
+    # 2. Fetch Existing Questions for Target Week
+    existing_questions = []
+    try:
+        q_res = (
+            supabase.table("weekly_questions")
+            .select("*")
+            .eq("week_number", week)
+            .order("question_number")
+            .execute()
+        )
+        existing_questions = q_res.data if q_res.data else []
+    except Exception as e:
+        print(f"Admin Questions Fetch Error: {e}")
+
+    # Map fetched questions and parse out the Away/Home teams from the saved string
+    questions_map = {}
+    for q in existing_questions:
+        qn = q.get("question_number")
+        q_text = q.get("question_text", "")
+        
+        # Default extraction states
+        prompt = q_text
+        away_team = "🏈 Free Agent / Neutral"
+        home_team = "🏈 Free Agent / Neutral"
+        
+        if " | MATCHUP: " in q_text:
+            parts = q_text.split(" | MATCHUP: ")
+            prompt = parts[0]
+            teams = parts[1].split(" @ ")
+            if len(teams) == 2:
+                away_team = teams[0]
+                home_team = teams[1]
+                
+        questions_map[qn] = {
+            "question_text": prompt,
+            "away_team": away_team,
+            "home_team": home_team
+        }
+
+    return templates.TemplateResponse(
+        request=request,
+        name="admin.html",
+        context={
+            "request": request,
+            "profile": current_profile,
+            "active_tokens": current_profile.get("tokens", 10),
+            "target_week": week,
+            "questions_map": questions_map
+        }
+    )
 
 @router.post("/publish")
 async def admin_publish_questions(
@@ -74,7 +157,7 @@ async def admin_publish_questions(
         else:
             supabase.table("weekly_questions").insert({"week_number": week_number, "question_number": i, "question_text": combined_text, "winning_answer": "Pending"}).execute()
     
-    return RedirectResponse(url="/?success=questions_published", status_code=303)
+    return RedirectResponse(url="/admin?success=questions_published", status_code=303)
 
 @router.post("/schedule")
 async def admin_save_lockout(
@@ -90,7 +173,7 @@ async def admin_save_lockout(
         "question_text": "LOCKTIME SCHEDULER",
         "winning_answer": f"LOCKTIME:{lockout_iso}"
     }).execute()
-    return RedirectResponse(url="/?success=lockout_saved", status_code=303)
+    return RedirectResponse(url="/admin?success=lockout_saved", status_code=303)
 
 @router.post("/live")
 async def admin_grade_live(
@@ -107,7 +190,7 @@ async def admin_grade_live(
             supabase.table("weekly_questions").update({"winning_answer": ans}).eq("id", q["id"]).execute()
             
     recalculate_all_user_balances(supabase)
-    return RedirectResponse(url="/?success=week_graded", status_code=303)
+    return RedirectResponse(url="/admin?success=week_graded", status_code=303)
 
 @router.post("/adjust")
 async def admin_bulk_adjust_tokens(
@@ -126,7 +209,7 @@ async def admin_bulk_adjust_tokens(
         else:
             new_tokens = amount
         supabase.table("profiles").update({"tokens": new_tokens}).eq("id", user_id).execute()
-    return RedirectResponse(url="/?success=tokens_adjusted", status_code=303)
+    return RedirectResponse(url="/admin?success=tokens_adjusted", status_code=303)
 
 @router.post("/control")
 async def admin_app_access_control(
@@ -140,4 +223,4 @@ async def admin_app_access_control(
     supabase.table("weekly_questions").delete().eq("week_number", 997).execute()
     supabase.table("weekly_questions").insert({"week_number": 997, "question_number": 99, "question_text": "SIGNUP LOCK SETTING", "winning_answer": "LOCKED" if signup_locked else "UNLOCKED"}).execute()
     
-    return RedirectResponse(url="/?success=access_controls_updated", status_code=303)
+    return RedirectResponse(url="/admin?success=access_controls_updated", status_code=303)
