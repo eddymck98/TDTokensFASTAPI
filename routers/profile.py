@@ -12,7 +12,7 @@ templates = Jinja2Templates(directory="templates")
 def get_supabase(request: Request) -> Client:
     return request.app.state.supabase
 
-@router.get("/profile", response_class=HTMLResponse)
+@router.get("/", response_class=HTMLResponse)
 async def get_profile_page(request: Request, supabase: Client = Depends(get_supabase)):
     session_cookie = request.cookies.get("td_tokens_session")
     if not session_cookie:
@@ -43,7 +43,7 @@ async def get_profile_page(request: Request, supabase: Client = Depends(get_supa
         "all_profiles": all_profiles
     })
 
-@router.post("/profile/update")
+@router.post("/update")
 async def update_profile(
     request: Request,
     full_name: str = Form(...),
@@ -88,7 +88,7 @@ async def update_profile(
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@router.post("/profile/featured-badges")
+@router.post("/featured-badges")
 async def update_featured_badges(
     request: Request,
     supabase: Client = Depends(get_supabase)
