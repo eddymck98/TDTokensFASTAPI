@@ -52,7 +52,7 @@ async def admin_portal_landing(request: Request):
     """Renders the central admin tab view or control hub."""
     return templates.TemplateResponse(request=request, name="admin.html", context={"request": request})
 
-@router.post("/questions/publish")
+@router.post("/publish")
 async def admin_publish_questions(
     request: Request,
     week_number: int = Form(...),
@@ -76,7 +76,7 @@ async def admin_publish_questions(
     
     return RedirectResponse(url="/?success=questions_published", status_code=303)
 
-@router.post("/lockout/schedule")
+@router.post("/schedule")
 async def admin_save_lockout(
     request: Request,
     week_number: int = Form(...),
@@ -92,7 +92,7 @@ async def admin_save_lockout(
     }).execute()
     return RedirectResponse(url="/?success=lockout_saved", status_code=303)
 
-@router.post("/grade/live")
+@router.post("/live")
 async def admin_grade_live(
     request: Request,
     week_number: int = Form(...),
@@ -109,7 +109,7 @@ async def admin_grade_live(
     recalculate_all_user_balances(supabase)
     return RedirectResponse(url="/?success=week_graded", status_code=303)
 
-@router.post("/tokens/adjust")
+@router.post("/adjust")
 async def admin_bulk_adjust_tokens(
     user_id: str = Form(...),
     adjustment_type: str = Form(...),
@@ -128,7 +128,7 @@ async def admin_bulk_adjust_tokens(
         supabase.table("profiles").update({"tokens": new_tokens}).eq("id", user_id).execute()
     return RedirectResponse(url="/?success=tokens_adjusted", status_code=303)
 
-@router.post("/access/control")
+@router.post("/control")
 async def admin_app_access_control(
     signin_locked: bool = Form(False),
     signup_locked: bool = Form(False),
