@@ -1,7 +1,9 @@
 import json
+import os
 from fastapi import APIRouter, Form, HTTPException, Request, Response
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
+from supabase import create_client
 
 from utils.database import supabase
 from utils.email_service import send_verification_email
@@ -17,7 +19,7 @@ async def login_page(request: Request):
 
 
 @router.post("/login")
-async def handle_login(request: Response, email: str = Form(...), password: str = Form(...)):
+async def handle_login(request: Request, email: str = Form(...), password: str = Form(...)):
     """Handles user sign-in and session cookie storage matching app.py."""
     try:
         # Check sign-in lock state
@@ -37,7 +39,6 @@ async def handle_login(request: Response, email: str = Form(...), password: str 
                     "access_token": auth_response.session.access_token,
                     "refresh_token": auth_response.session.refresh_token
                 })
-                # Set cookie matching app.py controller logic (30 days max_age)
                 response.set_cookie(key="td_tokens_session", value=session_data, max_age=2592000, httponly=True)
             return response
         else:
@@ -93,7 +94,6 @@ async def handle_signup(
                 "reduced_motion": False
             }).execute()
 
-            # Add user to global league membership table
             try:
                 supabase.table("league_members").insert({
                     "league_id": "00000000-0000-0000-0000-000000000001",
@@ -102,7 +102,6 @@ async def handle_signup(
             except Exception:
                 pass
 
-            # Send verification email via Resend
             send_verification_email(email.strip(), "https://tdtokens.co.uk")
             
             try:
@@ -115,6 +114,32 @@ async def handle_signup(
             raise HTTPException(status_code=400, detail="Sign up failed.")
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Sign up error: {str(e)}")
+
+
+@router.post("/forgot-password")
+async def handle_forgot_password(email: str = Form(...)):
+    """Generates and emails password reset links matching app.py logic."""
+    try:
+        service_key = os.environ.get("SUPABASE_SERVICE_KEY", "")
+        url = os.environ.get("SUPABASE_URL", "")
+        admin_supabase = create_client(url, service_key) if service_key and url else supabase
+        
+        response = admin_supabase.auth.admin.generate_link({"type": "recovery", "email": email.strip()})
+        if response and hasattr(response, "properties") and response.properties:
+            props = response.properties
+            action_link = props.get("action_link") if isinstance(props, dict) else getattr(props, "action_link", None)
+            email_otp = props.get("email_otp") if isinstance(props, dict) else getattr(props, "email_otp", None)
+            recovery_link = f"https://tdtokens.co.uk/auth/reset-password?token={email_otp}&type=recovery" if email_otp else action_link
+
+            if recovery_link:
+                # Custom Resend Email HTML matching app.py
+                html_content = f"""<div style="background-color: #0b0f19; padding: 30px; font-family: 'Inter', Arial, sans-serif; color: #f8fafc;"><div style="max-width: 600px; margin: 0 auto; background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(255, 255, 255, 0.12); border-top: 4px solid #fbbf24; border-radius: 16px; padding: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);"><h3 style="color: #ffffff; font-size: 20px; margin-bottom: 15px;">Reset Your Password 🔑</h3><p style="color: #cbd5e1; font-size: 15px; line-height: 1.6; margin-bottom: 25px;">Click the secure button below to choose a brand new password for your account:</p><div style="text-align: center; margin: 35px 0;"><a href="{recovery_link}" style="background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000000; padding: 14px 28px; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 16px; display: inline-block;">RESET PASSWORD</a></div></div></div>"""
+                import resend
+                resend.Emails.send({"from": "Touchdown Tokens <noreply@auth.tdtokens.co.uk>", "to": [email.strip()], "subject": "🔑 Reset Your Touchdown Tokens Password", "html": html_content})
+                return RedirectResponse(url="/auth/login?msg=Reset+Link+Sent", status_code=303)
+        raise HTTPException(status_code=400, detail="Could not generate recovery link.")
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error sending reset email: {str(e)}")
 
 
 @router.get("/logout")
