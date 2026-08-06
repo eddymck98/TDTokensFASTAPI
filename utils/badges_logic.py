@@ -1,13 +1,118 @@
 import os
+from datetime import datetime, timezone
+from typing import List, Tuple, Set, Optional
 from supabase import Client
 
-def sync_and_get_user_badges(supabase: Client, target_user_id: str, check_celebration: bool = False, st_session_state=None) -> list:
-    """
-    Syncs and calculates all unlocked Master Badges for a target user based on their historical bets,
-    touchdown picks, tokens, mini-league memberships, and leaderboard performance.
-    """
+PROFANITY_FILTER = ["damn", "hell", "crap", "shit", "fuck", "bitch", "asshole", "dick", "cunt", "bastard"]
+
+AVAILABLE_TITLES = {
+    "🏈 Gridiron Contender": {"badge": None, "req": "Default baseline title for all players."},
+    "👑 League Champion": {"badge": "🏆 League Champion", "req": "Be crowned the official end-of-season League Champion."},
+    "⭐ League Commissioner": {"badge": "⭐ League Commissioner", "req": "Create or administer a custom mini-league."},
+    "🔮 The Oracle": {"badge": "🔮 Oracle of Delphi", "req": "Successfully call a 5+ token wager correctly 4 weeks in a row."},
+    "💰 Token Tycoon": {"badge": "🚀 Token Tycoon", "req": "Accumulate 50+ lifetime tokens earned."},
+    "⚡ Gridiron Prophet": {"badge": "⚡ Gridiron Prophet", "req": "Correctly predict 13+ Touchdown Scorers across the season."},
+    "🎯 Sharp Shooter": {"badge": "🎯 Sniper", "req": "Correctly predict 9+ Touchdown Scorers across the season."},
+    "🏈 TD Specialist": {"badge": "🏈 TD Guru", "req": "Correctly predict 5+ Touchdown Scorers."},
+    "🛡️ Mini-League Monarch": {"badge": "🛡️ Mini-League Monarch", "req": "Finish in 1st place in any active mini-league."},
+    "📉 Bankrupt Gambler": {"badge": "📉 Down Bad", "req": "Reach a token balance of 0 tokens."}
+}
+
+MASTER_BADGES = {
+    "🚀 Token Tycoon": "Accumulate 50+ lifetime tokens earned across your career",
+    "🎯 High Roller": "Wager 10+ tokens on a single question",
+    "⚡ Double Down Legend": "Wager 15+ total tokens in a single week",
+    "💣 All-In Maverick": "Wager 100% of your remaining token balance on a slate",
+    "🏈 TD Guru": "Correctly predict 5+ Touchdown Scorers",
+    "🎯 Sniper": "Correctly predict 9+ Touchdown Scorers across the season",
+    "👑 Weekly High Scorer": "Win the most net tokens in a single week",
+    "🎯 Perfect 10/10": "Correctly answer all 10 scenarios in a single week",
+    "🧊 Clutch Gene": "Win a scenario where 75%+ of the league picked the wrong side",
+    "🛡️ Iron Defender": "Submit bets for 5 or more weeks without missing",
+    "💰 Century Club": "Accumulate 100+ total cumulative tokens won across history",
+    "📉 Wall Street Bets": "Take the largest token loss in a single week",
+    "📉 Down Bad": "Reach a token balance of 0 tokens",
+    "🏆 League Champion": "Be crowned the official end-of-season League Champion",
+    "⭐ League Commissioner": "Create or administer a custom mini-league",
+    "🔮 Oracle of Delphi": "Successfully call a 5+ token wager correctly 4 weeks in a row",
+    "🔥 Untouchable Run": "Gain 20+ net tokens in a single weekly slate",
+    "⚡ Gridiron Prophet": "Correctly predict 13+ Touchdown Scorers across the season",
+    "💎 Diamond Hands": "Survive with fewer than 3 tokens remaining and bounce back to 30+",
+    "🛡️ Mini-League Monarch": "Finish 1st place in any active mini-league standing",
+    "🌟 Gridiron General": "Maintain a 70%+ win rate across 20+ total bets in your mini-league",
+    "🎯 Pick Six Prodigy": "Correctly predict a Touchdown Scorer on 3 consecutive weeks",
+    "🎩 Commissioner's Right Hand": "Be an active member of 3+ custom mini-leagues"
+}
+
+def get_true_global_token_balance(target_user_id: str, supabase: Client) -> int:
+    """Calculates the verified global token balance directly from the database."""
     try:
-        p_data = supabase.table("profiles").select("tokens, unlocked_badges").eq("id", target_user_id).single().execute().data
+        res = supabase.table("profiles").select("tokens").eq("id", target_user_id).single().execute()
+        return max(0, (res.data or {}).get("tokens", 10))
+    except Exception:
+        return 10
+
+def calculate_nemesis(target_user_id: str, supabase: Client, allowed_peer_ids: Optional[Set[str]] = None) -> Tuple[str, int]:
+    """Calculates the user's biggest rival (Nemesis) based on contested weekly picks."""
+    try:
+        user_bets = supabase.table("user_bets").select("week_number, question_id, pick").eq("user_id", target_user_id).execute().data
+        if not user_bets:
+            return "None Yet", 0
+        
+        user_picks_map = {(b["week_number"], b["question_id"]): b["pick"] for b in user_bets}
+        rival_disagreements = {}
+
+        for (w_num, q_id), u_pick in user_picks_map.items():
+            other_bets_query = supabase.table("user_bets").select("user_id, pick, weekly_questions(winning_answer)").eq("week_number", w_num).eq("question_id", q_id).neq("user_id", target_user_id)
+            if allowed_peer_ids is not None:
+                if not allowed_peer_ids:
+                    continue
+                other_bets_query = other_bets_query.in_("user_id", list(allowed_peer_ids))
+            
+            other_bets = other_bets_query.execute().data
+            if other_bets:
+                for ob in other_bets:
+                    rival_id = ob["user_id"]
+                    rival_pick = ob["pick"]
+                    wq = ob.get("weekly_questions")
+                    winning_ans = wq.get("winning_answer") if isinstance(wq, dict) else None
+                    
+                    if rival_pick != u_pick and winning_ans in ["Yes", "No"] and rival_pick == winning_ans:
+                        rival_disagreements[rival_id] = rival_disagreements.get(rival_id, 0) + 1
+
+        if not rival_disagreements:
+            return "None Yet", 0
+        
+        nemesis_id = max(rival_disagreements, key=rival_disagreements.get)
+        nemesis_prof = supabase.table("profiles").select("full_name").eq("id", nemesis_id).single().execute().data
+        return nemesis_prof.get("full_name", "Unknown Rival") if nemesis_prof else "Unknown Rival", rival_disagreements[nemesis_id]
+    except Exception:
+        return "None Yet", 0
+
+def calculate_streak(target_user_id: str, supabase: Client) -> str:
+    """Calculates the user's active correct prediction streak."""
+    try:
+        u_bets = supabase.table("user_bets").select("week_number, pick, weekly_questions(winning_answer)").eq("user_id", target_user_id).order("week_number", desc=True).execute().data
+        if not u_bets:
+            return "0W"
+        
+        streak = 0
+        for b in u_bets:
+            wq = b.get("weekly_questions")
+            w_ans = wq.get("winning_answer") if isinstance(wq, dict) else None
+            if w_ans in ["Yes", "No"]:
+                if b["pick"] == w_ans:
+                    streak += 1
+                else:
+                    break
+        return f"{streak}W" if streak > 0 else "0W"
+    except Exception:
+        return "0W"
+
+def sync_and_get_user_badges(target_user_id: str, supabase: Client) -> List[str]:
+    """Evaluates user gameplay milestones and synchronizes unlocked badges in Supabase."""
+    try:
+        p_data = supabase.table("profiles").select("tokens, unlocked_badges, is_admin").eq("id", target_user_id).single().execute().data
         if not p_data:
             return []
     except Exception:
@@ -15,34 +120,33 @@ def sync_and_get_user_badges(supabase: Client, target_user_id: str, check_celebr
 
     toks = p_data.get("tokens", 10)
     existing_unlocked = p_data.get("unlocked_badges") if isinstance(p_data.get("unlocked_badges"), list) else []
-    
     u_bets = supabase.table("user_bets").select("*, weekly_questions(winning_answer)").eq("user_id", target_user_id).execute().data
     u_td = supabase.table("touchdown_picks").select("*").eq("user_id", target_user_id).eq("is_correct", True).order("week_number").execute().data
 
     newly_earned = set(existing_unlocked)
     
-    # Check if user is a league commissioner or admin
-    is_commish = bool(supabase.table("leagues").select("id").eq("created_by", target_user_id).execute().data)
-    is_adm = bool(supabase.table("profiles").select("is_admin").eq("id", target_user_id).single().execute().data.get("is_admin", False))
-    if is_commish or is_adm:
+    # Commissioner & Admin badges
+    if supabase.table("leagues").select("id").eq("created_by", target_user_id).execute().data or p_data.get("is_admin"):
         newly_earned.add("⭐ League Commissioner")
-        
+    
     if any(b.get("wager_amount", 0) >= 10 for b in u_bets):
         newly_earned.add("🎯 High Roller")
+    
     if len(u_td) >= 5:
         newly_earned.add("🏈 TD Guru")
     if len(u_td) >= 9:
         newly_earned.add("🎯 Sniper")
     if len(u_td) >= 13:
         newly_earned.add("⚡ Gridiron Prophet")
+    
     if toks == 0:
         newly_earned.add("📉 Down Bad")
 
     my_joined_leagues = supabase.table("league_members").select("league_id").eq("user_id", target_user_id).execute().data
-    joined_l_ids = [m["league_id"] for m in my_joined_leagues] if my_joined_leagues else []
-    if len(joined_l_ids) >= 3:
+    if my_joined_leagues and len(my_joined_leagues) >= 3:
         newly_earned.add("🎩 Commissioner's Right Hand")
 
+    # Pick six consecutive touchdown scorer streaks
     if u_td:
         correct_weeks = sorted([td["week_number"] for td in u_td])
         consec_count, max_consec = 1, 1
@@ -60,18 +164,21 @@ def sync_and_get_user_badges(supabase: Client, target_user_id: str, check_celebr
     weekly_nets = {}
 
     for b in u_bets:
-        w_num, w_ans = b["week_number"], b.get("weekly_questions", {}).get("winning_answer")
+        w_num = b["week_number"]
+        wq = b.get("weekly_questions")
+        w_ans = wq.get("winning_answer") if isinstance(wq, dict) else None
+        wager = b.get("wager_amount", 0)
+        
         weeks_played.add(w_num)
         if w_num not in weekly_nets:
-            weekly_nets[w_num] = {"gains": 0, "losses": 0, "large_wager_hits": 0}
+            weekly_nets[w_num] = {"gains": 0, "losses": 0}
+        
         if w_ans in ["Yes", "No"]:
             if b["pick"] == w_ans:
-                total_lifetime_won += b["wager_amount"]
-                weekly_nets[w_num]["gains"] += b["wager_amount"]
-                if b["wager_amount"] >= 5:
-                    weekly_nets[w_num]["large_wager_hits"] += 1
+                total_lifetime_won += wager
+                weekly_nets[w_num]["gains"] += wager
             else:
-                weekly_nets[w_num]["losses"] += b["wager_amount"]
+                weekly_nets[w_num]["losses"] += wager
 
     for td in u_td:
         if td["week_number"] in weekly_nets:
@@ -80,10 +187,20 @@ def sync_and_get_user_badges(supabase: Client, target_user_id: str, check_celebr
     if total_lifetime_won >= 50:
         newly_earned.add("🚀 Token Tycoon")
 
-    sorted_weeks, consecutive_oracle_weeks = sorted(list(weekly_nets.keys())), 0
+    # Oracle streak calculation
+    sorted_weeks = sorted(list(weekly_nets.keys()))
+    consecutive_oracle_weeks = 0
     for w in sorted_weeks:
-        week_bets_list = [b for b in u_bets if b["week_number"] == w]
-        if any(b["wager_amount"] >= 5 and b["pick"] == b.get("weekly_questions", {}).get("winning_answer") for b in week_bets_list):
+        week_bets = [b for b in u_bets if b["week_number"] == w]
+        has_oracle_hit = False
+        for b in week_bets:
+            wq = b.get("weekly_questions")
+            w_ans = wq.get("winning_answer") if isinstance(wq, dict) else None
+            if b.get("wager_amount", 0) >= 5 and b["pick"] == w_ans:
+                has_oracle_hit = True
+                break
+        
+        if has_oracle_hit:
             consecutive_oracle_weeks += 1
             if consecutive_oracle_weeks >= 4:
                 newly_earned.add("🔮 Oracle of Delphi")
@@ -108,66 +225,6 @@ def sync_and_get_user_badges(supabase: Client, target_user_id: str, check_celebr
     if total_lifetime_won >= 100:
         newly_earned.add("💰 Century Club")
 
-    # Evaluate Mini-League specific badges
-    for l_id in joined_l_ids:
-        if l_id == "00000000-0000-0000-0000-000000000001":
-            continue
-        league_members_res = supabase.table("league_members").select("user_id").eq("league_id", l_id).execute().data
-        peer_ids = [m["user_id"] for m in league_members_res] if league_members_res else []
-        if peer_ids:
-            # Calculate mini-league leaderboard stats
-            mini_stats = []
-            leader_res = supabase.table("profiles").select("id, full_name, tokens, favorite_team, is_admin, avatar_emoji, avatar_border, avatar_color, selected_title, featured_badges, unlocked_badges, favorite_player, bio, default_league_view, email_notifications, high_contrast_mode, reduced_motion").execute().data
-            if leader_res:
-                for p in leader_res:
-                    if p["id"] not in peer_ids:
-                        continue
-                    p_bets = supabase.table("user_bets").select("*, weekly_questions(winning_answer)").eq("user_id", p["id"]).execute().data
-                    p_wins, p_graded = 0, 0
-                    for pb in p_bets:
-                        p_w_ans = pb.get("weekly_questions", {}).get("winning_answer")
-                        if p_w_ans in ["Yes", "No"]:
-                            p_graded += 1
-                            if pb["pick"] == p_w_ans:
-                                p_wins += 1
-                    mini_stats.append({
-                        **p,
-                        "tokens": p.get("tokens", 10),
-                        "win_rate": int((p_wins / p_graded) * 100) if p_graded > 0 else 0,
-                        "total_bets": p_graded
-                    })
-                mini_stats = sorted(mini_stats, key=lambda x: (-x["tokens"], x["full_name"]))
-                
-                if mini_stats and mini_stats[0]["id"] == target_user_id:
-                    newly_earned.add("🛡️ Mini-League Monarch")
-                
-                my_mini_stat = next((s for s in mini_stats if s["id"] == target_user_id), None)
-                if my_mini_stat and my_mini_stat["win_rate"] >= 70 and my_mini_stat["total_bets"] >= 20:
-                    newly_earned.add("🌟 Gridiron General")
-
-    # Evaluate weekly high scorer and perfect 10/10
-    graded_q = supabase.table("weekly_questions").select("week_number").neq("week_number", 999).neq("week_number", 998).neq("week_number", 997).neq("week_number", 96).neq("winning_answer", "Pending").neq("winning_answer", "LOCKED").order("week_number", desc=True).execute().data
-    if graded_q:
-        latest_w = graded_q[0]["week_number"]
-        all_latest_bets = supabase.table("user_bets").select("*, weekly_questions(winning_answer)").eq("week_number", latest_w).execute().data
-        user_gains, user_loss, user_correct = {}, {}, {}
-        for b in all_latest_bets:
-            u, w_ans = b["user_id"], b.get("weekly_questions", {}).get("winning_answer")
-            if u not in user_gains:
-                user_gains[u], user_loss[u], user_correct[u] = 0, 0, 0
-            if w_ans in ["Yes", "No"]:
-                if b["pick"] == w_ans:
-                    user_gains[u] += b["wager_amount"]
-                    user_correct[u] += 1
-                else:
-                    user_loss[u] += b["wager_amount"]
-        if user_gains and max(user_gains.values(), default=-1) > 0 and max(user_gains, key=user_gains.get) == target_user_id:
-            newly_earned.add("👑 Weekly High Scorer")
-        if user_loss and max(user_loss.values(), default=-1) > 0 and max(user_loss, key=user_loss.get) == target_user_id:
-            newly_earned.add("📉 Wall Street Bets")
-        if user_correct.get(target_user_id, 0) == 10:
-            newly_earned.add("🎯 Perfect 10/10")
-
     final_badges_list = list(newly_earned)
     if set(final_badges_list) != set(existing_unlocked):
         try:
@@ -175,14 +232,19 @@ def sync_and_get_user_badges(supabase: Client, target_user_id: str, check_celebr
         except Exception:
             pass
 
-    if check_celebration and st_session_state is not None:
-        cache_key = f"seen_badges_{target_user_id}"
-        if cache_key not in st_session_state:
-            st_session_state[cache_key] = final_badges_list
-        else:
-            newly_detected = [b for b in final_badges_list if b not in st_session_state[cache_key]]
-            if newly_detected:
-                st_session_state[cache_key] = final_badges_list
-                return {"badges": final_badges_list, "newly_detected": newly_detected}
-
     return final_badges_list
+
+def get_earned_title(target_user_id: str, supabase: Client) -> str:
+    """Determines the active prestigious title unlocked by the user."""
+    try:
+        prof_res = supabase.table("profiles").select("selected_title").eq("id", target_user_id).single().execute().data
+        if prof_res and prof_res.get("selected_title") in AVAILABLE_TITLES:
+            return prof_res.get("selected_title")
+    except Exception:
+        pass
+    
+    user_badges = sync_and_get_user_badges(target_user_id, supabase)
+    for title, info in AVAILABLE_TITLES.items():
+        if info["badge"] and info["badge"] in user_badges:
+            return title
+    return "🏈 Gridiron Contender"
