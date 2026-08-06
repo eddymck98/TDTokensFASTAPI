@@ -40,7 +40,7 @@ async def get_bets_page(request: Request, supabase: Client = Depends(get_supabas
         available_weeks = []
         profile = {}
 
-    return templates.TemplateResponse("bets.html", {
+    return templates.TemplateResponse(request=request, name="bets.html", context={
         "request": request,
         "user": user,
         "profile": profile,
