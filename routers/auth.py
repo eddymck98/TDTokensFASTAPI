@@ -37,7 +37,6 @@ async def login_user(
     password: str = Form(...),
     supabase: Client = Depends(get_supabase)
 ):
-    # Check if sign-in is locked globally via weekly_questions meta table
     try:
         lock_check = supabase.table("weekly_questions").select("winning_answer").eq("week_number", 998).execute().data
         if lock_check and lock_check[0].get("winning_answer") == "LOCKED":
@@ -73,7 +72,6 @@ async def signup_user(
     password: str = Form(...),
     supabase: Client = Depends(get_supabase)
 ):
-    # Check if sign-up is locked globally via weekly_questions meta table
     try:
         lock_check = supabase.table("weekly_questions").select("winning_answer").eq("week_number", 997).execute().data
         if lock_check and lock_check[0].get("winning_answer") == "LOCKED":
@@ -120,8 +118,21 @@ async def signup_user(
             except Exception:
                 pass
 
-            base_url = str(request.base_url).rstrip("/")
-send_verification_email(email.strip(), base_url)
+            # Generate proper verification token link via admin api
+            service_key = os.environ.get("SUPABASE_SERVICE_KEY", "")
+            url = os.environ.get("SUPABASE_URL", "")
+            admin_supabase = create_client(url, service_key) if service_key and url else supabase
+            
+            link_response = admin_supabase.auth.admin.generate_link({"type": "signup", "email": email.strip()})
+            verification_link = f"https://tdtokens.co.uk/"
+            
+            if link_response and hasattr(link_response, "properties") and link_response.properties:
+                props = link_response.properties
+                action_link = props.get("action_link") if isinstance(props, dict) else getattr(props, "action_link", None)
+                email_otp = props.get("email_otp") if isinstance(props, dict) else getattr(props, "email_otp", None)
+                verification_link = f"https://tdtokens.co.uk/?token={email_otp}&type=signup" if email_otp else (action_link or verification_link)
+
+            send_verification_email(email.strip(), verification_link)
             return RedirectResponse(url="/?success=signup_complete", status_code=303)
         else:
             raise HTTPException(status_code=400, detail="Sign up failed.")
