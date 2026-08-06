@@ -1,295 +1,191 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="admin-panel-container" style="max-width: 1000px; margin: 0 auto; padding-bottom: 40px;">
-  
-  <div style="background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(255, 255, 255, 0.12); border-left: 4px solid #ef4444; padding: 24px; border-radius: 16px; margin-bottom: 24px; backdrop-filter: blur(14px);">
-    <h2 style="font-family: 'Bebas Neue', sans-serif; font-size: 36px; color: #f8fafc; letter-spacing: 2px; margin: 0 0 4px 0;">⚙️ SYSTEM ADMIN MANAGEMENT PORTAL</h2>
-    <p style="color: #94a3b8; font-size: 14px; margin: 0;">Configure weekly questions, grade live matches, adjust token banks, schedule lockouts, and manage global settings.</p>
+<div class="admin-portal-container">
+  <div class="nfl-header">
+    <h1 style="font-family: 'Bebas Neue', sans-serif; color: #fbbf24; font-size: 38px; letter-spacing: 2px; margin-bottom: 5px;">SYSTEM ADMIN MANAGEMENT PORTAL</h1>
+    <p class="nfl-subtitle">Platform Control Hub</p>
   </div>
 
-  <!-- Admin Navigation Tabs/Buttons -->
-  <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; background: rgba(11, 15, 25, 0.7); padding: 8px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08);">
-    <button type="button" onclick="switchAdminTab('questions')" id="btn-tab-questions" class="admin-tab-btn active-admin-btn" style="flex: 1; min-width: 130px; padding: 10px; background: #1e3a8a; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; color: #fff; font-family: 'Teko', sans-serif; font-size: 18px; letter-spacing: 1px; cursor: pointer;">Manage Questions</button>
-    <button type="button" onclick="switchAdminTab('grading')" id="btn-tab-grading" class="admin-tab-btn" style="flex: 1; min-width: 130px; padding: 10px; background: rgba(30, 41, 59, 0.8); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #94a3b8; font-family: 'Teko', sans-serif; font-size: 18px; letter-spacing: 1px; cursor: pointer;">Live Grading</button>
-    <button type="button" onclick="switchAdminTab('scheduler')" id="btn-tab-scheduler" class="admin-tab-btn" style="flex: 1; min-width: 130px; padding: 10px; background: rgba(30, 41, 59, 0.8); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #94a3b8; font-family: 'Teko', sans-serif; font-size: 18px; letter-spacing: 1px; cursor: pointer;">Lockout Scheduler</button>
-    <button type="button" onclick="switchAdminTab('tokens')" id="btn-tab-tokens" class="admin-tab-btn" style="flex: 1; min-width: 130px; padding: 10px; background: rgba(30, 41, 59, 0.8); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #94a3b8; font-family: 'Teko', sans-serif; font-size: 18px; letter-spacing: 1px; cursor: pointer;">Token Adjuster</button>
-    <button type="button" onclick="switchAdminTab('tools')" id="btn-tab-tools" class="admin-tab-btn" style="flex: 1; min-width: 130px; padding: 10px; background: rgba(30, 41, 59, 0.8); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #94a3b8; font-family: 'Teko', sans-serif; font-size: 18px; letter-spacing: 1px; cursor: pointer;">Tools & Controls</button>
+  <!-- Admin Navigation Tabs -->
+  <div class="admin-tabs" style="display: flex; gap: 8px; margin-bottom: 25px; overflow-x: auto; padding-bottom: 5px;">
+    <button class="admin-tab-btn active" onclick="switchAdminTab(event, 'questions')">📋 Questions</button>
+    <button class="admin-tab-btn" onclick="switchAdminTab(event, 'lockout')">⏳ Lockout Scheduler</button>
+    <button class="admin-tab-btn" onclick="switchAdminTab(event, 'grading')">🏈 Grade Week</button>
+    <button class="admin-tab-btn" onclick="switchAdminTab(event, 'tokens')">🪙 Token Adjuster</button>
+    <button class="admin-tab-btn" onclick="switchAdminTab(event, 'access')">🔒 Access Control</button>
   </div>
 
-  <!-- 1. MANAGE QUESTIONS SECTION -->
-  <div id="admin-section-questions" class="admin-content-section">
-    <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255,255,255,0.12); border-left: 4px solid #fbbf24; padding: 20px; border-radius: 16px; margin-bottom: 20px;">
-      <h3 style="color: #fbbf24; font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: 1px; margin: 0 0 5px 0;">📋 WEEKLY QUESTIONS & MATCHUPS HUB</h3>
-      <p style="color: #cbd5e1; font-size: 14px; margin: 0;">Configure matchups, publish scenario prompts, or load quick default templates.</p>
+  <!-- Tab 1: Manage Questions -->
+  <div id="questions" class="admin-tab-content" style="display: block;">
+    <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255,255,255,0.12); border-left: 4px solid #fbbf24; padding: 20px; border-radius: 16px; margin-bottom: 25px;">
+      <h3 style="color: #fbbf24; font-family: 'Bebas Neue', sans-serif; font-size: 28px; margin: 0 0 5px 0;">WEEKLY QUESTIONS & MATCHUPS HUB</h3>
+      <p style="color: #cbd5e1; font-size: 14px; margin: 0;">Configure and publish the 10 weekly prediction prompts and match pairings.</p>
     </div>
 
-    <!-- Week Selector Form / Toolbar -->
-    <div style="display: flex; gap: 12px; margin-bottom: 20px; align-items: center; flex-wrap: wrap;">
-      <form method="GET" action="/admin" style="display: flex; gap: 10px; align-items: center; flex: 1;">
-        <label style="font-weight: 600; font-size: 14px;">Target Week:</label>
-        <select name="week" onchange="this.form.submit()" style="background: rgba(15,23,42,0.9); color: #fff; padding: 8px 12px; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px;">
-          {% for w in db_week_nums %}
-          <option value="{{ w }}" {% if w == selected_week %}selected{% endif %}>Week {{ w }}</option>
-          {% endfor %}
-          {% if selected_week not in db_week_nums %}
-          <option value="{{ selected_week }}" selected>Week {{ selected_week }} (New)</option>
-          {% endif %}
-        </select>
-      </form>
-      
-      <form method="POST" action="/admin/questions/templates">
-        <input type="hidden" name="week_number" value="{{ selected_week }}">
-        <button type="submit" style="background: rgba(30,41,59,0.9); color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 9px 16px; border-radius: 8px; font-family: 'Teko', sans-serif; font-size: 18px; cursor: pointer;">📋 Load Templates</button>
-      </form>
+    <form action="/admin/questions/publish" method="POST">
+      <div style="margin-bottom: 20px;">
+        <label for="week_number" style="font-weight: 600; font-size: 16px; color: #f8fafc;">Target Week Number:</label>
+        <input type="number" id="week_number" name="week_number" value="1" min="1" max="25" required style="width: 150px; padding: 10px; background: rgba(15, 23, 42, 0.92); color: #fff; border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; margin-left: 10px;">
+      </div>
 
-      <form method="POST" action="/admin/questions/clear">
-        <input type="hidden" name="week_number" value="{{ selected_week }}">
-        <button type="submit" style="background: rgba(153, 27, 27, 0.7); color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 9px 16px; border-radius: 8px; font-family: 'Teko', sans-serif; font-size: 18px; cursor: pointer;" onclick="return confirm('Clear pending questions for Week {{ selected_week }}?');">🗑️ Clear Week</button>
-      </form>
-    </div>
-
-    <!-- Questions Form Editor -->
-    <form method="POST" action="/admin/questions/save">
-      <input type="hidden" name="week_number" value="{{ selected_week }}">
-      
-      {% for q in questions_editor_data %}
-      <div style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.08); border-left: 3px solid #38bdf8; padding: 16px; border-radius: 12px; margin-bottom: 16px;">
-        <span style="font-family: 'Bebas Neue'; font-size: 18px; color: #38bdf8; letter-spacing: 1px;">QUESTION {{ q.number }} CONFIGURATION</span>
-        
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 10px 0;">
+      {% for i in range(1, 11) %}
+      <div style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255,255,255,0.08); border-left: 3px solid #38bdf8; padding: 16px; border-radius: 12px; margin-bottom: 16px;">
+        <span style="font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: #38bdf8; letter-spacing: 1px;">QUESTION {{ i }} CONFIGURATION</span>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; margin-bottom: 10px;">
           <div>
-            <label style="font-size: 12px; color: #94a3b8;">Away Team (Q{{ q.number }})</label>
-            <select name="away_{{ q.number }}" style="width: 100%; background: rgba(15,23,42,0.9); color: #fff; padding: 8px; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px;">
-              {% for team in nfl_teams %}
-              <option value="{{ team }}" {% if team == q.away_team %}selected{% endif %}>{{ team }}</option>
-              {% endfor %}
+            <label style="font-size: 13px; color: #94a3b8;">Away Team (Q{{ i }})</label>
+            <select name="away_{{ i }}" style="width: 100%; padding: 8px; background: #0f172a; color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px;">
+              <option value="🏈 Free Agent / Neutral">🏈 Free Agent / Neutral</option>
+              <option value="🔴 Kansas City Chiefs">🔴 Kansas City Chiefs</option>
+              <option value="🔵 Dallas Cowboys">🔵 Dallas Cowboys</option>
+              <option value="🟢 Green Bay Packers">🟢 Green Bay Packers</option>
+              <!-- Include other NFL teams as needed -->
             </select>
           </div>
           <div>
-            <label style="font-size: 12px; color: #94a3b8;">Home Team (Q{{ q.number }})</label>
-            <select name="home_{{ q.number }}" style="width: 100%; background: rgba(15,23,42,0.9); color: #fff; padding: 8px; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px;">
-              {% for team in nfl_teams %}
-              <option value="{{ team }}" {% if team == q.home_team %}selected{% endif %}>{{ team }}</option>
-              {% endfor %}
+            <label style="font-size: 13px; color: #94a3b8;">Home Team (Q{{ i }})</label>
+            <select name="home_{{ i }}" style="width: 100%; padding: 8px; background: #0f172a; color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px;">
+              <option value="🏈 Free Agent / Neutral">🏈 Free Agent / Neutral</option>
+              <option value="🔴 Kansas City Chiefs">🔴 Kansas City Chiefs</option>
+              <option value="🔵 Dallas Cowboys">🔵 Dallas Cowboys</option>
+              <option value="🟢 Green Bay Packers">🟢 Green Bay Packers</option>
+              <!-- Include other NFL teams as needed -->
             </select>
           </div>
         </div>
-
         <div>
-          <label style="font-size: 12px; color: #94a3b8;">Question {{ q.number }} Prompt Text</label>
-          <input type="text" name="prompt_{{ q.number }}" value="{{ q.prompt }}" placeholder="Enter scenario prompt text..." style="width: 100%; background: rgba(15,23,42,0.9); color: #fff; padding: 10px; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; margin-top: 4px;" required>
+          <input type="text" name="prompt_{{ i }}" placeholder="Enter scenario prompt text (e.g., Will QB throw for 250+ yards?)..." required style="width: 100%; padding: 10px; background: rgba(15, 23, 42, 0.92); color: #fff; border: 1px solid rgba(255,255,255,0.15); border-radius: 12px;">
         </div>
       </div>
       {% endfor %}
 
-      <button type="submit" style="width: 100%; background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000; border: none; padding: 14px; border-radius: 12px; font-family: 'Teko', sans-serif; font-size: 24px; letter-spacing: 2px; font-weight: bold; cursor: pointer; margin-top: 10px;">Save & Publish All Questions 💾</button>
+      <button type="submit" style="background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000; padding: 14px 28px; font-family: 'Teko', sans-serif; font-size: 22px; font-weight: bold; border-radius: 12px; border: none; cursor: pointer; width: 100%; margin-top: 15px;">Save & Publish All Questions 💾</button>
     </form>
   </div>
 
-  <!-- 2. LIVE GRADING SECTION -->
-  <div id="admin-section-grading" class="admin-content-section" style="display: none;">
-    <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255,255,255,0.12); border-left: 4px solid #10b981; padding: 20px; border-radius: 16px; margin-bottom: 20px;">
-      <h3 style="color: #34d399; font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: 1px; margin: 0 0 5px 0;">🏈 LIVE GAME GRADING & TOKEN CALCULATOR</h3>
-      <p style="color: #cbd5e1; font-size: 14px; margin: 0;">Update match results as games finish. Player token banks recalculate instantly upon submission.</p>
+  <!-- Tab 2: Lockout Scheduler -->
+  <div id="lockout" class="admin-tab-content" style="display: none;">
+    <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255,255,255,0.12); border-left: 4px solid #38bdf8; padding: 20px; border-radius: 16px; margin-bottom: 25px;">
+      <h3 style="color: #38bdf8; font-family: 'Bebas Neue', sans-serif; font-size: 28px; margin: 0 0 5px 0;">KICKOFF LOCKOUT SCHEDULER</h3>
+      <p style="color: #cbd5e1; font-size: 14px; margin: 0;">Configure precise kickoff lockout ISO timestamps so picks automatically lock prior to kickoff.</p>
     </div>
 
-    <!-- Grading Week Selector -->
-    <form method="GET" action="/admin" style="margin-bottom: 20px; display: flex; gap: 10px; align-items: center;">
-      <input type="hidden" name="tab" value="grading">
-      <label style="font-weight: 600;">Grade Week:</label>
-      <select name="grade_week" onchange="this.form.submit()" style="background: rgba(15,23,42,0.9); color: #fff; padding: 8px 12px; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px;">
-        {% for w in db_week_nums %}
-        <option value="{{ w }}" {% if w == grade_week %}selected{% endif %}>Week {{ w }}</option>
-        {% endfor %}
-      </select>
-    </form>
-
-    <form method="POST" action="/admin/grade/save">
-      <input type="hidden" name="grade_week" value="{{ grade_week }}">
-      
-      <h4 style="color: #fff; font-family: 'Bebas Neue'; letter-spacing: 1px; margin-bottom: 10px;">Live Matchup Results</h4>
-      {% for q in grading_questions %}
-      <div style="background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255,255,255,0.08); padding: 12px 16px; border-radius: 12px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; gap: 15px;">
-        <div style="flex: 1;">
-          <b style="color: #38bdf8;">Q{{ q.question_number }}:</b> <span style="font-size: 14px; color: #fff;">{{ q.prompt_clean }}</span>
-        </div>
-        <select name="result_{{ q.id }}" style="background: rgba(15,23,42,0.9); color: #fff; padding: 8px 12px; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; min-width: 110px;">
-          <option value="Pending" {% if q.winning_answer == 'Pending' %}selected{% endif %}>Pending</option>
-          <option value="Yes" {% if q.winning_answer == 'Yes' %}selected{% endif %}>Yes ✅</option>
-          <option value="No" {% if q.winning_answer == 'No' %}selected{% endif %}>No ❌</option>
-        </select>
+    <form action="/admin/lockout/schedule" method="POST">
+      <div style="margin-bottom: 15px;">
+        <label for="lockout_week" style="font-weight: 600; color: #f8fafc;">Week Number:</label>
+        <input type="number" id="lockout_week" name="week_number" value="1" min="1" max="25" required style="width: 150px; padding: 10px; background: rgba(15, 23, 42, 0.92); color: #fff; border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; margin-left: 10px;">
       </div>
-      {% endfor %}
-
-      <h4 style="color: #fff; font-family: 'Bebas Neue'; letter-spacing: 1px; margin: 20px 0 10px 0;">Touchdown Scorer Bonus Picks</h4>
-      {% if grading_td_picks %}
-        {% for td in grading_td_picks %}
-        <div style="background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255,255,255,0.08); padding: 12px 16px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
-          <div>
-            <b style="color: #fbbf24;">{{ td.user_name }}</b> picked: <i style="color: #fff;">{{ td.player_name }}</i>
-          </div>
-          <select name="td_{{ td.id }}" style="background: rgba(15,23,42,0.9); color: #fff; padding: 8px 12px; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px;">
-            <option value="Pending" {% if td.is_correct is none %}selected{% endif %}>Pending</option>
-            <option value="Correct" {% if td.is_correct is true %}selected{% endif %}>Correct (+5 🪙)</option>
-            <option value="Incorrect" {% if td.is_correct is false %}selected{% endif %}>Incorrect</option>
-          </select>
-        </div>
-        {% endfor %}
-      {% else %}
-      <p style="color: #94a3b8; font-size: 13px;">No touchdown scorer picks submitted for Week {{ grade_week }}.</p>
-      {% endif %}
-
-      <div style="display: flex; gap: 12px; margin-top: 20px;">
-        <button type="submit" style="flex: 2; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; border: none; padding: 14px; border-radius: 12px; font-family: 'Teko', sans-serif; font-size: 22px; letter-spacing: 1px; font-weight: bold; cursor: pointer;">Save Live Results & Recalculate Tokens 🚀</button>
-        <button type="submit" formaction="/admin/grade/close-week" style="flex: 1; background: rgba(30,41,59,0.9); color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 14px; border-radius: 12px; font-family: 'Teko', sans-serif; font-size: 22px; letter-spacing: 1px; cursor: pointer;">Manually Close Week 🔒</button>
+      <div style="margin-bottom: 20px;">
+        <label for="lockout_iso" style="font-weight: 600; color: #f8fafc;">Lockout ISO Datetime (UTC):</label>
+        <input type="text" id="lockout_iso" name="lockout_iso" placeholder="2026-09-13T17:00:00" required style="width: 100%; padding: 10px; background: rgba(15, 23, 42, 0.92); color: #fff; border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; margin-top: 5px;">
       </div>
+      <button type="submit" style="background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000; padding: 12px 24px; font-family: 'Teko', sans-serif; font-size: 20px; font-weight: bold; border-radius: 12px; border: none; cursor: pointer;">Save Lockout Schedule ⏳</button>
     </form>
   </div>
 
-  <!-- 3. AUTO-LOCKOUT SCHEDULER SECTION -->
-  <div id="admin-section-scheduler" class="admin-content-section" style="display: none;">
-    <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255,255,255,0.12); border-left: 4px solid #38bdf8; padding: 20px; border-radius: 16px; margin-bottom: 20px;">
-      <h3 style="color: #38bdf8; font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: 1px; margin: 0 0 5px 0;">⏳ KICKOFF LOCKOUT SCHEDULER</h3>
-      <p style="color: #cbd5e1; font-size: 14px; margin: 0;">Configure precise kickoff lockout timestamps so picks automatically lock down before Sunday games.</p>
+  <!-- Tab 3: Grade Week -->
+  <div id="grading" class="admin-tab-content" style="display: none;">
+    <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255,255,255,0.12); border-left: 4px solid #10b981; padding: 20px; border-radius: 16px; margin-bottom: 25px;">
+      <h3 style="color: #34d399; font-family: 'Bebas Neue', sans-serif; font-size: 28px; margin: 0 0 5px 0;">LIVE GAME GRADING & TOKEN CALCULATOR</h3>
+      <p style="color: #cbd5e1; font-size: 14px; margin: 0;">Set winning answers for questions to evaluate user token balances instantly.</p>
     </div>
 
-    <form method="POST" action="/admin/scheduler/save">
-      <div style="margin-bottom: 15px;">
-        <label style="font-weight: 600;">Select Week:</label>
-        <select name="week_number" style="width: 100%; background: rgba(15,23,42,0.9); color: #fff; padding: 10px; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; margin-top: 5px;">
-          {% for w in db_week_nums %}
-          <option value="{{ w }}">Week {{ w }}</option>
-          {% endfor %}
-        </select>
+    <form action="/admin/grade/live" method="POST">
+      <div style="margin-bottom: 20px;">
+        <label for="grade_week" style="font-weight: 600; color: #f8fafc;">Week Number to Grade:</label>
+        <input type="number" id="grade_week" name="week_number" value="1" min="1" max="25" required style="width: 150px; padding: 10px; background: rgba(15, 23, 42, 0.92); color: #fff; border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; margin-left: 10px;">
       </div>
-
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-        <div>
-          <label style="font-weight: 600;">Lockout Date (Sunday)</label>
-          <input type="date" name="lock_date" value="{{ default_lock_date }}" style="width: 100%; background: rgba(15,23,42,0.9); color: #fff; padding: 10px; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; margin-top: 5px;" required>
-        </div>
-        <div>
-          <label style="font-weight: 600;">Lockout Time (UTC)</label>
-          <input type="time" name="lock_time" value="{{ default_lock_time }}" style="width: 100%; background: rgba(15,23,42,0.9); color: #fff; padding: 10px; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; margin-top: 5px;" required>
-        </div>
-      </div>
-
-      <div style="display: flex; gap: 12px;">
-        <button type="submit" style="flex: 2; background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%); color: #000; border: none; padding: 14px; border-radius: 12px; font-family: 'Teko', sans-serif; font-size: 22px; font-weight: bold; cursor: pointer;">Save Lockout Schedule ⏳</button>
-        <button type="submit" formaction="/admin/scheduler/clear" style="flex: 1; background: rgba(153, 27, 27, 0.7); color: #fff; border: none; padding: 14px; border-radius: 12px; font-family: 'Teko', sans-serif; font-size: 22px; cursor: pointer;">Clear Timer 🗑️</button>
-      </div>
+      <p style="color: #94a3b8; font-size: 13px;">* Note: In your FastAPI backend router (`admin.py`), live question answers (`win_ans_{id}`) are dynamically pulled from form elements to execute bulk grading and balance recalculation.</p>
+      <button type="submit" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; padding: 14px 28px; font-family: 'Teko', sans-serif; font-size: 22px; font-weight: bold; border-radius: 12px; border: none; cursor: pointer; margin-top: 10px;">Save Live Results & Recalculate Tokens 🚀</button>
     </form>
   </div>
 
-  <!-- 4. BULK TOKEN ADJUSTER SECTION -->
-  <div id="admin-section-tokens" class="admin-content-section" style="display: none;">
-    <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255,255,255,0.12); border-left: 4px solid #fbbf24; padding: 20px; border-radius: 16px; margin-bottom: 20px;">
-      <h3 style="color: #fbbf24; font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: 1px; margin: 0 0 5px 0;">💰 BULK TOKEN ADJUSTER</h3>
-      <p style="color: #cbd5e1; font-size: 14px; margin: 0;">Quickly add, subtract, or set absolute token balances for any player.</p>
+  <!-- Tab 4: Token Adjuster -->
+  <div id="tokens" class="admin-tab-content" style="display: none;">
+    <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255,255,255,0.12); border-left: 4px solid #fbbf24; padding: 20px; border-radius: 16px; margin-bottom: 25px;">
+      <h3 style="color: #fbbf24; font-family: 'Bebas Neue', sans-serif; font-size: 28px; margin: 0 0 5px 0;">BULK TOKEN ADJUSTER</h3>
+      <p style="color: #cbd5e1; font-size: 14px; margin: 0;">Directly adjust token balances for any player account.</p>
     </div>
 
-    <form method="POST" action="/admin/tokens/adjust">
+    <form action="/admin/tokens/adjust" method="POST">
       <div style="margin-bottom: 15px;">
-        <label style="font-weight: 600;">Select Player</label>
-        <select name="user_id" style="width: 100%; background: rgba(15,23,42,0.9); color: #fff; padding: 10px; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; margin-top: 5px;">
-          {% for p in all_profiles %}
-          <option value="{{ p.id }}">{{ p.full_name }} ({{ p.tokens }} 🪙)</option>
-          {% endfor %}
-        </select>
+        <label style="font-weight: 600; color: #f8fafc;">User ID:</label>
+        <input type="text" name="user_id" placeholder="Enter Supabase user UUID..." required style="width: 100%; padding: 10px; background: rgba(15, 23, 42, 0.92); color: #fff; border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; margin-top: 5px;">
       </div>
-
       <div style="margin-bottom: 15px;">
-        <label style="font-weight: 600;">Adjustment Action</label>
-        <select name="action_type" style="width: 100%; background: rgba(15,23,42,0.9); color: #fff; padding: 10px; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; margin-top: 5px;">
+        <label style="font-weight: 600; color: #f8fafc;">Adjustment Type:</label>
+        <select name="adjustment_type" style="width: 100%; padding: 10px; background: #0f172a; color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; margin-top: 5px;">
           <option value="add">Add Tokens (+)</option>
           <option value="subtract">Subtract Tokens (-)</option>
           <option value="set">Set Absolute Value</option>
         </select>
       </div>
-
       <div style="margin-bottom: 20px;">
-        <label style="font-weight: 600;">Token Amount</label>
-        <input type="number" name="amount" min="0" max="1000" value="5" style="width: 100%; background: rgba(15,23,42,0.9); color: #fff; padding: 10px; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; margin-top: 5px;" required>
+        <label style="font-weight: 600; color: #f8fafc;">Token Amount:</label>
+        <input type="number" name="amount" value="10" min="0" required style="width: 100%; padding: 10px; background: rgba(15, 23, 42, 0.92); color: #fff; border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; margin-top: 5px;">
       </div>
-
-      <button type="submit" style="width: 100%; background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000; border: none; padding: 14px; border-radius: 12px; font-family: 'Teko', sans-serif; font-size: 24px; font-weight: bold; cursor: pointer;">Apply Token Adjustment 💾</button>
+      <button type="submit" style="background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000; padding: 12px 24px; font-family: 'Teko', sans-serif; font-size: 20px; font-weight: bold; border-radius: 12px; border: none; cursor: pointer;">Apply Token Adjustment 💾</button>
     </form>
   </div>
 
-  <!-- 5. TOOLS & CONTROLS SECTION -->
-  <div id="admin-section-tools" class="admin-content-section" style="display: none;">
-    
-    <!-- CSV Export -->
-    <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255,255,255,0.12); padding: 20px; border-radius: 16px; margin-bottom: 20px;">
-      <h4 style="color: #38bdf8; font-family: 'Bebas Neue'; font-size: 22px; margin: 0 0 5px 0;">📊 Export League Data</h4>
-      <p style="color: #cbd5e1; font-size: 13px; margin-bottom: 15px;">Download comprehensive league standings and profiles as a CSV report.</p>
-      <a href="/admin/export/csv" style="display: inline-block; background: #38bdf8; color: #000; padding: 10px 20px; border-radius: 8px; font-family: 'Teko', sans-serif; font-size: 20px; font-weight: bold; text-decoration: none;">📥 Download Standings CSV</a>
+  <!-- Tab 5: Access Control -->
+  <div id="access" class="admin-tab-content" style="display: none;">
+    <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255,255,255,0.12); border-left: 4px solid #38bdf8; padding: 20px; border-radius: 16px; margin-bottom: 25px;">
+      <h3 style="color: #38bdf8; font-family: 'Bebas Neue', sans-serif; font-size: 28px; margin: 0 0 5px 0;">GLOBAL APP ACCESS CONTROLS</h3>
+      <p style="color: #cbd5e1; font-size: 14px; margin: 0;">Lock or unlock sign-ins and new account registrations across the platform.</p>
     </div>
 
-    <!-- Announcement -->
-    <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255,255,255,0.12); padding: 20px; border-radius: 16px; margin-bottom: 20px;">
-      <h4 style="color: #c084fc; font-family: 'Bebas Neue'; font-size: 22px; margin: 0 0 5px 0;">📢 Commissioner Announcement</h4>
-      <form method="POST" action="/admin/announcement/post">
-        <textarea name="announcement_text" placeholder="Broadcast official announcement into league feeds..." style="width: 100%; height: 90px; background: rgba(15,23,42,0.9); color: #fff; padding: 10px; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; margin-bottom: 12px;" required></textarea>
-        <button type="submit" style="background: #c084fc; color: #000; border: none; padding: 10px 20px; border-radius: 8px; font-family: 'Teko', sans-serif; font-size: 20px; font-weight: bold; cursor: pointer;">Broadcast Announcement 📢</button>
-      </form>
-    </div>
-
-    <!-- Season Archive & Reset -->
-    <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255,255,255,0.12); padding: 20px; border-radius: 16px; margin-bottom: 20px;">
-      <h4 style="color: #ef4444; font-family: 'Bebas Neue'; font-size: 22px; margin: 0 0 5px 0;">🏆 Global Season Archive & Reset</h4>
-      <form method="POST" action="/admin/season/archive" onsubmit="return confirm('Crown global champion, archive standings, and reset all player tokens to 10?');">
-        <input type="text" name="season_label" value="2026 NFL Season" style="width: 100%; background: rgba(15,23,42,0.9); color: #fff; padding: 10px; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; margin-bottom: 12px;" required>
-        <label style="display: flex; gap: 8px; align-items: center; font-size: 13px; margin-bottom: 15px; color: #cbd5e1;">
-          <input type="checkbox" name="confirm_reset" required> I confirm I want to crown the global champion, archive standings, and reset token banks to 10.
-        </label>
-        <button type="submit" style="background: #ef4444; color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-family: 'Teko', sans-serif; font-size: 20px; font-weight: bold; cursor: pointer;">Crown Champion & Reset Season 🏆</button>
-      </form>
-    </div>
-
-    <!-- App Access Controls -->
-    <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255,255,255,0.12); padding: 20px; border-radius: 16px;">
-      <h4 style="color: #38bdf8; font-family: 'Bebas Neue'; font-size: 22px; margin: 0 0 5px 0;">🔒 Global App Access Controls</h4>
-      <form method="POST" action="/admin/access/save">
-        <div style="display: flex; gap: 20px; margin: 15px 0;">
-          <label style="display: flex; gap: 8px; align-items: center; cursor: pointer;">
-            <input type="checkbox" name="signin_locked" {% if is_signin_locked %}checked{% endif %}> Lock All Sign-Ins
-          </label>
-          <label style="display: flex; gap: 8px; align-items: center; cursor: pointer;">
-            <input type="checkbox" name="signup_locked" {% if is_signup_locked %}checked{% endif %}> Lock All Sign-Ups
-          </label>
-        </div>
-        <button type="submit" style="background: rgba(30,41,59,0.9); color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 10px 20px; border-radius: 8px; font-family: 'Teko', sans-serif; font-size: 20px; cursor: pointer;">Save Access Settings 🔒</button>
-      </form>
-    </div>
-
+    <form action="/admin/access/control" method="POST">
+      <div style="margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+        <input type="checkbox" id="signin_locked" name="signin_locked" value="true" style="width: 20px; height: 20px;">
+        <label for="signin_locked" style="font-weight: 600; color: #f8fafc;">Lock All Sign-Ins (Prevent users from logging in)</label>
+      </div>
+      <div style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+        <input type="checkbox" id="signup_locked" name="signup_locked" value="true" style="width: 20px; height: 20px;">
+        <label for="signup_locked" style="font-weight: 600; color: #f8fafc;">Lock All New Sign-Ups (Prevent new account registrations)</label>
+      </div>
+      <button type="submit" style="background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%); color: #000; padding: 12px 24px; font-family: 'Teko', sans-serif; font-size: 20px; font-weight: bold; border-radius: 12px; border: none; cursor: pointer;">Save Access Control Settings 🔒</button>
+    </form>
   </div>
-
 </div>
 
 <script>
-function switchAdminTab(tabName) {
-  // Hide all sections
-  document.querySelectorAll('.admin-content-section').forEach(el => el.style.display = 'none');
-  // Remove active styling from buttons
-  document.querySelectorAll('.admin-tab-btn').forEach(btn => {
-    btn.style.background = 'rgba(30, 41, 59, 0.8)';
-    btn.style.color = '#94a3b8';
-  });
-  
-  // Show selected section & highlight button
-  document.getElementById('admin-section-' + tabName).style.display = 'block';
-  const activeBtn = document.getElementById('btn-tab-' + tabName);
-  activeBtn.style.background = '#1e3a8a';
-  activeBtn.style.color = '#fff';
+function switchAdminTab(evt, tabName) {
+  var i, tabContent, tabBtns;
+  tabContent = document.getElementsByClassName("admin-tab-content");
+  for (i = 0; i < tabContent.length; i++) {
+    tabContent[i].style.display = "none";
+  }
+  tabBtns = document.getElementsByClassName("admin-tab-btn");
+  for (i = 0; i < tabBtns.length; i++) {
+    tabBtns[i].className = tabBtns[i].className.replace(" active", "");
+  }
+  document.getElementById(tabName).style.display = "block";
+  evt.currentTarget.className += " active";
 }
-
-// Auto-switch tab if query param demands grading view
-{% if active_tab %}
-window.addEventListener('DOMContentLoaded', () => {
-  switchAdminTab('{{ active_tab }}');
-});
-{% endif %}
 </script>
+
+<style>
+.admin-tab-btn {
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 8px 16px;
+  font-family: 'Teko', sans-serif;
+  font-size: 20px;
+  letter-spacing: 1.2px;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+.admin-tab-btn.active {
+  background: linear-gradient(135deg, rgba(30, 58, 138, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-top: 3px solid #fbbf24;
+  color: #fff;
+  font-weight: 700;
+  box-shadow: 0 6px 20px rgba(251, 191, 36, 0.3);
+}
+</style>
 {% endblock %}
