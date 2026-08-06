@@ -3,20 +3,6 @@
 {% block content %}
 <div class="dashboard-container" style="max-width: 900px; margin: 0 auto; padding-bottom: 40px;">
 
-  <!-- Hero Banner -->
-  <div style="background: linear-gradient(135deg, rgba(30, 58, 138, 0.85) 0%, rgba(15, 23, 42, 0.95) 100%); border: 1px solid rgba(255, 255, 255, 0.15); border-top: 4px solid var(--team-color); border-radius: 20px; padding: 28px; margin-bottom: 25px; backdrop-filter: blur(16px); box-shadow: 0 12px 35px rgba(0,0,0,0.6); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
-    <div>
-      <div style="font-size: 14px; letter-spacing: 2px; text-transform: uppercase; color: #93c5fd; font-weight: 600;">Available Balance</div>
-      <div style="font-family: 'Bebas Neue', sans-serif; font-size: 64px; color: var(--team-color); letter-spacing: 2px; line-height: 1; margin: 0;" id="hero-tokens-val">{{ profile.tokens | default(10) }} 🪙</div>
-      <div style="font-size: 13px; color: #cbd5e1; margin-top: 4px;">True Global Bank: <b id="true-global-bank">{{ profile.tokens | default(10) }} 🪙</b></div>
-    </div>
-    <div style="text-align: right; border-left: 1px solid rgba(255,255,255,0.15); padding-left: 20px;">
-      <div style="font-size: 12px; color: #94a3b8; text-transform: uppercase; font-weight: 700;">Welcome Back</div>
-      <div style="font-size: 18px; font-weight: bold; color: #ffffff;" id="hero-profile-name">{{ profile.full_name | default('Contender') }}</div>
-      <div style="font-size: 11px; color: #38bdf8;" id="hero-profile-title">{{ profile.selected_title | default('🏈 Gridiron Contender') }}</div>
-    </div>
-  </div>
-
   <!-- Weekly Pick & Share Hub Section -->
   <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px; padding: 24px; margin-bottom: 25px; backdrop-filter: blur(14px);">
     <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: #ffffff; letter-spacing: 1px; margin-top: 0; margin-bottom: 5px;">👁️ YOUR CURRENT WEEKLY PICKS & SHARE HUB</h3>
