@@ -130,7 +130,7 @@ MASTER_BADGES = {
 # HELPER & CALCULATION UTILITIES
 # ==========================================
 
-def get_ true_global_token_balance(target_user_id: str, supabase: Client) -> int:
+def get_true_global_token_balance(target_user_id: str, supabase: Client) -> int:
     """Calculates the verified global token balance directly from the database."""
     try:
         res = supabase.table("profiles").select("tokens").eq("id", target_user_id).single().execute()
