@@ -1,14 +1,38 @@
-# Python bytecode & cache
+# Python / Streamlit
 __pycache__/
 *.py[cod]
 *$py.class
-venv/
+*.so
+.Python
 env/
-.env
+venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
 
-# OS temporary files
+# Streamlit Local Configuration & State
+.streamlit/secrets.toml
+.streamlit/config.toml
+streamlit_cookies.json
+
+# IDE / Editor Files
+.vscode/
+.idea/
+*.swp
+*.swo
 .DS_Store
-Thumbs.db
-
-# Temporary exports / data
-temp_*.csv
