@@ -1,4 +1,6 @@
-# Python / Streamlit
+# ==========================================
+# PYTHON & ENVIRONMENT
+# ==========================================
 __pycache__/
 *.py[cod]
 *$py.class
@@ -7,32 +9,53 @@ __pycache__/
 env/
 venv/
 ENV/
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-share/python-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
+env.bak/
+venv.bak/
+.venv/
 
-# Streamlit Local Configuration & State
-.streamlit/secrets.toml
-.streamlit/config.toml
-streamlit_cookies.json
+# Environment Variables & Secrets
+.env
+.env.*
+!.env.example
+secrets.toml
+*.secret
 
-# IDE / Editor Files
+# ==========================================
+# FASTAPI / WEB & TESTING
+# ==========================================
+# Local SQLite databases (if used for testing)
+*.sqlite3
+*.db
+
+# HTML/JSON coverage reports or pytest caches
+.pytest_cache/
+htmlcov/
+.coverage
+.mypy_cache/
+.ruff_cache/
+
+# ==========================================
+# SUPABASE CLI & LOCAL DEV
+# ==========================================
+supabase/.temp/
+# Uncomment below if you want to ignore local Supabase migration snapshots/config data, 
+# though usually you DO want to track migrations. Keep .temp ignored at minimum.
+# supabase/.env
+
+# ==========================================
+# IDE & OS SPECIFIC FILES
+# ==========================================
 .vscode/
 .idea/
 *.swp
 *.swo
 .DS_Store
+Thumbs.db
+
+# ==========================================
+# LOGS & BUILD ARTIFACTS
+# ==========================================
+*.log
+dist/
+build/
+*.egg-info/
