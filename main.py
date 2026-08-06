@@ -31,5 +31,15 @@ async def root(request: Request):
     """Renders the primary application dashboard or login view."""
     session_cookie = request.cookies.get("td_tokens_session")
     if not session_cookie:
-        return templates.TemplateResponse("login.html", {"request": request})
+        return templates.TemplateResponse("index.html", {"request": request})
     return templates.TemplateResponse("dashboard.html", {"request": request})
+
+@app.get("/auth/login", response_class=HTMLResponse)
+async def login_page(request: Request):
+    """Renders the login template page."""
+    return templates.TemplateResponse("login.html", {"request": request})
+
+@app.get("/auth/signup", response_class=HTMLResponse)
+async def signup_page(request: Request):
+    """Renders the signup template page."""
+    return templates.TemplateResponse("signup.html", {"request": request})
