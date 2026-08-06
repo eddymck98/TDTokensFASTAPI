@@ -1,64 +1,128 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+<div class="bets-container" style="max-width: 900px; margin: 0 auto; padding-bottom: 40px;">
+  
+  <!-- Header & ESPN scoreboard link -->
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
     <div>
-        <h2 style="font-family: 'Bebas Neue', sans-serif; font-size: 38px; color: #ffffff; letter-spacing: 2px; margin: 0;">WEEKLY PREDICTIONS & WAGERS</h2>
-        <p style="color: #94a3b8; font-size: 14px; margin: 0;">Review matchups, lock in your predictions, and assign your token stakes.</p>
+      <h2 style="font-family: 'Bebas Neue', sans-serif; font-size: 38px; color: #ffffff; letter-spacing: 2px; margin: 0;">WEEKLY PREDICTIONS & WAGERS</h2>
+      <p style="color: #94a3b8; font-size: 14px; margin: 0;">Review matchups, lock in your predictions, and assign your token stakes.</p>
     </div>
     <div>
-        <a href="https://www.espn.com/nfl/schedule" target="_blank" style="background: rgba(30, 41, 59, 0.9); border: 1px solid rgba(255, 255, 255, 0.2); border-left: 4px solid #38bdf8; color: #ffffff; padding: 10px 18px; border-radius: 12px; font-family: 'Teko', sans-serif; font-size: 20px; text-decoration: none;">🏈 ESPN Scoreboard ↗</a>
+      <a href="https://www.espn.com/nfl/schedule" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; background: rgba(30, 41, 59, 0.9); border: 1px solid rgba(255, 255, 255, 0.2); border-left: 4px solid #38bdf8; color: #ffffff !important; padding: 10px 18px; border-radius: 12px; font-family: 'Teko', sans-serif; font-size: 20px; letter-spacing: 1.2px; text-decoration: none !important; box-shadow: 0 4px 15px rgba(0,0,0,0.4); transition: all 0.2s ease;">🏈 ESPN Scoreboard <span style="font-size: 14px; color: #38bdf8;">↗</span></a>
     </div>
-</div>
+  </div>
 
-{% if lockout_time %}
-<div class="timer-card">
-    ⏳ <b>KICKOFF LOCKOUT COUNTDOWN:</b> 
-    <span style="font-size:20px; font-weight:bold; color:var(--team-color);">{{ lockout_time_remaining }} remaining</span>
-</div>
-{% endif %}
+  {% if not active_weeks %}
+    <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255,255,255,0.12); padding: 30px; border-radius: 16px; text-align: center;">
+      <h3 style="color: #fbbf24; font-family: 'Bebas Neue'; font-size: 28px;">No Active Weeks Available</h3>
+      <p style="color: #cbd5e1;">All currently active weeks have been graded and closed, or no questions have been published yet. Check back soon!</p>
+    </div>
+  {% else %}
 
-<form action="/bets/submit" method="POST">
-    <!-- Matchup Slate Info -->
-    <div style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.9) 100%); border: 1px solid rgba(255,255,255,0.1); border-left: 4px solid #fbbf24; padding: 14px 18px; border-radius: 12px; margin-bottom: 20px;">
+    <!-- Week Selector Dropdown & Feeling Lucky Button Bar -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; background: rgba(15, 23, 42, 0.85); padding: 16px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.1);">
+      <form method="GET" action="/bets" style="display: flex; align-items: center; gap: 10px; flex: 1; min-width: 250px;">
+        <label style="font-weight: 600; font-size: 14px; color: #f8fafc;">Select Week:</label>
+        <select name="week" onchange="this.form.submit()" style="flex: 1; background: rgba(15,23,42,0.9); color: #fff; padding: 10px 14px; border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; font-weight: 600;">
+          {% for w in active_weeks %}
+          <option value="{{ w }}" {% if w == selected_week %}selected{% endif %}>Week {{ w }}</option>
+          {% endfor %}
+        </select>
+      </form>
+
+      {% if not is_locked and true_tokens > 0 %}
+      <form method="POST" action="/bets/lucky">
+        <input type="hidden" name="selected_week" value="{{ selected_week }}">
+        <button type="submit" style="background: rgba(30, 41, 59, 0.9); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.3); padding: 10px 18px; border-radius: 10px; font-family: 'Teko', sans-serif; font-size: 20px; letter-spacing: 1px; cursor: pointer; transition: all 0.2s;" title="Randomly distributes your available tokens and picks across the questions!">🎲 Feeling Lucky (Randomize)</button>
+      </form>
+      {% endif %}
+    </div>
+
+    <!-- Lockout Status Banner -->
+    {% if is_locked %}
+      <div style="background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; border-left: 4px solid #ef4444; padding: 16px; border-radius: 12px; margin-bottom: 20px; text-align: center;">
+        <b style="color: #f87171; font-size: 16px;">🔒 ENTRIES LOCKED</b>
+        <p style="color: #cbd5e1; font-size: 13px; margin: 4px 0 0 0;">Kickoff deadline has passed or entries have been locked by the commissioner. Picks are read-only.</p>
+      </div>
+    {% elif lock_time_remaining %}
+      <div style="background: rgba(15, 23, 42, 0.90); border: 1px solid rgba(255, 255, 255, 0.12); border-top: 3px solid var(--team-color); padding: 16px; border-radius: 14px; text-align: center; margin-bottom: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.4);">
+        ⏳ <b>KICKOFF LOCKOUT COUNTDOWN:</b> <span style="font-size: 18px; font-weight: bold; color: var(--team-color);">{{ lock_time_remaining }}</span>
+      </div>
+    {% endif %}
+
+    <!-- Main Bets Form -->
+    <form method="POST" action="/bets/submit">
+      <input type="hidden" name="selected_week" value="{{ selected_week }}">
+
+      <div style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.9) 100%); border: 1px solid rgba(255,255,255,0.1); border-left: 4px solid #fbbf24; padding: 14px 18px; border-radius: 12px; margin-bottom: 20px;">
         <b style="color: #fff; font-size: 15px;">MATCHUP PREDICTION SLATE</b>
-        <p style="color: #94a3b8; font-size: 13px; margin: 4px 0 0 0;">Matchup cards are expanded by default so you can easily review and configure your picks and token stakes.</p>
-    </div>
+        <p style="color: #94a3b8; font-size: 13px; margin: 4px 0 0 0;">Review matchups, make your Yes/No picks, and allocate your token wagers.</p>
+      </div>
 
-    {% for q in questions %}
-    <details class="matchup-card-item" open style="background: rgba(15, 23, 42, 0.85); margin-bottom: 16px; border-radius: 12px;">
-        <summary style="font-weight: 600; color: #fff; padding: 10px; cursor: pointer; outline: none;">
-            Matchup Q{{ q.question_number }}: {{ q.away_team }} @ {{ q.home_team }}
-        </summary>
-        <div style="padding: 10px;">
-            <div style="font-size: 16px; font-weight: 600; color: #ffffff; margin-bottom: 16px;">{{ q.question_text }}</div>
-            
-            <div style="display: flex; gap: 20px;">
-                <div style="flex: 1;">
-                    <label style="color: #94a3b8; font-size: 13px; display: block; margin-bottom: 8px;">Your Pick</label>
-                    <select name="pick_{{ q.id }}" class="form-input" required>
-                        <option value="Yes">Yes</option>
-                        <option value="No">No</option>
-                    </select>
-                </div>
-                <div style="flex: 1;">
-                    <label style="color: #94a3b8; font-size: 13px; display: block; margin-bottom: 8px;">Token Wager</label>
-                    <input type="number" name="wager_{{ q.id }}" class="form-input" min="0" max="{{ active_tokens }}" value="0" required>
-                </div>
-            </div>
+      {% for q in questions %}
+      <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-left: 4px solid var(--team-color); border-radius: 14px; padding: 18px; margin-bottom: 16px; box-shadow: 0 6px 20px rgba(0,0,0,0.35);">
+        
+        <!-- Matchup Header -->
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px; padding: 8px 12px; background: rgba(30, 41, 59, 0.4); border-radius: 10px; flex-wrap: wrap;">
+          <span style="font-family: 'Bebas Neue'; font-size: 16px; color: #38bdf8; letter-spacing: 1px; margin-right: 6px;">Q{{ q.number }}</span>
+          <img src="{{ q.away_logo }}" style="width: 22px; height: 22px;" alt="Away Logo" />
+          <span style="font-size: 13px; color: #cbd5e1; font-weight: bold;">{{ q.away_name }}</span>
+          <span style="color: #64748b;">@</span>
+          <img src="{{ q.home_logo }}" style="width: 22px; height: 22px;" alt="Home Logo" />
+          <span style="font-size: 13px; color: #cbd5e1; font-weight: bold;">{{ q.home_name }}</span>
         </div>
-    </details>
-    {% endfor %}
 
-    <!-- Touchdown Scorer Bonus -->
-    <div style="background: linear-gradient(135deg, rgba(30, 58, 138, 0.7) 0%, rgba(15, 23, 42, 0.9) 100%); border: 1px solid rgba(255,255,255,0.1); border-left: 4px solid #38bdf8; padding: 14px 18px; border-radius: 12px; margin: 20px 0 14px 0;">
-        <b style="color: #fff; font-size: 15px;">🏈 BONUS TOUCHDOWN SCORER</b>
-        <p style="color: #94a3b8; font-size: 13px; margin: 4px 0 10px 0;">Name 1 player to score a touchdown this week (rushing/receiving only). Correct pick yields +5 bonus tokens!</p>
-        <input type="text" name="td_scorer" class="form-input" placeholder="Player Name (e.g., Patrick Mahomes)">
-    </div>
+        <!-- Question Prompt -->
+        <div style="font-size: 15px; font-weight: 600; color: #ffffff; margin-bottom: 16px; line-height: 1.4;">
+          {{ q.prompt }}
+        </div>
 
-    <div style="margin-top: 30px;">
-        <button type="submit" class="btn-primary">Submit Weekly Bets 🚀</button>
-    </div>
-</form>
+        <!-- Pick & Wager Inputs -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; align-items: center;">
+          <div>
+            <label style="display: block; font-size: 12px; color: #94a3b8; text-transform: uppercase; font-weight: 600; margin-bottom: 6px;">Your Pick</label>
+            <div style="display: flex; gap: 15px;">
+              <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-weight: 600;">
+                <input type="radio" name="pick_{{ q.id }}" value="Yes" {% if q.default_pick == 'Yes' %}checked{% endif %} {% if is_locked %}disabled{% endif %} /> Yes
+              </label>
+              <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-weight: 600;">
+                <input type="radio" name="pick_{{ q.id }}" value="No" {% if q.default_pick == 'No' %}checked{% endif %} {% if is_locked %}disabled{% endif %} /> No
+              </label>
+            </div>
+          </div>
+
+          <div>
+            <label style="display: block; font-size: 12px; color: #94a3b8; text-transform: uppercase; font-weight: 600; margin-bottom: 6px;">Token Wager (Max: {{ true_tokens }})</label>
+            <input type="number" name="wager_{{ q.id }}" min="0" max="{{ true_tokens }}" value="{{ q.default_wager }}" {% if is_locked %}disabled{% endif %} style="width: 100%; background: rgba(15, 23, 42, 0.92); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 10px; padding: 8px 12px; font-weight: bold;" />
+          </div>
+        </div>
+
+      </div>
+      {% endfor %}
+
+      <!-- Touchdown Scorer Bonus Section -->
+      <div style="background: linear-gradient(135deg, rgba(30, 58, 138, 0.7) 0%, rgba(15, 23, 42, 0.9) 100%); border: 1px solid rgba(255,255,255,0.1); border-left: 4px solid #38bdf8; padding: 18px; border-radius: 14px; margin: 25px 0 20px 0;">
+        <b style="color: #fff; font-size: 16px;">🏈 BONUS TOUCHDOWN SCORER</b>
+        <p style="color: #94a3b8; font-size: 13px; margin: 4px 0 12px 0;">Name 1 player to score a touchdown this week (rushing/receiving only). Correct pick yields +5 bonus tokens!</p>
+        <input type="text" name="td_pick" value="{{ default_td_pick }}" placeholder="Player Name (e.g., Patrick Mahomes)" {% if is_locked %}disabled{% endif %} style="width: 100%; background: rgba(15, 23, 42, 0.92); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 10px; padding: 10px 14px;" />
+      </div>
+
+      <!-- Action Buttons -->
+      {% if not is_locked %}
+      <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+        <button type="submit" style="flex: 2; background: linear-gradient(135deg, var(--team-color) 0%, #d97706 100%); color: #000000; font-family: 'Teko', sans-serif; font-size: 26px; letter-spacing: 2px; text-transform: uppercase; border-radius: 12px; border: none; padding: 12px; font-weight: bold; cursor: pointer; box-shadow: 0 6px 20px rgba(0,0,0,0.5);">Submit Weekly Bets 🚀</button>
+      </div>
+      </form>
+
+      <form method="POST" action="/bets/clear" style="margin-top: 10px;">
+        <input type="hidden" name="selected_week" value="{{ selected_week }}">
+        <button type="submit" onclick="return confirm('Are you sure you want to clear all picks and wagers for Week {{ selected_week }}?');" style="width: 100%; background: rgba(153, 27, 27, 0.7); color: #ffffff; font-family: 'Teko', sans-serif; font-size: 22px; letter-spacing: 1px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); padding: 10px; cursor: pointer;">Clear Bet Choices 🗑️</button>
+      </form>
+      {% endif %}
+
+  {% endif %}
+
+</div>
 {% endblock %}
