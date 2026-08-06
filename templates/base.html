@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Touchdown Tokens - Weekly NFL Predictions & Wagers</title>
+    <title>Touchdown Tokens - Weekly NFL Predictions & Wagers Platform</title>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -74,22 +74,22 @@
         {% endif %}
     </nav>
 
-    <!-- Sticky Balance Bar (Only show if logged in with a valid profile) -->
-    {% if profile and profile.full_name and profile.full_name != "Error Loading Profile" %}
-    <div class="sticky-balance-bar container">
+    <!-- Sticky Balance Bar (Global across tabs, hidden on login and admin pages) -->
+    {% if profile and profile.full_name and profile.full_name != "Error Loading Profile" and request.url.path != '/auth/login' and not request.url.path.startswith('/admin') %}
+    <div class="sticky-balance-bar container" style="position: sticky; top: 20px; z-index: 100; margin-bottom: 25px; background: rgba(15, 23, 42, 0.90); border: 1px solid rgba(255, 255, 255, 0.12); border-left: 4px solid var(--team-color); border-radius: 16px; padding: 16px 24px; backdrop-filter: blur(14px); box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
         <div style="display: flex; align-items: center; gap: 14px;">
-            <div style="border: 3px {{ profile.avatar_border | default('solid') }} var(--team-color); border-radius: 10px; padding: 3px 8px; background: {{ profile.avatar_color | default('#1e3a8a') }};">
+            <div style="border: 3px {{ profile.avatar_border | default('solid') }} var(--team-color); border-radius: 10px; padding: 6px 10px; background: {{ profile.avatar_color | default('#1e3a8a') }};">
                 <span style="font-size: 26px;">{{ profile.avatar_emoji | default('🏈') }}</span>
             </div>
             <div>
-                <b style="font-size: 16px; color: #ffffff;">{{ profile.full_name }}</b> 
-                <span style="font-size:11px; color:#38bdf8; margin-left:6px;">({{ profile.selected_title | default('Gridiron Contender') }})</span>
-                <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase; font-weight: 600;">{{ profile.favorite_team | default('🏈 Free Agent / Neutral') }}</div>
+                <b style="font-size: 18px; color: #ffffff;">{{ profile.full_name }}</b> 
+                <span style="font-size:12px; color:#38bdf8; margin-left:6px;">({{ profile.selected_title | default('Gridiron Contender') }})</span>
+                <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase; font-weight: 600; margin-top: 2px;">{{ profile.favorite_team | default('🏈 Free Agent / Neutral') }}</div>
             </div>
         </div>
         <div style="text-align: right;">
-            <span style="font-family: 'Bebas Neue'; font-size: 26px; color: var(--team-color);">{{ active_tokens | default(profile.tokens) }} 🪙</span>
-            <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase; font-weight: 600;">Available Tokens</div>
+            <span style="font-family: 'Bebas Neue'; font-size: 32px; color: var(--team-color); line-height: 1;">{{ active_tokens | default(profile.tokens) }} 🪙</span>
+            <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase; font-weight: 600; letter-spacing: 1px;">Available Tokens</div>
         </div>
     </div>
     {% endif %}
