@@ -91,11 +91,18 @@ async def submit_weekly_bets(
             pick_val = form_data.get(f"pick_{week_number}_{q_id}", "Yes")
             wager_val = int(form_data.get(f"wager_{week_number}_{q_id}", 0))
             total_wagered += wager_val
+
+            # Safely cast question_id to integer if the schema expects integer IDs, avoiding type mismatch errors
+            try:
+                parsed_q_id = int(q_id)
+            except ValueError:
+                parsed_q_id = q_id
+
             bets_to_insert.append({
                 "user_id": user.id,
                 "user_name": profile.get("full_name", "Player"),
                 "week_number": week_number,
-                "question_id": q_id,
+                "question_id": parsed_q_id,
                 "pick": pick_val,
                 "wager_amount": wager_val
             })
