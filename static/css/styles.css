@@ -31,60 +31,148 @@ body {
     flex-direction: column;
 }
 
-/* Typography & Links */
-a, a:visited, a:hover, a:active {
-    color: var(--accent-blue) !important;
-    text-decoration: none !important;
-}
-
-p, span, label, div {
+/* Typography & General Links (Excluding Navbar) */
+body p, body span, body label, body div {
     color: var(--text-main);
 }
 
 /* App Container Layout */
-.app-container {
-    max-width: 900px;
+.app-container, .container {
+    max-width: 1000px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 0 20px;
     width: 100%;
+}
+
+main.container {
+    padding-top: 20px;
+    padding-bottom: 40px;
     flex: 1;
 }
 
-/* Header & Logos */
-.nfl-header {
-    text-align: center;
-    padding: 10px 0 15px 0;
+/* ==========================================
+   PREMIUM GLOSSY NAVBAR & HEADER
+   ========================================== */
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(15, 23, 42, 0.92);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    border-top: 3px solid var(--team-color, #fbbf24);
+    padding: 12px 30px;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    width: 100%;
 }
 
-.header-logo {
-    width: 200px;
-    filter: drop-shadow(0px 10px 22px rgba(251, 191, 36, 0.4));
-    border-radius: 12px;
+.brand-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none !important;
 }
 
-.nfl-subtitle {
-    font-family: 'Teko', sans-serif;
+.brand-logo-wrapper {
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.brand-logo {
+    max-height: 40px;
+    filter: drop-shadow(0px 4px 10px rgba(251, 191, 36, 0.4));
+}
+
+.brand-text {
+    font-family: 'Bebas Neue', sans-serif;
     font-size: 24px;
-    letter-spacing: 5px;
-    color: #93c5fd;
-    text-transform: uppercase;
-    margin-top: -4px;
-    text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+    color: #ffffff !important;
+    letter-spacing: 1.5px;
+    margin: 0;
 }
 
-/* Animations */
-@keyframes teamPulse {
-    0% { box-shadow: 0 0 12px rgba(251, 191, 36, 0.2); }
-    50% { box-shadow: 0 0 32px rgba(251, 191, 36, 0.5); }
-    100% { box-shadow: 0 0 12px rgba(251, 191, 36, 0.2); }
+.brand-text span {
+    color: var(--team-color, #fbbf24) !important;
 }
 
-.hero-banner, .champion-card {
-    animation: teamPulse 3.5s infinite ease-in-out;
+/* Navigation Links */
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
-/* Cards & Containers */
-.summary-box, .matchup-card-item, .rule-card, .chat-bubble {
+.nav-links a {
+    color: #cbd5e1 !important;
+    text-decoration: none !important;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 6px 10px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.nav-links a:hover, .nav-links a.active {
+    background: rgba(255, 255, 255, 0.08);
+    color: #ffffff !important;
+    text-decoration: none !important;
+}
+
+.nav-links a.active {
+    border-bottom: 2px solid var(--team-color, #fbbf24);
+}
+
+.nav-admin-btn {
+    background: rgba(239, 68, 68, 0.15) !important;
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    color: #fca5a5 !important;
+}
+
+.nav-logout-btn {
+    background: rgba(30, 41, 59, 0.8) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mobile-menu-btn {
+    display: none;
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 26px;
+    cursor: pointer;
+}
+
+/* ==========================================
+   STICKY BALANCE BAR
+   ========================================== */
+
+.sticky-balance-bar {
+    background: rgba(15, 23, 42, 0.90);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 14px;
+    padding: 14px 22px;
+    margin: 20px auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    backdrop-filter: blur(14px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+    width: 100%;
+}
+
+/* ==========================================
+   CARDS & CONTAINERS
+   ========================================== */
+
+.summary-box, .matchup-card-item, .rule-card, .chat-bubble, .profile-card {
     background: var(--card-bg);
     border: 1px solid var(--border-color);
     border-radius: 16px;
@@ -131,29 +219,10 @@ p, span, label, div {
     background: linear-gradient(135deg, rgba(180, 83, 9, 0.12) 0%, rgba(15, 23, 42, 0.90) 100%) !important;
 }
 
-/* Footer Styling */
-.footer-container {
-    margin-top: 60px;
-    margin-bottom: 30px;
-    padding: 30px 20px;
-    background: rgba(15, 23, 42, 0.85);
-    border-top: 1px solid var(--border-color);
-    border-radius: 16px;
-    text-align: center;
-    backdrop-filter: blur(14px);
-    box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
-}
+/* ==========================================
+   FORM CONTROLS & BUTTONS
+   ========================================== */
 
-.footer-links {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 20px;
-    margin-bottom: 15px;
-    flex-wrap: wrap;
-}
-
-/* Form Controls & Inputs */
 input[type="text"],
 input[type="email"],
 input[type="password"],
@@ -176,9 +245,8 @@ input:focus, select:focus, textarea:focus {
     box-shadow: 0 0 10px rgba(56, 189, 248, 0.25);
 }
 
-/* Buttons */
 button[type="submit"], .btn-primary {
-    background: linear-gradient(135deg, var(--team-color) 0%, #d97706 100%);
+    background: linear-gradient(135deg, var(--team-color, #fbbf24) 0%, #d97706 100%);
     color: #000000;
     padding: 12px 24px;
     font-family: 'Teko', sans-serif;
@@ -196,134 +264,45 @@ button[type="submit"]:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(251, 191, 36, 0.5);
 }
+
 /* ==========================================
-   PREMIUM GLOSSY NAVBAR & LAYOUT EXTENSIONS
+   FOOTER STYLING
    ========================================== */
 
-.container {
-    max-width: 1000px;
-    margin: 0 auto;
-    padding: 0 20px;
-}
-
-.navbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+.footer, .footer-container {
+    margin-top: 60px;
+    margin-bottom: 30px;
+    padding: 30px 20px;
     background: rgba(15, 23, 42, 0.85);
-    backdrop-filter: blur(16px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-    border-top: 3px solid var(--team-color, #fbbf24);
-    padding: 12px 30px;
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-}
-
-.brand-container {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    text-decoration: none !important;
-}
-
-.brand-logo-wrapper {
-    width: 45px;
-    height: 45px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.brand-logo {
-    max-height: 40px;
-    filter: drop-shadow(0px 4px 10px rgba(251, 191, 36, 0.4));
-}
-
-.brand-text {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 24px;
-    color: #ffffff;
-    letter-spacing: 1.5px;
-    margin: 0;
-}
-
-.brand-text span {
-    color: var(--team-color, #fbbf24);
-}
-
-.nav-links {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
-.nav-links a {
-    color: #cbd5e1 !important;
-    text-decoration: none !important;
-    font-size: 14px;
-    font-weight: 600;
-    padding: 8px 12px;
-    border-radius: 8px;
-    transition: all 0.2s ease;
-}
-
-.nav-links a:hover, .nav-links a.active {
-    background: rgba(255, 255, 255, 0.08);
-    color: #ffffff !important;
-}
-
-.nav-links a.active {
-    border-bottom: 2px solid var(--team-color, #fbbf24);
-}
-
-.nav-admin-btn {
-    background: rgba(239, 68, 68, 0.15);
-    border: 1px solid rgba(239, 68, 68, 0.4);
-    color: #fca5a5 !important;
-}
-
-.nav-logout-btn {
-    background: rgba(30, 41, 59, 0.8);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.mobile-menu-btn {
-    display: none;
-    background: none;
-    border: none;
-    color: #fff;
-    font-size: 26px;
-    cursor: pointer;
-}
-
-.sticky-balance-bar {
-    background: rgba(15, 23, 42, 0.90);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 14px;
-    padding: 14px 22px;
-    margin: 20px auto;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    border-top: 1px solid var(--border-color);
+    border-radius: 16px;
+    text-align: center;
     backdrop-filter: blur(14px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+    box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
+    width: 100%;
 }
 
-main.container {
-    padding-top: 20px;
-    padding-bottom: 40px;
+.footer-links {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
 }
 
-/* Responsive Mobile Navigation Drawer */
-@media (max-width: 900px) {
+/* ==========================================
+   RESPONSIVE MOBILE NAV DRAWER
+   ========================================== */
+
+@media (max-width: 950px) {
     .mobile-menu-btn {
         display: block;
     }
     .nav-links {
         display: none;
         flex-direction: column;
+        align-items: flex-start;
         position: absolute;
         top: 100%;
         left: 0;
@@ -332,8 +311,13 @@ main.container {
         padding: 20px;
         border-bottom: 1px solid rgba(255, 255, 255, 0.15);
         box-shadow: 0 15px 30px rgba(0,0,0,0.6);
+        gap: 10px;
     }
     .nav-links.active {
         display: flex;
+    }
+    .nav-links a {
+        width: 100%;
+        padding: 10px 14px;
     }
 }
