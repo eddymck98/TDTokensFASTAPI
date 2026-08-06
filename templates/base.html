@@ -39,7 +39,7 @@
 <body>
     <div class="app-background"></div>
 
-    <!-- Premium Glossy Navbar -->
+    <!-- Premium Glossy Navbar (Always visible background/logo wrapper) -->
     <nav class="navbar" style="--team-color: {{ t_color }};">
         <a href="/" class="brand-container">
             <div class="brand-logo-wrapper">
@@ -48,7 +48,7 @@
             <h1 class="brand-text">TOUCHDOWN <span>TOKENS</span></h1>
         </a>
         
-        <!-- Navigation Links (Only visible when user is logged in) -->
+        <!-- Navigation Links & Hamburger Toggle (Visible ONLY when logged in) -->
         {% if profile %}
         <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle navigation">
             ☰
@@ -101,8 +101,8 @@
         {% block content %}{% endblock %}
     </main>
 
-    <!-- Global Footer -->
-    <footer class="footer container">
+    <!-- Global Footer (Original consolidated design without extra disclaimer paragraph) -->
+    <footer class="footer container" style="margin-top: 60px; margin-bottom: 30px; padding: 30px 20px; background: rgba(15, 23, 42, 0.85); border-top: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px; text-align: center; backdrop-filter: blur(14px); box-shadow: 0 -10px 30px rgba(0,0,0,0.5);">
         <div style="display: flex; justify-content: center; align-items: center; gap: 20px; margin-bottom: 15px; flex-wrap: wrap;">
             <a href="https://www.nfl.com" target="_blank" style="color: #94a3b8; font-size: 13px; text-decoration: none;">NFL Official Site</a>
             <span style="color: #475569;">•</span>
@@ -110,8 +110,8 @@
             <span style="color: #475569;">•</span>
             <a href="https://buymeacoffee.com/ed.mckenna" target="_blank" style="color: #fbbf24; font-size: 13px; font-weight: bold; text-decoration: none;">☕ Support the App</a>
         </div>
-        <div style="color: #94a3b8; font-size: 12px; font-weight: 600;">&copy; 2026 Touchdown Tokens. All rights reserved. Designed & Engineered by Ed McKenna.</div>
-        <div style="margin-top: 20px;">
+        <div style="color: #94a3b8; font-size: 12px; font-weight: 600; margin-bottom: 20px;">&copy; 2026 Touchdown Tokens. All rights reserved. Designed & Engineered by Ed McKenna.</div>
+        <div>
             <a href="https://buymeacoffee.com/ed.mckenna" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000000; padding: 10px 22px; border-radius: 12px; font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 1px; font-weight: bold; text-decoration: none; box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3);">☕ Buy Me A Coffee</a>
         </div>
     </footer>
