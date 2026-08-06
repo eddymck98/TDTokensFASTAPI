@@ -1,1 +1,50 @@
+{% extends "base.html" %}
 
+{% block content %}
+<div class="commish-container" style="max-width: 900px; margin: 0 auto; padding-bottom: 40px;">
+
+  <!-- Header Section -->
+  <div style="margin-bottom: 25px;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <h2 style="font-family: 'Bebas Neue', sans-serif; font-size: 38px; color: #fbbf24; letter-spacing: 2px; margin: 0;">⭐ COMMISSIONER HUB</h2>
+      <span style="background: rgba(251, 191, 36, 0.15); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.3); padding: 2px 10px; border-radius: 6px; font-size: 12px; font-weight: bold; text-transform: uppercase;">League Owner</span>
+    </div>
+    <p style="color: #94a3b8; font-size: 14px; margin: 4px 0 0 0;">Manage mini-leagues, send league broadcasts, and configure custom stakes.</p>
+  </div>
+
+  <!-- Announcement Panel -->
+  <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255,255,255,0.12); border-left: 4px solid #fbbf24; border-radius: 16px; padding: 24px; margin-bottom: 25px; backdrop-filter: blur(14px);">
+    <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: #ffffff; letter-spacing: 1px; margin-top: 0; margin-bottom: 8px;">📢 LEAGUE ANNOUNCEMENT BOARD</h3>
+    <p style="color: #94a3b8; font-size: 13px; margin-bottom: 16px;">Post a message or weekly trash-talk highlight to all members of your mini-league.</p>
+
+    <form action="/commish/announcement" method="POST">
+      <textarea name="announcement_text" placeholder="Type your commissioner announcement here (e.g., Week 1 stakes are locked in!)..." required style="width: 100%; height: 90px; background: rgba(30, 41, 59, 0.9); color: #fff; border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; padding: 12px; font-size: 14px; resize: none; margin-bottom: 12px;"></textarea>
+      <button type="submit" style="background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000; padding: 10px 22px; font-family: 'Teko', sans-serif; font-size: 20px; font-weight: bold; border-radius: 10px; border: none; cursor: pointer;">Post Announcement 📣</button>
+    </form>
+  </div>
+
+  <!-- Mini-League Controls Grid -->
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+    
+    <!-- Invites & Roster -->
+    <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px; padding: 20px; backdrop-filter: blur(14px);">
+      <h4 style="font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: #38bdf8; margin: 0 0 8px 0;">🔑 LEAGUE INVITE CODES</h4>
+      <p style="color: #94a3b8; font-size: 13px; margin-bottom: 15px;">Share code with friends to join your private mini-league.</p>
+      
+      <div style="display: flex; gap: 8px;">
+        <input type="text" value="TD-TOKENS-COMMISH-2026" readonly style="width: 100%; padding: 10px; background: rgba(30, 41, 59, 0.9); color: #fbbf24; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; font-family: monospace; font-size: 13px; font-weight: bold;">
+        <button onclick="navigator.clipboard.writeText('TD-TOKENS-COMMISH-2026'); alert('Code copied!');" style="background: #38bdf8; color: #000; border: none; padding: 0 14px; border-radius: 8px; font-weight: bold; cursor: pointer;">Copy</button>
+      </div>
+    </div>
+
+    <!-- League Rules & Format -->
+    <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px; padding: 20px; backdrop-filter: blur(14px);">
+      <h4 style="font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: #34d399; margin: 0 0 8px 0;">🛡️ COMMISSIONER TOOLS</h4>
+      <p style="color: #94a3b8; font-size: 13px; margin-bottom: 15px;">Manage member permissions or inspect league activity logs.</p>
+      <a href="/leagues" style="display: inline-block; background: rgba(30, 41, 59, 0.9); color: #fff; padding: 8px 16px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); text-decoration: none; font-size: 14px; font-weight: 600;">Manage Mini-Leagues 🛡️</a>
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}
