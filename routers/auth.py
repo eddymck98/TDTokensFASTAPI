@@ -30,6 +30,24 @@ def send_verification_email(to_email: str, verification_link: str) -> bool:
     except Exception:
         return False
 
+# ==========================================
+# GET ROUTES FOR RENDERING TEMPLATES
+# ==========================================
+
+@router.get("/signup", response_class=HTMLResponse)
+async def signup_page(request: Request):
+    """Renders the user registration/signup page."""
+    return templates.TemplateResponse(request=request, name="signup.html", context={"request": request})
+
+@router.get("/login", response_class=HTMLResponse)
+async def login_page(request: Request):
+    """Renders the user login page."""
+    return templates.TemplateResponse(request=request, name="login.html", context={"request": request})
+
+# ==========================================
+# POST ROUTES FOR FORM ACTIONS
+# ==========================================
+
 @router.post("/login")
 async def login_user(
     request: Request,
