@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=Teko:wght@500;700&display=swap" rel="stylesheet">
     <!-- Global CSS Stylesheet linked via FastAPI StaticFiles -->
-    <link rel="stylesheet" href="{{ url_for('static', path='styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/styles.css') }}">
 
     <!-- Extract Team Info for Dynamic Styling -->
     {% set current_team = profile.favorite_team if profile and profile.favorite_team else "🏈 Free Agent / Neutral" %}
@@ -41,19 +41,19 @@
 
     <!-- Premium Glossy Navbar -->
     <nav class="navbar" style="--team-color: {{ t_color }};">
-        <a href="/dashboard" class="brand-container">
+        <a href="/" class="brand-container">
             <div class="brand-logo-wrapper">
                 <img src="{{ t_logo }}" alt="Logo" class="brand-logo">
             </div>
             <h1 class="brand-text">TOUCHDOWN <span>TOKENS</span></h1>
         </a>
         
-        <!-- Mobile Hamburger Toggle -->
+        <!-- Navigation Links (Only visible when user is logged in) -->
+        {% if profile %}
         <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle navigation">
             ☰
         </button>
 
-        <!-- Navigation Links -->
         <div class="nav-links" id="navLinks">
             <a href="/dashboard" class="{% if request.url.path == '/dashboard' %}active{% endif %}">🏠 Home</a>
             <a href="/bets" class="{% if request.url.path == '/bets' %}active{% endif %}">🎯 Bets</a>
@@ -63,18 +63,17 @@
             <a href="/profile" class="{% if request.url.path == '/profile' %}active{% endif %}">👤 Profile</a>
             <a href="/settings" class="{% if request.url.path == '/settings' %}active{% endif %}">⚙️ Settings</a>
             
-            <!-- Commissioner Tab -->
             {% if is_commissioner or (profile and profile.is_admin) %}
                 <a href="/commish" style="color: #fbbf24;">⭐ Commish</a>
             {% endif %}
 
-            <!-- Global Admin Tab -->
             {% if profile and profile.is_admin %}
                 <a href="/admin" class="nav-admin-btn">🛠️ Admin</a>
             {% endif %}
             
             <a href="/logout" class="nav-logout-btn">🚪 Logout</a>
         </div>
+        {% endif %}
     </nav>
 
     <!-- Sticky Balance Bar (Only show if logged in) -->
@@ -111,9 +110,6 @@
             <span style="color: #475569;">•</span>
             <a href="https://buymeacoffee.com/ed.mckenna" target="_blank" style="color: #fbbf24; font-size: 13px; font-weight: bold; text-decoration: none;">☕ Support the App</a>
         </div>
-        <p style="color: #64748b; font-size: 12px; line-height: 1.5; max-width: 600px; margin: 0 auto 15px auto;">
-            Touchdown Tokens is an independent, free-to-play recreational sports prediction platform built for community entertainment. All virtual tokens hold zero cash value. Not affiliated with or endorsed by the National Football League (NFL).
-        </p>
         <div style="color: #94a3b8; font-size: 12px; font-weight: 600;">&copy; 2026 Touchdown Tokens. All rights reserved. Designed & Engineered by Ed McKenna.</div>
         <div style="margin-top: 20px;">
             <a href="https://buymeacoffee.com/ed.mckenna" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000000; padding: 10px 22px; border-radius: 12px; font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 1px; font-weight: bold; text-decoration: none; box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3);">☕ Buy Me A Coffee</a>
@@ -124,157 +120,10 @@
     <script>
         function toggleMobileMenu() {
             const navLinks = document.getElementById('navLinks');
-            navLinks.classList.toggle('active');
+            if (navLinks) {
+                navLinks.classList.toggle('active');
+            }
         }
     </script>
 </body>
 </html>
-```[cite: 3]
-
----
-
-### **2. Append Navbar & Layout Rules to `static/styles.css`**
-Add these styling classes to the bottom of your `styles.css` file to format the navigation menu, mobile drawer, and sticky balance bar cleanly:
-
-```css
-/* ==========================================
-   PREMIUM GLOSSY NAVBAR & LAYOUT EXTENSIONS
-   ========================================== */
-
-.container {
-    max-width: 1000px;
-    margin: 0 auto;
-    padding: 0 20px;
-}
-
-.navbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: rgba(15, 23, 42, 0.85);
-    backdrop-filter: blur(16px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-    border-top: 3px solid var(--team-color, #fbbf24);
-    padding: 12px 30px;
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-}
-
-.brand-container {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    text-decoration: none !important;
-}
-
-.brand-logo-wrapper {
-    width: 45px;
-    height: 45px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.brand-logo {
-    max-height: 40px;
-    filter: drop-shadow(0px 4px 10px rgba(251, 191, 36, 0.4));
-}
-
-.brand-text {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 24px;
-    color: #ffffff;
-    letter-spacing: 1.5px;
-    margin: 0;
-}
-
-.brand-text span {
-    color: var(--team-color, #fbbf24);
-}
-
-.nav-links {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
-.nav-links a {
-    color: #cbd5e1 !important;
-    text-decoration: none !important;
-    font-size: 14px;
-    font-weight: 600;
-    padding: 8px 12px;
-    border-radius: 8px;
-    transition: all 0.2s ease;
-}
-
-.nav-links a:hover, .nav-links a.active {
-    background: rgba(255, 255, 255, 0.08);
-    color: #ffffff !important;
-}
-
-.nav-links a.active {
-    border-bottom: 2px solid var(--team-color, #fbbf24);
-}
-
-.nav-admin-btn {
-    background: rgba(239, 68, 68, 0.15);
-    border: 1px solid rgba(239, 68, 68, 0.4);
-    color: #fca5a5 !important;
-}
-
-.nav-logout-btn {
-    background: rgba(30, 41, 59, 0.8);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.mobile-menu-btn {
-    display: none;
-    background: none;
-    border: none;
-    color: #fff;
-    font-size: 26px;
-    cursor: pointer;
-}
-
-.sticky-balance-bar {
-    background: rgba(15, 23, 42, 0.90);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 14px;
-    padding: 14px 22px;
-    margin: 20px auto;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    backdrop-filter: blur(14px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.4);
-}
-
-main.container {
-    padding-top: 20px;
-    padding-bottom: 40px;
-}
-
-/* Responsive Mobile Navigation Drawer */
-@media (max-width: 900px) {
-    .mobile-menu-btn {
-        display: block;
-    }
-    .nav-links {
-        display: none;
-        flex-direction: column;
-        position: absolute;
-        top: 100%;
-        left: 0;
-        width: 100%;
-        background: rgba(15, 23, 42, 0.98);
-        padding: 20px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-        box-shadow: 0 15px 30px rgba(0,0,0,0.6);
-    }
-    .nav-links.active {
-        display: flex;
-    }
-}
