@@ -14,7 +14,7 @@ def get_supabase(request: Request) -> Client:
 
 @router.get("/", response_class=HTMLResponse)
 async def get_bets_page(request: Request, supabase: Client = Depends(get_supabase)):
-    # Session verification logic matching main.py cookie management
+    # Session verification
     session_cookie = request.cookies.get("td_tokens_session")
     if not session_cookie:
         return RedirectResponse(url="/", status_code=303)
@@ -30,21 +30,38 @@ async def get_bets_page(request: Request, supabase: Client = Depends(get_supabas
     except Exception:
         return RedirectResponse(url="/", status_code=303)
 
-    # Fetch active weeks and questions for betting pool
+    # Fetch active weeks, profile, and QUESTIONS
     try:
         weeks_res = supabase.table("weekly_questions").select("week_number").neq("week_number", 999).neq("week_number", 998).neq("week_number", 997).neq("week_number", 96).execute()
         available_weeks = sorted(list(set([r["week_number"] for r in weeks_res.data]))) if weeks_res.data else []
         
         profile = supabase.table("profiles").select("*").eq("id", user.id).single().execute().data
+        
+        # --- NEW CODE: Fetch questions for the betting slate ---
+        questions = []
+        if available_weeks:
+            latest_week = available_weeks[-1]
+            q_res = supabase.table("weekly_questions").select("id, question_text").eq("week_number", latest_week).lt("question_number", 11).order("question_number").execute()
+            
+            if q_res.data:
+                # Format to match the 'q.prompt' expected by your bets.html Jinja template
+                for q in q_res.data:
+                    questions.append({
+                        "id": q["id"],
+                        "prompt": q["question_text"]
+    })
+
     except Exception:
         available_weeks = []
         profile = {}
+        questions = []
 
-    return templates.TemplateResponse(request=request, name="bets.html", context={
+    return templates.TemplateResponse("bets.html", {
         "request": request,
         "user": user,
         "profile": profile,
-        "available_weeks": available_weeks
+        "available_weeks": available_weeks,
+        "questions": questions  # Pass the questions to the frontend!
     })
 
 @router.post("/submit")
