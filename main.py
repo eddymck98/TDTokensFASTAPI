@@ -123,3 +123,8 @@ async def login_page(request: Request):
 async def signup_page(request: Request):
     """Renders the signup template page."""
     return templates.TemplateResponse(request=request, name="signup.html", context={"request": request})
+
+@app.get("/rules", response_class=HTMLResponse)
+async def rules_page(request: Request):
+    """Renders the game rules and guidelines page."""
+    return templates.TemplateResponse(request=request, name="rules.html", context={"request": request})
