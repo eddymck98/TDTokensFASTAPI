@@ -64,8 +64,14 @@ async def render_dashboard_or_index(request: Request):
         return templates.TemplateResponse(request=request, name="index.html", context={"request": request})
 
     try:
-        profile_res = supabase.table("profiles").select("*").eq("id", user.id).single().execute()
-        current_profile = profile_res.data if profile_res.data else {}
+        # Safely query profile without using .single()
+        profile_res = supabase.table("profiles").select("*").eq("id", user.id).execute()
+        current_profile = profile_res.data[0] if profile_res.data else {
+            "tokens": 10, 
+            "full_name": "Gridiron Contender",
+            "selected_title": "🏈 Gridiron Contender",
+            "favorite_team": "🏈 Free Agent / Neutral"
+        }
         
         weeks_res = supabase.table("weekly_questions").select("week_number").neq("week_number", 999).neq("week_number", 998).neq("week_number", 997).neq("week_number", 96).execute()
         available_weeks = sorted(list(set([r["week_number"] for r in weeks_res.data]))) if weeks_res.data else []
@@ -89,7 +95,12 @@ async def render_dashboard_or_index(request: Request):
                     current_user_bets.append(b)
                     
     except Exception as e:
-        current_profile = {"tokens": 0, "full_name": "Error Loading Profile"}
+        current_profile = {
+            "tokens": 10, 
+            "full_name": "Gridiron Contender",
+            "selected_title": "🏈 Gridiron Contender",
+            "favorite_team": "🏈 Free Agent / Neutral"
+        }
         available_weeks = []
         current_user_bets = []
 
