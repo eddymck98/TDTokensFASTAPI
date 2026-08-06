@@ -23,19 +23,23 @@
       <p style="color: #cbd5e1; font-size: 14px; margin: 0;">Configure and publish the 10 weekly prediction prompts and match pairings.</p>
     </div>
 
+    <!-- Ensure you add a way to swap target weeks to load different questions if needed, usually via a GET query like /admin?week=2 -->
     <form action="/admin/questions/publish" method="POST">
       <div style="margin-bottom: 20px;">
         <label for="week_number" style="font-weight: 600; font-size: 16px; color: #f8fafc;">Target Week Number:</label>
-        <input type="number" id="week_number" name="week_number" value="1" min="1" max="25" required style="width: 150px; padding: 10px; background: rgba(15, 23, 42, 0.92); color: #fff; border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; margin-left: 10px;">
+        <input type="number" id="week_number" name="week_number" value="{{ target_week | default(1) }}" min="1" max="25" required style="width: 150px; padding: 10px; background: rgba(15, 23, 42, 0.92); color: #fff; border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; margin-left: 10px;">
+        <button type="button" onclick="window.location.href='/admin?week=' + document.getElementById('week_number').value" style="margin-left: 10px; padding: 10px 15px; background: #38bdf8; border: none; border-radius: 8px; color: #000; font-weight: bold; cursor: pointer;">Load Week</button>
       </div>
 
       {% for i in range(1, 11) %}
+      {% set q = questions_map.get(i, {}) if questions_map else {} %}
       <div style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255,255,255,0.08); border-left: 3px solid #38bdf8; padding: 16px; border-radius: 12px; margin-bottom: 16px;">
         <span style="font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: #38bdf8; letter-spacing: 1px;">QUESTION {{ i }} CONFIGURATION</span>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; margin-bottom: 10px;">
           <div>
             <label style="font-size: 13px; color: #94a3b8;">Away Team (Q{{ i }})</label>
             <select name="away_{{ i }}" style="width: 100%; padding: 8px; background: #0f172a; color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px;">
+              <option value="{{ q.get('away_team', '🏈 Free Agent / Neutral') }}" selected>{{ q.get('away_team', '🏈 Free Agent / Neutral') }}</option>
               <option value="🏈 Free Agent / Neutral">🏈 Free Agent / Neutral</option>
               <option value="🔴 Kansas City Chiefs">🔴 Kansas City Chiefs</option>
               <option value="🔵 Dallas Cowboys">🔵 Dallas Cowboys</option>
@@ -46,6 +50,7 @@
           <div>
             <label style="font-size: 13px; color: #94a3b8;">Home Team (Q{{ i }})</label>
             <select name="home_{{ i }}" style="width: 100%; padding: 8px; background: #0f172a; color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px;">
+              <option value="{{ q.get('home_team', '🏈 Free Agent / Neutral') }}" selected>{{ q.get('home_team', '🏈 Free Agent / Neutral') }}</option>
               <option value="🏈 Free Agent / Neutral">🏈 Free Agent / Neutral</option>
               <option value="🔴 Kansas City Chiefs">🔴 Kansas City Chiefs</option>
               <option value="🔵 Dallas Cowboys">🔵 Dallas Cowboys</option>
@@ -55,7 +60,7 @@
           </div>
         </div>
         <div>
-          <input type="text" name="prompt_{{ i }}" placeholder="Enter scenario prompt text (e.g., Will QB throw for 250+ yards?)..." required style="width: 100%; padding: 10px; background: rgba(15, 23, 42, 0.92); color: #fff; border: 1px solid rgba(255,255,255,0.15); border-radius: 12px;">
+          <input type="text" name="prompt_{{ i }}" value="{{ q.get('question_text', '') }}" placeholder="Enter scenario prompt text (e.g., Will QB throw for 250+ yards?)..." required style="width: 100%; padding: 10px; background: rgba(15, 23, 42, 0.92); color: #fff; border: 1px solid rgba(255,255,255,0.15); border-radius: 12px;">
         </div>
       </div>
       {% endfor %}
