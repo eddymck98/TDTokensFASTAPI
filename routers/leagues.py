@@ -12,7 +12,7 @@ templates = Jinja2Templates(directory="templates")
 def get_supabase(request: Request) -> Client:
     return request.app.state.supabase
 
-@router.get("/leagues", response_class=HTMLResponse)
+@router.get("/", response_class=HTMLResponse)
 async def get_leagues_page(request: Request, supabase: Client = Depends(get_supabase)):
     # Session verification logic matching main.py cookie management
     session_cookie = request.cookies.get("td_tokens_session")
@@ -51,7 +51,7 @@ async def get_leagues_page(request: Request, supabase: Client = Depends(get_supa
         "all_profiles": all_profiles
     })
 
-@router.post("/leagues/create")
+@router.post("/create")
 async def create_league(
     request: Request,
     league_name: str = Form(...),
@@ -96,7 +96,7 @@ async def create_league(
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@router.post("/leagues/join")
+@router.post("/join")
 async def join_league(
     request: Request,
     invite_code: str = Form(...),
@@ -142,7 +142,7 @@ async def join_league(
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@router.post("/leagues/chat")
+@router.post("/chat")
 async def post_trash_talk(
     request: Request,
     league_id: str = Form(...),
