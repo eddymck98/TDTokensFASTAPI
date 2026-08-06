@@ -2,7 +2,7 @@ import os
 import json
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from supabase import create_client
@@ -189,5 +189,84 @@ async def rules_page(request: Request):
             "request": request, 
             "profile": profile, 
             "active_tokens": active_tokens
+        }
+    )
+
+@app.get("/history", response_class=HTMLResponse)
+async def history_page(request: Request):
+    """Renders user betting history."""
+    session_cookie = request.cookies.get("td_tokens_session")
+    if not session_cookie:
+        return RedirectResponse(url="/auth/login", status_code=303)
+        
+    supabase = request.app.state.supabase
+    profile = None
+    user_bets = []
+    
+    try:
+        token_data = json.loads(session_cookie)
+        access_token = token_data.get("access_token")
+        supabase.auth.set_session(access_token, token_data.get("refresh_token"))
+        user = supabase.auth.get_user(access_token).user
+        
+        if user:
+            profile_res = supabase.table("profiles").select("*").eq("email", user.email).execute()
+            if profile_res.data:
+                profile = profile_res.data[0]
+                
+            # Fetch all past bets for the logged-in user
+            bets_res = supabase.table("user_bets").select("*").eq("user_id", user.id).execute()
+            if bets_res.data:
+                # Add sorting or additional mapping here if you want to embellish the history
+                user_bets = sorted(bets_res.data, key=lambda x: x.get("week_number", 0), reverse=True)
+    except Exception as e:
+        print(f"History Page Error: {e}")
+
+    return templates.TemplateResponse(
+        request=request, 
+        name="history.html", 
+        context={
+            "request": request, 
+            "profile": profile, 
+            "active_tokens": profile.get("tokens", 10) if profile else 10,
+            "user_bets": user_bets
+        }
+    )
+
+@app.get("/settings", response_class=HTMLResponse)
+async def settings_page(request: Request):
+    """Redirects Settings tab directly to Profile customization hub."""
+    return RedirectResponse(url="/profile", status_code=303)
+
+@app.get("/commish", response_class=HTMLResponse)
+async def commish_page(request: Request):
+    """Renders Commissioner hub for league owners and admins."""
+    session_cookie = request.cookies.get("td_tokens_session")
+    if not session_cookie:
+        return RedirectResponse(url="/auth/login", status_code=303)
+        
+    supabase = request.app.state.supabase
+    profile = None
+    
+    try:
+        token_data = json.loads(session_cookie)
+        access_token = token_data.get("access_token")
+        supabase.auth.set_session(access_token, token_data.get("refresh_token"))
+        user = supabase.auth.get_user(access_token).user
+        
+        if user:
+            profile_res = supabase.table("profiles").select("*").eq("email", user.email).execute()
+            if profile_res.data:
+                profile = profile_res.data[0]
+    except Exception as e:
+        print(f"Commish Page Error: {e}")
+
+    return templates.TemplateResponse(
+        request=request, 
+        name="commish.html", 
+        context={
+            "request": request, 
+            "profile": profile, 
+            "active_tokens": profile.get("tokens", 10) if profile else 10
         }
     )
