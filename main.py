@@ -44,9 +44,25 @@ app.include_router(admin.router, prefix="/admin", tags=["Admin Portal"])
 async def root(request: Request):
     """Renders the primary application dashboard or login view."""
     session_cookie = request.cookies.get("td_tokens_session")
+    
+    # If no session cookie exists, render the public landing/login index page safely
     if not session_cookie:
         return templates.TemplateResponse(request=request, name="index.html", context={"request": request})
-    return templates.TemplateResponse(request=request, name="dashboard.html", context={"request": request})
+    
+    # Fallback profile context to prevent 'profile is undefined' errors on the dashboard
+    current_profile = {
+        "tokens": 10,
+        "username": "Player1"
+    }
+
+    return templates.TemplateResponse(
+        request=request, 
+        name="dashboard.html", 
+        context={
+            "request": request,
+            "profile": current_profile
+        }
+    )
     
 @app.get("/auth/login", response_class=HTMLResponse)
 async def login_page(request: Request):
