@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=Teko:wght@500;700&display=swap" rel="stylesheet">
     <!-- Global CSS Stylesheet linked via FastAPI StaticFiles -->
-    <link rel="stylesheet" href="{{ url_for('static', path='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='styles.css') }}">
 
     <!-- Extract Team Info safely with robust fallbacks for logged-out users -->
     {% set current_team = profile.favorite_team if profile and profile.favorite_team else "🏈 Free Agent / Neutral" %}
@@ -108,8 +108,8 @@
             <span style="color: #475569;">•</span>
             <a href="https://buymeacoffee.com/ed.mckenna" target="_blank" style="color: #fbbf24; font-size: 13px; font-weight: bold; text-decoration: none;">☕ Support the App</a>
         </div>
-        <div style="color: #94a3b8; font-size: 12px; font-weight: 600; margin-bottom: 20px;">&copy; 2026 Touchdown Tokens. All rights reserved. Designed & Engineered by Ed McKenna.</div>
-        <div>
+        <div style="color: #94a3b8; font-size: 12px; font-weight: 600; margin-bottom: 20px; text-align: center;">&copy; 2026 Touchdown Tokens. All rights reserved. Designed & Engineered by Ed McKenna.</div>
+        <div style="text-align: center;">
             <a href="https://buymeacoffee.com/ed.mckenna" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000000; padding: 10px 22px; border-radius: 12px; font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 1px; font-weight: bold; text-decoration: none; box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3);">☕ Buy Me A Coffee</a>
         </div>
     </footer>
