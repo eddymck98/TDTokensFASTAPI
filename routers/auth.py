@@ -5,7 +5,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, EmailStr
 import resend
-from supabase import Client
+from supabase import Client, create_client
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
