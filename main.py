@@ -27,7 +27,12 @@ app = FastAPI(
     version="2.0.0",
     lifespan=lifespan
 )
+# Get the absolute directory where main.py resides
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+STATIC_DIR = os.path.join(BASE_DIR, "static")
 
+# Mount using the absolute path
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 # Mount static directory for CSS and assets
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
