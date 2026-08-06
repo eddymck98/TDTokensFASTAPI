@@ -55,13 +55,16 @@ async def get_bets_page(request: Request, supabase: Client = Depends(get_supabas
         profile = {}
         questions = []
 
-    return templates.TemplateResponse("bets.html", {
-        "request": request,
-        "user": user,
-        "profile": profile,
-        "available_weeks": available_weeks,
-        "questions": questions
-    })
+    return templates.TemplateResponse(
+        request=request,
+        name="bets.html",
+        context={
+            "user": user,
+            "profile": profile,
+            "available_weeks": available_weeks,
+            "questions": questions
+        }
+    )
 
 @router.post("/submit")
 async def submit_weekly_bets(
