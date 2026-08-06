@@ -120,7 +120,8 @@ async def signup_user(
             except Exception:
                 pass
 
-            send_verification_email(email.strip(), "https://tdtokens.co.uk")
+            base_url = str(request.base_url).rstrip("/")
+send_verification_email(email.strip(), base_url)
             return RedirectResponse(url="/?success=signup_complete", status_code=303)
         else:
             raise HTTPException(status_code=400, detail="Sign up failed.")
