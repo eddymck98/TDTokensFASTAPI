@@ -1,37 +1,55 @@
-import json
 import os
-from fastapi import APIRouter, Form, HTTPException, Request, Response
+import json
+from fastapi import APIRouter, Depends, Form, Request, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-from supabase import create_client
+from pydantic import BaseModel, EmailStr
+import resend
+from supabase import Client
 
-from utils.database import supabase
-from utils.email_service import send_verification_email
-from utils.helpers import contains_profanity
-
-router = APIRouter(prefix="/auth", tags=["Auth"])
+router = APIRouter()
 templates = Jinja2Templates(directory="templates")
 
-@router.get("/login", response_class=HTMLResponse)
-async def login_page(request: Request):
-    """Renders the login and sign-up page matching app.py logic."""
-    return templates.TemplateResponse("login.html", {"request": request})
+# Resend API Key setup from environment variables
+resend.api_key = os.environ.get("RESEND_API_KEY", "")
 
+def get_supabase(request: Request) -> Client:
+    return request.app.state.supabase
 
-@router.post("/login")
-async def handle_login(request: Request, email: str = Form(...), password: str = Form(...)):
-    """Handles user sign-in and session cookie storage matching app.py."""
+def contains_profanity(text: str) -> bool:
+    PROFANITY_FILTER = ["damn", "hell", "crap", "shit", "fuck", "bitch", "asshole", "dick", "cunt", "bastard"]
+    if not text: return False
+    text_lower = text.lower(); words = text_lower.split()
+    return any(p_word in text_lower or any(p_word == w for w in words) for p_word in PROFANITY_FILTER)
+
+def send_verification_email(to_email: str, verification_link: str) -> bool:
     try:
-        # Check sign-in lock state
-        signin_lock_res = supabase.table("weekly_questions").select("winning_answer").eq("week_number", 998).execute().data
-        is_signin_locked = signin_lock_res[0]["winning_answer"] == "LOCKED" if signin_lock_res else False
-        
-        if is_signin_locked:
-            raise HTTPException(status_code=403, detail="SIGN-IN LOCKED: The Admin has temporarily disabled log-ins.")
+        html_content = f"""<div style="background-color: #0b0f19; padding: 30px; font-family: 'Inter', Arial, sans-serif; color: #f8fafc;"><div style="max-width: 600px; margin: 0 auto; background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(255, 255, 255, 0.12); border-top: 4px solid #fbbf24; border-radius: 16px; padding: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);"><div style="text-align: center; margin-bottom: 30px;"><h1 style="font-family: 'Bebas Neue', Arial, sans-serif; color: #fbbf24; font-size: 32px; letter-spacing: 2px; margin: 0;">TOUCHDOWN TOKENS</h1><p style="color: #93c5fd; font-size: 14px; letter-spacing: 3px; text-transform: uppercase; margin-top: 5px;">Weekly NFL Predictions & Wagers</p></div><h3 style="color: #ffffff; font-size: 20px; margin-bottom: 15px;">Welcome to the League, Fan! 🏈</h3><p style="color: #cbd5e1; font-size: 15px; line-height: 1.6; margin-bottom: 25px;">Thanks for registering an account with Touchdown Tokens. To lock in your weekly picks, compete on leaderboards, and claim your tokens, please authorise your email address below:</p><div style="text-align: center; margin: 35px 0;"><a href="{verification_link}" style="background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000000; padding: 14px 28px; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 16px; letter-spacing: 1px; display: inline-block; box-shadow: 0 6px 20px rgba(251, 191, 36, 0.3);">AUTHORISE EMAIL ADDRESS</a></div><p style="color: #94a3b8; font-size: 13px; line-height: 1.5; margin-top: 30px; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 20px;">If you did not request this account creation or verification, you can safely ignore and delete this email.</p></div><div style="text-align: center; margin-top: 20px; color: #64748b; font-size: 12px;">&copy; 2026 Touchdown Tokens. All rights reserved.</div></div>"""
+        resend.Emails.send({"from": "Touchdown Tokens <noreply@auth.tdtokens.co.uk>", "to": [to_email], "subject": "🏈 Authorise Your Touchdown Tokens Account", "html": html_content})
+        return True
+    except Exception:
+        return False
 
+@router.post("/auth/login")
+async def login_user(
+    request: Request,
+    email: str = Form(...),
+    password: str = Form(...),
+    supabase: Client = Depends(get_supabase)
+):
+    # Check if sign-in is locked globally via weekly_questions meta table
+    try:
+        lock_check = supabase.table("weekly_questions").select("winning_answer").eq("week_number", 998).execute().data
+        if lock_check and lock_check[0].get("winning_answer") == "LOCKED":
+            raise HTTPException(status_code=403, detail="Sign-in is currently locked by the administrator.")
+    except HTTPException as he:
+        raise he
+    except Exception:
+        pass
+
+    try:
         auth_response = supabase.auth.sign_in_with_password({"email": email, "password": password})
         user = auth_response.user
-        
         if user and user.email_confirmed_at:
             response = RedirectResponse(url="/", status_code=303)
             if auth_response.session:
@@ -39,40 +57,40 @@ async def handle_login(request: Request, email: str = Form(...), password: str =
                     "access_token": auth_response.session.access_token,
                     "refresh_token": auth_response.session.refresh_token
                 })
-                response.set_cookie(key="td_tokens_session", value=session_data, max_age=2592000, httponly=True)
+                response.set_cookie(key="td_tokens_session", value=session_data, max_age=2592000, httponly=True, secure=True)
             return response
         else:
-            supabase.auth.sign_out()
-            raise HTTPException(status_code=400, detail="Please authorise your email first before logging in.")
+            raise HTTPException(status_code=400, detail="Please authorise your email address before logging in.")
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Login failed: {str(e)}")
+        raise HTTPException(status_code=400, detail=str(e))
 
-
-@router.post("/signup")
-async def handle_signup(
+@router.post("/auth/signup")
+async def signup_user(
+    request: Request,
     first_name: str = Form(...),
     surname: str = Form(...),
     email: str = Form(...),
-    password: str = Form(...)
+    password: str = Form(...),
+    supabase: Client = Depends(get_supabase)
 ):
-    """Handles new user registration, profile creation, and verification email trigger matching app.py."""
+    # Check if sign-up is locked globally via weekly_questions meta table
     try:
-        # Check sign-up lock state
-        signup_lock_res = supabase.table("weekly_questions").select("winning_answer").eq("week_number", 997).execute().data
-        is_signup_locked = signup_lock_res[0]["winning_answer"] == "LOCKED" if signup_lock_res else False
+        lock_check = supabase.table("weekly_questions").select("winning_answer").eq("week_number", 997).execute().data
+        if lock_check and lock_check[0].get("winning_answer") == "LOCKED":
+            raise HTTPException(status_code=403, detail="New account registrations are currently locked by the administrator.")
+    except HTTPException as he:
+        raise he
+    except Exception:
+        pass
 
-        if is_signup_locked:
-            raise HTTPException(status_code=403, detail="SIGN-UP LOCKED: The Admin has temporarily disabled new account registrations.")
+    combined_full_name = f"{first_name.strip()} {surname.strip()}"
+    if contains_profanity(combined_full_name):
+        raise HTTPException(status_code=400, detail="Name contains restricted language.")
 
-        combined_full_name = f"{first_name.strip()} {surname.strip()}"
-        if contains_profanity(combined_full_name):
-            raise HTTPException(status_code=400, detail="Your name contains restricted language.")
-
+    try:
         response = supabase.auth.sign_up({"email": email.strip(), "password": password})
         if response.user:
             new_uid = response.user.id
-            
-            # Insert profile row with default settings matching app.py
             supabase.table("profiles").insert({
                 "id": new_uid,
                 "email": email.strip(),
@@ -103,52 +121,44 @@ async def handle_signup(
                 pass
 
             send_verification_email(email.strip(), "https://tdtokens.co.uk")
-            
-            try:
-                supabase.auth.sign_out()
-            except Exception:
-                pass
-
-            return RedirectResponse(url="/auth/login?msg=Account+Created+Please+Verify+Email", status_code=303)
+            return RedirectResponse(url="/?success=signup_complete", status_code=303)
         else:
             raise HTTPException(status_code=400, detail="Sign up failed.")
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Sign up error: {str(e)}")
+        raise HTTPException(status_code=400, detail=str(e))
 
-
-@router.post("/forgot-password")
-async def handle_forgot_password(email: str = Form(...)):
-    """Generates and emails password reset links matching app.py logic."""
-    try:
-        service_key = os.environ.get("SUPABASE_SERVICE_KEY", "")
-        url = os.environ.get("SUPABASE_URL", "")
-        admin_supabase = create_client(url, service_key) if service_key and url else supabase
-        
-        response = admin_supabase.auth.admin.generate_link({"type": "recovery", "email": email.strip()})
-        if response and hasattr(response, "properties") and response.properties:
-            props = response.properties
-            action_link = props.get("action_link") if isinstance(props, dict) else getattr(props, "action_link", None)
-            email_otp = props.get("email_otp") if isinstance(props, dict) else getattr(props, "email_otp", None)
-            recovery_link = f"https://tdtokens.co.uk/auth/reset-password?token={email_otp}&type=recovery" if email_otp else action_link
-
-            if recovery_link:
-                # Custom Resend Email HTML matching app.py
-                html_content = f"""<div style="background-color: #0b0f19; padding: 30px; font-family: 'Inter', Arial, sans-serif; color: #f8fafc;"><div style="max-width: 600px; margin: 0 auto; background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(255, 255, 255, 0.12); border-top: 4px solid #fbbf24; border-radius: 16px; padding: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);"><h3 style="color: #ffffff; font-size: 20px; margin-bottom: 15px;">Reset Your Password 🔑</h3><p style="color: #cbd5e1; font-size: 15px; line-height: 1.6; margin-bottom: 25px;">Click the secure button below to choose a brand new password for your account:</p><div style="text-align: center; margin: 35px 0;"><a href="{recovery_link}" style="background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000000; padding: 14px 28px; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 16px; display: inline-block;">RESET PASSWORD</a></div></div></div>"""
-                import resend
-                resend.Emails.send({"from": "Touchdown Tokens <noreply@auth.tdtokens.co.uk>", "to": [email.strip()], "subject": "🔑 Reset Your Touchdown Tokens Password", "html": html_content})
-                return RedirectResponse(url="/auth/login?msg=Reset+Link+Sent", status_code=303)
-        raise HTTPException(status_code=400, detail="Could not generate recovery link.")
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Error sending reset email: {str(e)}")
-
-
-@router.get("/logout")
-async def handle_logout():
-    """Clears session cookie and signs out user matching app.py session cleanup."""
-    response = RedirectResponse(url="/auth/login", status_code=303)
-    response.delete_cookie(key="td_tokens_session")
+@router.post("/auth/logout")
+async def logout_user(request: Request, supabase: Client = Depends(get_supabase)):
     try:
         supabase.auth.sign_out()
     except Exception:
         pass
+    response = RedirectResponse(url="/", status_code=303)
+    response.delete_cookie(key="td_tokens_session")
     return response
+
+@router.post("/auth/password-reset-request")
+async def request_password_reset(
+    request: Request,
+    email: str = Form(...),
+    supabase: Client = Depends(get_supabase)
+):
+    try:
+        service_key = os.environ.get("SUPABASE_SERVICE_KEY", "")
+        url = os.environ.get("SUPABASE_URL", "")
+        admin_supabase = create_client(url, service_key) if service_key and url else supabase
+        response = admin_supabase.auth.admin.generate_link({"type": "recovery", "email": email.strip()})
+        
+        if response and hasattr(response, "properties") and response.properties:
+            props = response.properties
+            action_link = props.get("action_link") if isinstance(props, dict) else getattr(props, "action_link", None)
+            email_otp = props.get("email_otp") if isinstance(props, dict) else getattr(props, "email_otp", None)
+            recovery_link = f"https://tdtokens.co.uk/?token={email_otp}&type=recovery" if email_otp else action_link
+            
+            if recovery_link:
+                html_content = f"""<div style="background-color: #0b0f19; padding: 30px; font-family: 'Inter', Arial, sans-serif; color: #f8fafc;"><div style="max-width: 600px; margin: 0 auto; background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(255, 255, 255, 0.12); border-top: 4px solid #fbbf24; border-radius: 16px; padding: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);"><div style="text-align: center; margin-bottom: 30px;"><h1 style="font-family: 'Bebas Neue', Arial, sans-serif; color: #fbbf24; font-size: 32px; letter-spacing: 2px; margin: 0;">TOUCHDOWN TOKENS</h1><p style="color: #93c5fd; font-size: 14px; letter-spacing: 3px; text-transform: uppercase; margin-top: 5px;">Password Reset Request</p></div><h3 style="color: #ffffff; font-size: 20px; margin-bottom: 15px;">Reset Your Password 🔑</h3><p style="color: #cbd5e1; font-size: 15px; line-height: 1.6; margin-bottom: 25px;">Click the secure button below to choose a brand new password for your account:</p><div style="text-align: center; margin: 35px 0;"><a href="{recovery_link}" style="background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000000; padding: 14px 28px; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 16px; letter-spacing: 1px; display: inline-block; box-shadow: 0 6px 20px rgba(251, 191, 36, 0.3);">RESET PASSWORD</a></div></div></div>"""
+                resend.Emails.send({"from": "Touchdown Tokens <noreply@auth.tdtokens.co.uk>", "to": [email.strip()], "subject": "🔑 Reset Your Touchdown Tokens Password", "html": html_content})
+                return RedirectResponse(url="/?success=reset_sent", status_code=303)
+        raise HTTPException(status_code=400, detail="Could not generate recovery link.")
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
