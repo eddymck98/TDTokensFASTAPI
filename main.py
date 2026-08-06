@@ -73,7 +73,8 @@ async def render_dashboard_or_index(request: Request):
             "tokens": 10, 
             "full_name": user_email.split('@')[0],
             "selected_title": "🏈 Gridiron Contender",
-            "favorite_team": "🏈 Free Agent / Neutral"
+            "favorite_team": "🏈 Free Agent / Neutral",
+            "is_admin": False
         }
         
         # Extract active tokens dynamically from profile data
@@ -105,7 +106,8 @@ async def render_dashboard_or_index(request: Request):
             "tokens": 10, 
             "full_name": "Ed McKenna",
             "selected_title": "🏈 Gridiron Contender",
-            "favorite_team": "🏈 New Orleans Saints"
+            "favorite_team": "🏈 New Orleans Saints",
+            "is_admin": True
         }
         active_tokens = 10
         available_weeks = []
