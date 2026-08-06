@@ -1,354 +1,144 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Touchdown Tokens 🏈 - Login & Sign Up</title>
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=Teko:wght@500;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --team-color: #fbbf24;
-        }
+{% extends "base.html" %}
 
-        body {
-            background: radial-gradient(circle at 50% 20%, rgba(15, 23, 42, 0.90), rgba(7, 13, 25, 0.99)), url('https://images.unsplash.com/photo-1566577739112-5180d4bf9390?auto=format&fit=crop&w=1920&q=80') center center / cover no-repeat fixed !important;
-            color: #f8fafc !important;
-            font-family: 'Inter', sans-serif !important;
-            margin: 0;
-            padding: 20px;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
+{% block content %}
+<div class="login-container" style="max-width: 600px; margin: 0 auto; padding-bottom: 40px;">
 
-        .auth-wrapper {
-            width: 100%;
-            max-width: 520px;
-            background: rgba(15, 23, 42, 0.92);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-top: 4px solid var(--team-color);
-            border-radius: 20px;
-            padding: 35px;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.7);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            box-sizing: border-box;
-        }
+  <!-- Hero Welcome Banner -->
+  <div style="background: linear-gradient(135deg, rgba(30, 58, 138, 0.85) 0%, rgba(15, 23, 42, 0.95) 100%); border: 1px solid rgba(255, 255, 255, 0.15); border-top: 4px solid var(--team-color); border-radius: 20px; padding: 32px; margin-bottom: 25px; backdrop-filter: blur(16px); box-shadow: 0 12px 35px rgba(0,0,0,0.6); text-align: center;">
+    <h1 style="font-family: 'Bebas Neue', sans-serif; font-size: 42px; color: var(--team-color); letter-spacing: 2px; margin-top: 0; margin-bottom: 8px;">TOUCHDOWN TOKENS PORTAL</h1>
+    <p style="color: #cbd5e1; font-size: 15px; line-height: 1.5; margin: 0;">
+      Log in to your account or sign up to start making weekly NFL predictions and wagers.
+    </p>
+  </div>
 
-        .nfl-header {
-            text-align: center;
-            margin-bottom: 25px;
-        }
+  <!-- Navigation Tabs for Login / Signup -->
+  <div class="auth-tabs" style="display: flex; gap: 8px; margin-bottom: 25px;">
+    <button class="auth-tab-btn active" onclick="switchAuthTab(event, 'login-section')">🔒 Log In</button>
+    <button class="auth-tab-btn" onclick="switchAuthTab(event, 'signup-section')">📝 Sign Up</button>
+  </div>
 
-        .header-logo {
-            width: 200px;
-            filter: drop-shadow(0px 10px 22px rgba(251, 191, 36, 0.4));
-            border-radius: 12px;
-            margin-bottom: 10px;
-        }
+  <!-- Tab 1: Log In Section -->
+  <div id="login-section" class="auth-tab-content" style="display: block; background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px; padding: 24px; backdrop-filter: blur(14px);">
+    <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: #ffffff; letter-spacing: 1px; margin-top: 0; margin-bottom: 15px;">Login to Your Account</h3>
 
-        .nfl-subtitle {
-            font-family: 'Teko', sans-serif;
-            font-size: 22px;
-            letter-spacing: 4px;
-            color: #93c5fd;
-            text-transform: uppercase;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.8);
-        }
+    <form action="/auth/login" method="POST">
+      <div style="margin-bottom: 15px;">
+        <label for="login-email" style="font-weight: 600; font-size: 14px; color: #f8fafc; display: block; margin-bottom: 6px;">Email Address:</label>
+        <input type="email" id="login-email" name="email" required placeholder="Enter your email..." style="width: 100%; padding: 12px; background: rgba(30, 41, 59, 0.9); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; font-size: 15px;">
+      </div>
 
-        .auth-tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 25px;
-            background: rgba(11, 15, 25, 0.7);
-            padding: 6px;
-            border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.08);
-        }
+      <div style="margin-bottom: 20px;">
+        <label for="login-password" style="font-weight: 600; font-size: 14px; color: #f8fafc; display: block; margin-bottom: 6px;">Password:</label>
+        <input type="password" id="login-password" name="password" required placeholder="Enter your password..." style="width: 100%; padding: 12px; background: rgba(30, 41, 59, 0.9); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; font-size: 15px;">
+      </div>
 
-        .auth-tab {
-            flex: 1;
-            background: transparent;
-            border: none;
-            color: #94a3b8;
-            font-family: 'Teko', sans-serif;
-            font-size: 22px;
-            letter-spacing: 1px;
-            padding: 8px;
-            border-radius: 8px;
-            cursor: pointer;
-            text-align: center;
-            text-decoration: none;
-            transition: all 0.2s ease;
-        }
+      <button type="submit" style="background: linear-gradient(135deg, var(--team-color) 0%, #d97706 100%); color: #000; padding: 12px 24px; font-family: 'Teko', sans-serif; font-size: 22px; font-weight: bold; border-radius: 10px; border: none; cursor: pointer; width: 100%; box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3);">Log In 🚀</button>
+    </form>
 
-        .auth-tab.active {
-            background: linear-gradient(135deg, rgba(30, 58, 138, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-top: 3px solid var(--team-color);
-            color: #ffffff;
-            font-weight: bold;
-            box-shadow: 0 4px 15px rgba(251, 191, 36, 0.2);
-        }
-
-        .form-group {
-            margin-bottom: 18px;
-        }
-
-        label {
-            display: block;
-            font-size: 14px;
-            font-weight: 600;
-            color: #f8fafc;
-            margin-bottom: 6px;
-            letter-spacing: 0.5px;
-        }
-
-        input[type="email"], input[type="password"], input[type="text"] {
-            width: 100%;
-            background: rgba(15, 23, 42, 0.92);
-            color: #ffffff;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 12px;
-            padding: 12px 14px;
-            font-size: 15px;
-            box-sizing: border-box;
-            transition: border-color 0.2s;
-        }
-
-        input:focus {
-            outline: none;
-            border-color: #38bdf8;
-        }
-
-        .btn-primary-auth {
-            width: 100%;
-            background: linear-gradient(135deg, var(--team-color) 0%, #d97706 100%);
-            color: #000000;
-            font-family: 'Teko', sans-serif;
-            font-size: 26px;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            border-radius: 12px;
-            border: none;
-            padding: 12px;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.5);
-            transition: transform 0.2s;
-            margin-top: 10px;
-        }
-
-        .btn-primary-auth:hover {
-            transform: translateY(-2px);
-        }
-
-        .msg-box {
-            background: rgba(16, 185, 129, 0.2);
-            border: 1px solid #10b981;
-            color: #34d399;
-            padding: 12px 16px;
-            border-radius: 12px;
-            font-weight: 600;
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 14px;
-        }
-
-        .error-box {
-            background: rgba(239, 68, 68, 0.2);
-            border: 1px solid #ef4444;
-            color: #fca5a5;
-            padding: 12px 16px;
-            border-radius: 12px;
-            font-weight: 600;
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 14px;
-        }
-
-        details summary {
-            color: #38bdf8;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 14px;
-            margin-top: 15px;
-        }
-
-        .terms-box {
-            max-height: 150px;
-            overflow-y: auto;
-            background: rgba(11, 15, 25, 0.8);
-            border: 1px solid rgba(255,255,255,0.1);
-            padding: 12px;
-            border-radius: 10px;
-            font-size: 12px;
-            color: #cbd5e1;
-            line-height: 1.5;
-            margin-bottom: 15px;
-        }
-    </style>
-</head>
-<body>
-
-    <div class="auth-wrapper">
-        <!-- Logo Banner -->
-        <div class="nfl-header">
-            <img src="https://github.com/eddymck98/TD-Tokens-Render-/blob/main/TD%20Tokens%207.png?raw=true" class="header-logo" alt="Touchdown Tokens Logo" />
-            <div class="nfl-subtitle">Weekly NFL Predictions & Wagers</div>
-        </div>
-
-        {% if msg %}
-        <div class="msg-box">{{ msg }}</div>
-        {% endif %}
-
-        {% if error %}
-        <div class="error-box">{{ error }}</div>
-        {% endif %}
-
-        {% if signup_success_email %}
-        <!-- Signup Success State -->
-        <div style="text-align: center;">
-            <h2 style="color: #fbbf24; font-family: 'Bebas Neue'; font-size: 32px; letter-spacing: 2px; margin-bottom: 10px;">WELCOME TO THE LEAGUE! 🏈</h2>
-            <p style="color: #cbd5e1; font-size: 15px; line-height: 1.6; margin-bottom: 20px;">We have successfully created your account and sent a verification email to <b style="color: #38bdf8;">{{ signup_success_email }}</b>.</p>
-            <div style="background: rgba(30, 41, 59, 0.8); border: 1px solid rgba(255, 255, 255, 0.1); padding: 16px; border-radius: 12px; margin-bottom: 25px; text-align: left;">
-                <b style="color: #ffffff; font-size: 14px;">Next Steps:</b>
-                <ul style="color: #cbd5e1; font-size: 13px; margin-top: 6px; margin-bottom: 0; padding-left: 18px; line-height: 1.5;">
-                    <li>Check your email inbox (and spam folder) for the verification message.</li>
-                    <li>Click the <b>Authorise Email Address</b> verification button inside the email.</li>
-                </ul>
+    <!-- Forgot Password Accordion / Form -->
+    <div style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
+      <details style="color: #94a3b8; font-size: 14px; cursor: pointer;">
+        <summary style="font-weight: 600; color: #38bdf8;">🔑 Forgot Your Password?</summary>
+        <div style="margin-top: 12px;">
+          <form action="/auth/password-reset-request" method="POST">
+            <p style="color: #cbd5e1; font-size: 13px; margin-bottom: 10px;">Enter your email address below to receive a secure password reset link.</p>
+            <div style="margin-bottom: 10px;">
+              <input type="email" name="email" required placeholder="Your account email..." style="width: 100%; padding: 10px; background: rgba(30, 41, 59, 0.9); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; font-size: 14px;">
             </div>
-            <a href="/login" class="btn-primary-auth" style="display: block; text-decoration: none; text-align: center; line-height: 44px;">Proceed to Log In 🔒</a>
+            <button type="submit" style="background: rgba(30, 41, 59, 0.9); color: #fff; padding: 8px 16px; font-family: 'Teko', sans-serif; font-size: 18px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); cursor: pointer;">Send Reset Link ✉️</button>
+          </form>
         </div>
-
-        {% elif is_recovery %}
-        <!-- Password Recovery Screen -->
-        <h3 style="font-family: 'Bebas Neue'; font-size: 26px; color: #fbbf24; margin-top: 0; letter-spacing: 1px;">🔑 Set a New Password</h3>
-        <p style="color: #94a3b8; font-size: 13px; margin-bottom: 20px;">Please choose a secure new password for your account.</p>
-        <form method="POST" action="/auth/recovery">
-            <div class="form-group">
-                <label>Confirm Your Account Email</label>
-                <input type="email" name="recovery_email" required placeholder="name@example.com" />
-            </div>
-            <div class="form-group">
-                <label>New Password (min 6 chars)</label>
-                <input type="password" name="new_password" required placeholder="••••••••" />
-            </div>
-            <div class="form-group">
-                <label>Confirm New Password</label>
-                <input type="password" name="confirm_password" required placeholder="••••••••" />
-            </div>
-            <button type="submit" class="btn-primary-auth">Update Password & Log In 🚀</button>
-        </form>
-        <div style="text-align: center; margin-top: 15px;">
-            <a href="/login" style="color: #94a3b8; font-size: 13px; text-decoration: underline;">Cancel & Return to Login</a>
-        </div>
-
-        {% else %}
-        <!-- Standard Login / Signup Tabs -->
-        <div class="auth-tabs">
-            <button type="button" class="auth-tab {% if active_tab == 'login' %}active{% endif %}" onclick="switchTab('login')">🔒 Log In</button>
-            <button type="button" class="auth-tab {% if active_tab == 'signup' %}active{% endif %}" onclick="switchTab('signup')">📝 Sign Up</button>
-        </div>
-
-        <!-- Login Form Container -->
-        <div id="login-container" style="display: {% if active_tab == 'login' %}block{% else %}none{% endif %};">
-            {% if is_signin_locked %}
-            <div class="error-box">🔒 <b>SIGN-IN LOCKED:</b> The Admin has temporarily disabled log-ins. Please check back soon!</div>
-            {% else %}
-            <form method="POST" action="/login">
-                <div class="form-group">
-                    <label>Email</label>
-                    <input type="email" name="email" required placeholder="name@example.com" />
-                </div>
-                <div class="form-group">
-                    <label>Password</label>
-                    <input type="password" name="password" required placeholder="••••••••" />
-                </div>
-                <button type="submit" class="btn-primary-auth">Login</button>
-            </form>
-
-            <details>
-                <summary>🔑 Forgot Password?</summary>
-                <form method="POST" action="/auth/forgot" style="margin-top: 12px; background: rgba(30,41,59,0.5); padding: 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08);">
-                    <div class="form-group" style="margin-bottom: 10px;">
-                        <label style="font-size: 12px;">Your Account Email</label>
-                        <input type="email" name="reset_email" required placeholder="name@example.com" style="padding: 8px 12px; font-size: 13px;" />
-                    </div>
-                    <button type="submit" style="background: rgba(30, 41, 59, 0.9); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.3); padding: 8px 14px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 13px;">Send Reset Link</button>
-                </form>
-            </details>
-            {% endif %}
-        </div>
-
-        <!-- Signup Form Container -->
-        <div id="signup-container" style="display: {% if active_tab == 'signup' %}block{% else %}none{% endif %};">
-            {% if is_signup_locked %}
-            <div class="error-box">🔒 <b>SIGN-UP LOCKED:</b> The Admin has temporarily disabled new account registrations. Please check back soon!</div>
-            {% else %}
-            <p style="color: #94a3b8; font-size: 13px; margin-top: 0; margin-bottom: 15px;">New players start with 10 free tokens!</p>
-            <form method="POST" action="/signup">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                    <div class="form-group">
-                        <label>First Name</label>
-                        <input type="text" name="first_name" required placeholder="Ed" />
-                    </div>
-                    <div class="form-group">
-                        <label>Surname</label>
-                        <input type="text" name="surname" required placeholder="McKenna" />
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Email Address</label>
-                    <input type="email" name="email" required placeholder="name@example.com" />
-                </div>
-                <div class="form-group">
-                    <label>Password (min 6 chars)</label>
-                    <input type="password" name="password" required placeholder="••••••••" />
-                </div>
-
-                <details style="margin-bottom: 15px;">
-                    <summary>📖 View Touchdown Tokens Terms of Service</summary>
-                    <div class="terms-box" style="margin-top: 8px;">
-                        <b>TOUCHDOWN TOKENS — TERMS OF SERVICE & USER AGREEMENT</b><br><br>
-                        <b>1. Nature of the Platform & Virtual Currency</b><br>
-                        • Touchdown Tokens is strictly an independent, recreational, free-to-play sports prediction and entertainment platform designed solely for amusement.<br>
-                        • All points, scores, standings, and virtual tokens maintain zero real-world cash or monetary value and cannot be redeemed for currency.<br><br>
-                        <b>2. Gameplay & Deadlines</b><br>
-                        • Weekly picks and bonus selections lock strictly 15 minutes prior to the first scheduled Sunday NFL kickoff. Late submissions are not accepted.<br>
-                        • Your final submitted state at the moment of lockout constitutes your official entry.
-                    </div>
-                </details>
-
-                <div style="margin-bottom: 15px; display: flex; align-items: flex-start; gap: 8px;">
-                    <input type="checkbox" name="tc_accepted" id="tc_accepted" required style="width: 18px; height: 18px; margin-top: 2px;" />
-                    <label for="tc_accepted" style="font-size: 12px; color: #cbd5e1; font-weight: normal; line-height: 1.4; cursor: pointer;">I agree to the Touchdown Tokens Terms of Service & User Agreement</label>
-                </div>
-
-                <button type="submit" class="btn-primary-auth">Sign Up</button>
-            </form>
-            {% endif %}
-        </div>
-        {% endif %}
-
+      </details>
     </div>
+  </div>
 
-    <script>
-        function switchTab(tabName) {
-            if (tabName === 'login') {
-                document.getElementById('login-container').style.display = 'block';
-                document.getElementById('signup-container').style.display = 'none';
-                document.querySelectorAll('.auth-tab')[0].classList.add('active');
-                document.querySelectorAll('.auth-tab')[1].classList.remove('active');
-            } else {
-                document.getElementById('login-container').style.display = 'none';
-                document.getElementById('signup-container').style.display = 'block';
-                document.querySelectorAll('.auth-tab')[0].classList.remove('active');
-                document.querySelectorAll('.auth-tab')[1].classList.add('active');
-            }
-        }
-    </script>
-</body>
-</html>
+  <!-- Tab 2: Sign Up Section -->
+  <div id="signup-section" class="auth-tab-content" style="display: none; background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px; padding: 24px; backdrop-filter: blur(14px);">
+    <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: #ffffff; letter-spacing: 1px; margin-top: 0; margin-bottom: 5px;">Create an Account</h3>
+    <p style="color: #94a3b8; font-size: 13px; margin-bottom: 20px;">New players start with 10 free virtual tokens!</p>
+
+    <form action="/auth/signup" method="POST">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px;">
+        <div>
+          <label for="first_name" style="font-weight: 600; font-size: 13px; color: #f8fafc; display: block; margin-bottom: 4px;">First Name:</label>
+          <input type="text" id="first_name" name="first_name" required placeholder="First name" style="width: 100%; padding: 10px; background: rgba(30, 41, 59, 0.9); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; font-size: 14px;">
+        </div>
+        <div>
+          <label for="surname" style="font-weight: 600; font-size: 13px; color: #f8fafc; display: block; margin-bottom: 4px;">Surname:</label>
+          <input type="text" id="surname" name="surname" required placeholder="Surname" style="width: 100%; padding: 10px; background: rgba(30, 41, 59, 0.9); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; font-size: 14px;">
+        </div>
+      </div>
+
+      <div style="margin-bottom: 15px;">
+        <label for="signup-email" style="font-weight: 600; font-size: 14px; color: #f8fafc; display: block; margin-bottom: 6px;">Email Address:</label>
+        <input type="email" id="signup-email" name="email" required placeholder="Enter your email..." style="width: 100%; padding: 12px; background: rgba(30, 41, 59, 0.9); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; font-size: 15px;">
+      </div>
+
+      <div style="margin-bottom: 15px;">
+        <label for="signup-password" style="font-weight: 600; font-size: 14px; color: #f8fafc; display: block; margin-bottom: 6px;">Password (min 6 chars):</label>
+        <input type="password" id="signup-password" name="password" required minlength="6" placeholder="Choose a password..." style="width: 100%; padding: 12px; background: rgba(30, 41, 59, 0.9); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; font-size: 15px;">
+      </div>
+
+      <!-- Terms of Service Accordion -->
+      <div style="margin-bottom: 15px;">
+        <details style="color: #94a3b8; font-size: 13px; background: rgba(30, 41, 59, 0.5); padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);">
+          <summary style="font-weight: 600; color: #38bdf8;">📖 Read Terms of Service & User Agreement</summary>
+          <div style="margin-top: 8px; max-height: 120px; overflow-y: auto; color: #cbd5e1; font-size: 12px; line-height: 1.4;">
+            Touchdown Tokens is strictly an independent, recreational, free-to-play sports prediction platform designed solely for amusement. All virtual tokens hold zero cash value. Each user is permitted one account. Pick submissions lock 15 minutes before Sunday kickoff.
+          </div>
+        </details>
+      </div>
+
+      <div style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+        <input type="checkbox" id="tc_accepted" name="tc_accepted" required style="width: 18px; height: 18px;">
+        <label for="tc_accepted" style="font-size: 13px; color: #cbd5e1;">I agree to the Touchdown Tokens Terms of Service</label>
+      </div>
+
+      <button type="submit" style="background: linear-gradient(135deg, var(--team-color) 0%, #d97706 100%); color: #000; padding: 12px 24px; font-family: 'Teko', sans-serif; font-size: 22px; font-weight: bold; border-radius: 10px; border: none; cursor: pointer; width: 100%; box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3);">Sign Up & Claim Tokens 📝</button>
+    </form>
+  </div>
+
+</div>
+
+<!-- Client-side script to switch between Login and Signup tabs smoothly -->
+<script>
+function switchAuthTab(evt, sectionId) {
+  var i, tabContent, tabBtns;
+  tabContent = document.getElementsByClassName("auth-tab-content");
+  for (i = 0; i < tabContent.length; i++) {
+    tabContent[i].style.display = "none";
+  }
+  tabBtns = document.getElementsByClassName("auth-tab-btn");
+  for (i = 0; i < tabBtns.length; i++) {
+    tabBtns[i].className = tabBtns[i].className.replace(" active", "");
+  }
+  document.getElementById(sectionId).style.display = "block";
+  evt.currentTarget.className += " active";
+}
+</script>
+
+<style>
+.auth-tab-btn {
+  flex: 1;
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 10px 16px;
+  font-family: 'Teko', sans-serif;
+  font-size: 22px;
+  letter-spacing: 1.2px;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  text-align: center;
+}
+.auth-tab-btn.active {
+  background: linear-gradient(135deg, rgba(30, 58, 138, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-top: 3px solid var(--team-color);
+  color: #fff;
+  font-weight: 700;
+  box-shadow: 0 6px 20px rgba(251, 191, 36, 0.3);
+}
+</style>
+{% endblock %}
