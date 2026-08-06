@@ -8,18 +8,20 @@
     </div>
 </div>
 
-<div class="admin-grid">
-    <!-- Add New Matchup -->
-    <div class="matchup-box" style="border-left-color: #ef4444;">
-        <h3 style="font-family: 'Bebas Neue', sans-serif; color: #ef4444; letter-spacing: 1px; margin-top: 0;">📝 ADD MATCHUP QUESTION</h3>
+<div class="admin-dashboard-grid">
+    
+    <!-- 1. ADD MATCHUP (Red) -->
+    <div class="matchup-box admin-card-red">
+        <h3 style="font-family: 'Bebas Neue', sans-serif; color: #ef4444; letter-spacing: 1px; margin-top: 0;">📝 1. PUBLISH MATCHUP SLATE</h3>
+        <p style="color: #94a3b8; font-size: 12px;">Push a new question to the active weekly betting board.</p>
         <form action="/admin/add_question" method="POST">
             <div class="form-group">
                 <label>Week Number</label>
                 <input type="number" name="week_number" class="form-input" required>
             </div>
             <div class="form-group">
-                <label>Question Text</label>
-                <input type="text" name="question_text" class="form-input" placeholder="e.g. Will Mahomes throw 3+ TDs?" required>
+                <label>Question Text (e.g. Will Mahomes throw 3+ TDs?)</label>
+                <input type="text" name="question_text" class="form-input" required>
             </div>
             <div class="form-row">
                 <div class="form-group" style="flex: 1;">
@@ -35,40 +37,87 @@
         </form>
     </div>
 
-    <!-- Grade Existing Matchups -->
-    <div class="summary-box">
-        <h3 style="font-family: 'Bebas Neue', sans-serif; color: #fbbf24; letter-spacing: 1px; margin-top: 0;">⚖️ GRADE PENDING MATCHUPS</h3>
-        <div class="table-responsive">
+    <!-- 2. GRADE MATCHUPS (Yellow) -->
+    <div class="matchup-box admin-card-yellow">
+        <h3 style="font-family: 'Bebas Neue', sans-serif; color: #fbbf24; letter-spacing: 1px; margin-top: 0;">⚖️ 2. LIVE GRADING & PAYOUTS</h3>
+        <p style="color: #94a3b8; font-size: 12px;">Grade outcomes to automatically update global user balances.</p>
+        <div class="table-responsive" style="margin-top: 15px;">
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th>Q#</th>
-                        <th>Matchup / Question</th>
-                        <th>Action</th>
+                        <th style="font-size: 14px;">Matchup</th>
+                        <th style="font-size: 14px;">Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for q in pending_questions %}
                     <tr>
-                        <td>{{ q.id }}</td>
-                        <td>{{ q.question_text }}<br><span style="font-size: 11px; color: #94a3b8;">{{ q.away_team }} @ {{ q.home_team }}</span></td>
+                        <td style="font-size: 13px;">
+                            <b>{{ q.question_text }}</b><br>
+                            <span style="color: #94a3b8;">{{ q.away_team }} @ {{ q.home_team }}</span>
+                        </td>
                         <td>
                             <form action="/admin/grade/{{ q.id }}" method="POST" style="display: flex; gap: 5px;">
-                                <select name="result" class="form-input" style="padding: 5px; width: 80px;">
+                                <select name="result" class="form-input" style="padding: 5px; width: 75px; font-size: 12px;">
                                     <option value="Yes">Yes</option>
                                     <option value="No">No</option>
                                     <option value="Push">Push</option>
                                 </select>
-                                <button type="submit" class="secondary-btn">Grade</button>
+                                <button type="submit" class="secondary-btn" style="padding: 5px 10px;">Grade</button>
                             </form>
                         </td>
                     </tr>
                     {% else %}
-                    <tr><td colspan="3" style="text-align: center; color: #94a3b8;">No pending questions to grade.</td></tr>
+                    <tr><td colspan="2" style="text-align: center; color: #94a3b8; font-size: 13px;">No pending questions to grade.</td></tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
     </div>
+
+    <!-- 3. TOKEN ADJUSTMENT (Blue) -->
+    <div class="matchup-box admin-card-blue">
+        <h3 style="font-family: 'Bebas Neue', sans-serif; color: #38bdf8; letter-spacing: 1px; margin-top: 0;">🏦 3. MANUAL TOKEN BANK ADJUST</h3>
+        <p style="color: #94a3b8; font-size: 12px;">Directly modify a specific player's token balance.</p>
+        <form action="/admin/adjust_tokens" method="POST">
+            <div class="form-group">
+                <label>Select Player</label>
+                <select name="user_id" class="form-input" required>
+                    <option value="" disabled selected>-- Select User --</option>
+                    {% for u in users %}
+                        <option value="{{ u.id }}">{{ u.full_name }} (Current: {{ u.tokens }}🪙)</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-row">
+                <div class="form-group" style="flex: 1;">
+                    <label>Operation</label>
+                    <select name="operation" class="form-input" required>
+                        <option value="add">➕ Add</option>
+                        <option value="subtract">➖ Subtract</option>
+                        <option value="set">🔄 Set Exact</option>
+                    </select>
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label>Amount</label>
+                    <input type="number" name="amount" class="form-input" required min="0">
+                </div>
+            </div>
+            <button type="submit" class="btn-primary" style="background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%); color: #fff;">Execute Adjustment</button>
+        </form>
+    </div>
+
+    <!-- 4. EXPORT LEADERBOARD (Green) -->
+    <div class="matchup-box admin-card-green">
+        <h3 style="font-family: 'Bebas Neue', sans-serif; color: #10b981; letter-spacing: 1px; margin-top: 0;">📊 4. EXPORT SYSTEM DATA</h3>
+        <p style="color: #94a3b8; font-size: 12px;">Download a raw CSV dump of the current global leaderboard, token balances, and win rates for external tracking.</p>
+        
+        <div style="text-align: center; margin-top: 30px;">
+            <a href="/admin/export_csv" class="btn-export">
+                📥 Download Leaderboard (.CSV)
+            </a>
+        </div>
+    </div>
+
 </div>
 {% endblock %}
