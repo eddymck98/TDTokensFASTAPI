@@ -1,4 +1,5 @@
 import os
+import json
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
@@ -49,18 +50,61 @@ async def root(request: Request):
     if not session_cookie:
         return templates.TemplateResponse(request=request, name="index.html", context={"request": request})
     
-    # Fallback profile context to prevent 'profile is undefined' errors on the dashboard
-    current_profile = {
-        "tokens": 10,
-        "username": "Player1"
-    }
+    supabase = request.app.state.supabase
+    
+    # Authenticate the user via the session cookie
+    try:
+        token_data = json.loads(session_cookie)
+        supabase.auth.set_session(token_data.get("access_token"), token_data.get("refresh_token"))
+        user = supabase.auth.get_user().user
+        if not user:
+            return templates.TemplateResponse(request=request, name="index.html", context={"request": request})
+    except Exception:
+        # If the session is invalid or expired, default back to the public index
+        return templates.TemplateResponse(request=request, name="index.html", context={"request": request})
 
+    # Fetch the actual user profile and dashboard data from Supabase
+    try:
+        profile_res = supabase.table("profiles").select("*").eq("id", user.id).single().execute()
+        current_profile = profile_res.data if profile_res.data else {}
+        
+        # Fetch available weeks to populate the dashboard dropdowns
+        weeks_res = supabase.table("weekly_questions").select("week_number").neq("week_number", 999).neq("week_number", 998).neq("week_number", 997).neq("week_number", 96).execute()
+        available_weeks = sorted(list(set([r["week_number"] for r in weeks_res.data]))) if weeks_res.data else []
+        
+        # Fetch the user's active bets for the most recent week to display in the hub
+        current_user_bets = []
+        if available_weeks:
+            latest_week = available_weeks[-1]
+            bets_res = supabase.table("user_bets").select("*, weekly_questions(question_number, question_text, winning_answer)").eq("user_id", user.id).eq("week_number", latest_week).execute()
+            
+            if bets_res.data:
+                for b in bets_res.data:
+                    wq = b.get("weekly_questions") or {}
+                    b["question_number"] = wq.get("question_number", "?")
+                    b["question_text"] = wq.get("question_text", "Unknown Matchup")
+                    
+                    w_ans = wq.get("winning_answer", "Pending")
+                    if w_ans in ["Yes", "No"]:
+                        b["status_label"] = "Won ✅" if b["pick"] == w_ans else "Lost ❌"
+                    else:
+                        b["status_label"] = "Pending ⏳"
+                    current_user_bets.append(b)
+                    
+    except Exception as e:
+        current_profile = {"tokens": 0, "full_name": "Error Loading Profile"}
+        available_weeks = []
+        current_user_bets = []
+
+    # Pass the fully loaded live data to the template
     return templates.TemplateResponse(
         request=request, 
         name="dashboard.html", 
         context={
             "request": request,
-            "profile": current_profile
+            "profile": current_profile,
+            "available_weeks": available_weeks,
+            "current_user_bets": current_user_bets
         }
     )
     
