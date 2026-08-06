@@ -36,7 +36,7 @@ async def get_profile_page(request: Request, supabase: Client = Depends(get_supa
         profile = {}
         all_profiles = []
 
-    return templates.TemplateResponse("profile.html", {
+    return templates.TemplateResponse(request=request, name="profile.html", context={
         "request": request,
         "user": user,
         "profile": profile,
