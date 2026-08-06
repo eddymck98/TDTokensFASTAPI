@@ -147,5 +147,31 @@ async def signup_page(request: Request):
 
 @app.get("/rules", response_class=HTMLResponse)
 async def rules_page(request: Request):
-    """Renders the game rules and guidelines page."""
-    return templates.TemplateResponse(request=request, name="rules.html", context={"request": request})
+    """Renders the game rules and guidelines page with profile context."""
+    session_cookie = request.cookies.get("td_tokens_session")
+    profile = None
+    active_tokens = 10
+    
+    if session_cookie:
+        try:
+            supabase = request.app.state.supabase
+            token_data = json.loads(session_cookie)
+            supabase.auth.set_session(token_data.get("access_token"), token_data.get("refresh_token"))
+            user = supabase.auth.get_user(token_data.get("access_token")).user
+            if user:
+                profile_res = supabase.table("profiles").select("*").eq("email", user.email).execute()
+                if profile_res.data:
+                    profile = profile_res.data[0]
+                    active_tokens = profile.get("tokens", 10)
+        except Exception:
+            pass
+
+    return templates.TemplateResponse(
+        request=request, 
+        name="rules.html", 
+        context={
+            "request": request, 
+            "profile": profile, 
+            "active_tokens": active_tokens
+        }
+    )
