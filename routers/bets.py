@@ -37,19 +37,18 @@ async def get_bets_page(request: Request, supabase: Client = Depends(get_supabas
         
         profile = supabase.table("profiles").select("*").eq("id", user.id).single().execute().data
         
-        # --- NEW CODE: Fetch questions for the betting slate ---
+        # Fetch questions for the betting slate
         questions = []
         if available_weeks:
             latest_week = available_weeks[-1]
             q_res = supabase.table("weekly_questions").select("id, question_text").eq("week_number", latest_week).lt("question_number", 11).order("question_number").execute()
             
             if q_res.data:
-                # Format to match the 'q.prompt' expected by your bets.html Jinja template
                 for q in q_res.data:
                     questions.append({
                         "id": q["id"],
                         "prompt": q["question_text"]
-    })
+                    })
 
     except Exception:
         available_weeks = []
@@ -61,7 +60,7 @@ async def get_bets_page(request: Request, supabase: Client = Depends(get_supabas
         "user": user,
         "profile": profile,
         "available_weeks": available_weeks,
-        "questions": questions  # Pass the questions to the frontend!
+        "questions": questions
     })
 
 @router.post("/submit")
@@ -86,14 +85,11 @@ async def submit_weekly_bets(
 
     form_data = await request.form()
     
-    # Process dynamically submitted question picks and wagers from form fields
     try:
         profile = supabase.table("profiles").select("full_name, tokens").eq("id", user.id).single().execute().data
         
-        # Clear out existing bets for this specific week before inserting new overrides
         supabase.table("user_bets").delete().eq("user_id", user.id).eq("week_number", week_number).execute()
         
-        # Parse dynamic inputs sent from the HTML frontend form elements
         question_ids = set()
         for key in form_data.keys():
             if key.startswith("pick_"):
@@ -109,7 +105,6 @@ async def submit_weekly_bets(
             wager_val = int(form_data.get(f"wager_{week_number}_{q_id}", 0))
             total_wagered += wager_val
 
-            # Safely cast question_id to integer if the schema expects integer IDs, avoiding type mismatch errors
             try:
                 parsed_q_id = int(q_id)
             except ValueError:
@@ -124,15 +119,12 @@ async def submit_weekly_bets(
                 "wager_amount": wager_val
             })
 
-        # Validate token constraints
         if total_wagered > profile.get("tokens", 10):
             raise HTTPException(status_code=400, detail="Token allocation exceeds available balance.")
 
-        # Batch write user picks
         for bet in bets_to_insert:
             supabase.table("user_bets").insert(bet).execute()
 
-        # Handle Touchdown Scorer Bonus Pick
         if touchdown_pick.strip():
             supabase.table("touchdown_picks").delete().eq("user_id", user.id).eq("week_number", week_number).execute()
             supabase.table("touchdown_picks").insert({
