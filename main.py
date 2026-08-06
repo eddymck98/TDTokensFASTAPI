@@ -64,8 +64,8 @@ async def render_dashboard_or_index(request: Request):
     except Exception:
         return templates.TemplateResponse(request=request, name="index.html", context={"request": request})
 
+    # --- 1. ISOLATED PROFILE FETCH ---
     try:
-        # Query profiles table using the user's email directly to guarantee a match with your table data
         user_email = user.email
         profile_res = supabase.table("profiles").select("*").eq("email", user_email).execute()
         
@@ -76,42 +76,58 @@ async def render_dashboard_or_index(request: Request):
             "favorite_team": "🏈 Free Agent / Neutral",
             "is_admin": False
         }
-        
-        # Extract active tokens dynamically from profile data
         active_tokens = current_profile.get("tokens", 10)
-        
+    except Exception as e:
+        print(f"Profile Fetch Error: {e}")
+        current_profile = {
+            "tokens": 10, 
+            "full_name": "Error Loading Profile",
+            "selected_title": "🏈 Gridiron Contender",
+            "favorite_team": "🏈 Free Agent / Neutral",
+            "is_admin": False
+        }
+        active_tokens = 10
+
+    # --- 2. ISOLATED BETS & WEEKS FETCH ---
+    available_weeks = []
+    current_user_bets = []
+    
+    try:
         weeks_res = supabase.table("weekly_questions").select("week_number").neq("week_number", 999).neq("week_number", 998).neq("week_number", 997).neq("week_number", 96).execute()
-        available_weeks = sorted(list(set([r["week_number"] for r in weeks_res.data]))) if weeks_res.data else []
+        if weeks_res.data:
+            available_weeks = sorted(list(set([r["week_number"] for r in weeks_res.data])))
         
-        current_user_bets = []
         if available_weeks:
             latest_week = available_weeks[-1]
-            bets_res = supabase.table("user_bets").select("*, weekly_questions(question_number, question_text, winning_answer)").eq("user_id", user.id).eq("week_number", latest_week).execute()
+            
+            # Fetch bets without the risky relational join
+            bets_res = supabase.table("user_bets").select("*").eq("user_id", user.id).eq("week_number", latest_week).execute()
             
             if bets_res.data:
+                # Fetch questions manually to map them perfectly in Python
+                q_res = supabase.table("weekly_questions").select("*").eq("week_number", latest_week).execute()
+                questions_map = {q["id"]: q for q in q_res.data} if q_res.data else {}
+                
                 for b in bets_res.data:
-                    wq = b.get("weekly_questions") or {}
+                    q_id = b.get("question_id")
+                    wq = questions_map.get(q_id, {})
+                    
                     b["question_number"] = wq.get("question_number", "?")
                     b["question_text"] = wq.get("question_text", "Unknown Matchup")
                     
                     w_ans = wq.get("winning_answer", "Pending")
                     if w_ans in ["Yes", "No"]:
-                        b["status_label"] = "Won ✅" if b["pick"] == w_ans else "Lost ❌"
+                        b["status_label"] = "Won ✅" if b.get("pick") == w_ans else "Lost ❌"
                     else:
                         b["status_label"] = "Pending ⏳"
+                        
                     current_user_bets.append(b)
-                    
+                
+                # Sort bets so Q1, Q2, Q3 display in order
+                current_user_bets = sorted(current_user_bets, key=lambda x: str(x.get("question_number", "0")))
+                
     except Exception as e:
-        current_profile = {
-            "tokens": 10, 
-            "full_name": "Ed McKenna",
-            "selected_title": "🏈 Gridiron Contender",
-            "favorite_team": "🏈 New Orleans Saints",
-            "is_admin": True
-        }
-        active_tokens = 10
-        available_weeks = []
-        current_user_bets = []
+        print(f"Bets Fetch Error: {e}")
 
     return templates.TemplateResponse(
         request=request, 
