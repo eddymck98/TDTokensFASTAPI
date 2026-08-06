@@ -1,259 +1,110 @@
 /* ==========================================
-   STREAMLIT-AUTHENTIC CORE STYLING
-   ========================================== */
+   TOUCHDOWN TOKENS - GLOBAL STYLESHEET
+   ================ ========================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Bebas+Neue&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=Teko:wght@500;700&display=swap');
 
-body {
-    background: radial-gradient(circle at 50% 10%, #0f172a 0%, #070d19 100%);
-    color: #f8fafc;
-    font-family: 'Inter', sans-serif;
-    margin: 0;
-    padding: 0;
-    min-height: 100vh;
+.stMainBlockContainer, div[data-testid="stMainBlockContainer"] {
+    padding-top: 1rem !important;
 }
 
-.login-body {
-    background: radial-gradient(circle at 50% 20%, rgba(15, 23, 42, 0.90), rgba(7, 13, 25, 0.99));
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+header[data-testid="stHeader"] {
+    background: transparent !important;
 }
 
-.login-container {
-    background: rgba(15, 23, 42, 0.95);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-top: 4px solid #fbbf24;
-    border-radius: 16px;
-    padding: 40px;
-    width: 100%;
-    max-width: 450px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+.stApp, div[data-testid="stAppViewContainer"] {
+    color: #f8fafc !important;
+    font-family: 'Inter', sans-serif !important;
 }
 
-.logo-area {
+section[data-testid="stSidebar"] {
+    display: none !important;
+}
+
+a, a:visited, a:hover, a:active {
+    color: #38bdf8 !important;
+    text-decoration: none !important;
+}
+
+p, span, label, div[data-testid="stMarkdownContainer"] {
+    color: #f8fafc !important;
+}
+
+.nfl-header {
     text-align: center;
-    margin-bottom: 25px;
+    padding: 0px 0 4px 0;
+    margin-top: -25px;
 }
 
-.auth-logo {
-    width: 140px;
-    filter: drop-shadow(0px 6px 15px rgba(251, 191, 36, 0.4));
-}
-
-.logo-area h1 {
-    font-family: 'Bebas Neue', sans-serif;
-    color: #fbbf24;
-    font-size: 32px;
-    letter-spacing: 2px;
-    margin: 10px 0 0 0;
-}
-
-.logo-area p {
+.nfl-subtitle {
+    font-family: 'Teko', sans-serif;
+    font-size: 24px;
+    letter-spacing: 5px;
     color: #93c5fd;
-    font-size: 13px;
     text-transform: uppercase;
-    letter-spacing: 2px;
-    margin: 5px 0 0 0;
+    margin-top: -4px;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.8);
 }
 
-/* ==========================================
-   ULTRA-HD GLOSSY NAVBAR & TEAM NEON PULSE
-   ========================================== */
-
-@keyframes teamNeonPulse {
-    0% {
-        box-shadow: 0 0 8px var(--team-color, #fbbf24), inset 0 0 4px var(--team-color, #fbbf24);
-    }
-    50% {
-        box-shadow: 0 0 22px var(--team-color, #fbbf24), inset 0 0 10px var(--team-color, #fbbf24);
-    }
-    100% {
-        box-shadow: 0 0 8px var(--team-color, #fbbf24), inset 0 0 4px var(--team-color, #fbbf24);
-    }
+.header-logo {
+    width: 240px;
+    border-radius: 12px;
 }
 
-.navbar {
-    background: rgba(11, 17, 32, 0.95);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-    padding: 12px 32px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+@keyframes teamPulse {
+    0% { box-shadow: 0 0 12px rgba(251, 191, 36, 0.2); }
+    50% { box-shadow: 0 0 32px rgba(251, 191, 36, 0.7); }
+    100% { box-shadow: 0 0 12px rgba(251, 191, 36, 0.2); }
 }
 
-.brand-container {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    text-decoration: none;
-}
-
-.brand-logo-wrapper {
-    position: relative;
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(15, 23, 42, 0.9);
-    border: 2px solid var(--team-color, #fbbf24);
-    animation: teamNeonPulse 3s infinite ease-in-out;
-    transition: transform 0.3s ease;
-}
-
-.brand-container:hover .brand-logo-wrapper {
-    transform: scale(1.05);
-}
-
-.brand-logo {
-    width: 30px;
-    height: 30px;
-    object-fit: contain;
-    border-radius: 50%;
-}
-
-.brand-text {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 26px;
-    color: #ffffff;
-    letter-spacing: 2px;
-    line-height: 1;
-    margin: 0;
-    text-shadow: 0 2px 8px rgba(0,0,0,0.7);
-}
-
-.brand-text span {
-    color: var(--team-color, #fbbf24);
-}
-
-.nav-links {
-    display: flex;
-    gap: 22px;
-    align-items: center;
-}
-
-.nav-links a {
-    color: #94a3b8;
-    text-decoration: none;
-    font-family: 'Inter', sans-serif;
-    font-size: 14.5px;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    transition: color 0.2s ease, text-shadow 0.2s ease;
-}
-
-.nav-links a:hover, .nav-links a.active {
-    color: #38bdf8;
-    text-shadow: 0 0 12px rgba(56, 189, 248, 0.5);
-}
-
-.nav-admin-btn {
-    color: #fbbf24 !important;
-    background: rgba(251, 191, 36, 0.1);
-    border: 1px solid rgba(251, 191, 36, 0.3);
-    padding: 6px 14px !important;
-    border-radius: 8px;
-    transition: background 0.2s ease !important;
-}
-
-.nav-admin-btn:hover {
-    background: rgba(251, 191, 36, 0.2) !important;
-}
-
-.nav-logout-btn {
-    color: #fca5a5 !important;
-}
-
-/* Mobile Hamburger Toggle Button */
-.mobile-menu-btn {
-    display: none;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    color: #fbbf24;
-    font-size: 22px;
-    padding: 8px 14px;
-    border-radius: 10px;
-    cursor: pointer;
-}
-
-/* Responsive Breakpoint for Mobile Devices */
-@media (max-width: 992px) {
-    .mobile-menu-btn {
-        display: block;
-    }
-
-    .nav-links {
-        display: none;
-        flex-direction: column;
-        position: absolute;
-        top: 100%;
-        left: 0;
-        width: 100%;
-        background: rgba(11, 17, 32, 0.98);
-        backdrop-filter: blur(25px);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-        padding: 24px 0;
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8);
-        gap: 18px;
-        text-align: center;
-    }
-
-    .nav-links.active {
-        display: flex;
-    }
-
-    .nav-links a {
-        font-size: 16px;
-        width: 100%;
-        padding: 6px 0;
-    }
-}
-
-/* ==========================================
-   LAYOUT CONTAINERS & CARDS
-   ========================================== */
-
-.container {
-    max-width: 900px;
-    margin: 30px auto;
-    padding: 0 20px;
-}
-
-/* Sticky Balance Bar (Appended for the base layout) */
 .sticky-balance-bar {
     position: sticky;
-    top: 65px;
+    top: 0;
     z-index: 999;
     background: rgba(15, 23, 42, 0.94);
     border: 1px solid rgba(255, 255, 255, 0.12);
-    border-bottom: 3px solid var(--team-color, #fbbf24);
     padding: 10px 22px;
+    margin-top: 4px;
     margin-bottom: 20px;
     border-radius: 0 0 16px 16px;
     backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     display: flex;
     justify-content: space-between;
     align-items: center;
     box-shadow: 0 10px 30px rgba(0,0,0,0.7);
 }
 
-.matchup-box, .matchup-card-item {
+.hero-banner {
+    background: linear-gradient(135deg, rgba(30, 58, 138, 0.85) 0%, rgba(15, 23, 42, 0.95) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 20px;
+    padding: 28px;
+    margin-bottom: 25px;
+    backdrop-filter: blur(16px);
+    box-shadow: 0 12px 35px rgba(0,0,0,0.6);
+    animation: teamPulse 3.5s infinite ease-in-out;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.hero-tokens-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 64px;
+    letter-spacing: 2px;
+    line-height: 1;
+    margin: 0;
+}
+
+.matchup-card-item {
     background: rgba(15, 23, 42, 0.85);
     border: 1px solid rgba(255, 255, 255, 0.12);
-    border-left: 4px solid var(--team-color, #fbbf24);
     border-radius: 14px;
-    padding: 20px;
-    margin-bottom: 16px;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+    padding: 16px 20px;
+    margin-bottom: 12px;
+    backdrop-filter: blur(14px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.35);
     transition: transform 0.2s ease;
 }
 
@@ -262,41 +113,20 @@ body {
     border-color: rgba(255, 255, 255, 0.25);
 }
 
-.summary-box {
-    background-color: rgba(15, 23, 42, 0.88);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-left: 4px solid var(--team-color, #fbbf24);
-    padding: 20px;
-    border-radius: 14px;
-    color: #f8fafc;
-    margin-top: 16px;
-    box-shadow: 0 8px 28px rgba(0,0,0,0.35);
+.champion-card {
+    background: linear-gradient(135deg, rgba(120, 53, 15, 0.92) 0%, rgba(180, 83, 9, 0.92) 50%, rgba(245, 158, 11, 0.92) 100%);
+    padding: 32px;
+    border-radius: 18px;
+    color: #ffffff !important;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-top: 4px solid #fbbf24;
+    margin-bottom: 30px;
+    backdrop-filter: blur(14px);
+    box-shadow: 0 10px 35px rgba(0,0,0,0.6);
+    animation: teamPulse 2s infinite ease-in-out;
 }
 
-.hero-banner {
-    background: linear-gradient(135deg, rgba(30, 58, 138, 0.85) 0%, rgba(15, 23, 42, 0.95) 100%);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-top: 4px solid var(--team-color, #fbbf24);
-    border-radius: 20px;
-    padding: 28px;
-    margin-bottom: 25px;
-    box-shadow: 0 12px 35px rgba(0,0,0,0.6);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    animation: teamNeonPulse 3.5s infinite ease-in-out;
-}
-
-.hero-tokens-val {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 54px;
-    color: var(--team-color, #fbbf24);
-    letter-spacing: 2px;
-    line-height: 1;
-    margin: 0;
-}
-
-/* MVP and Timer Cards (Appended for the dashboard layout) */
 .mvp-banner {
     background: linear-gradient(135deg, rgba(147, 51, 234, 0.90) 0%, rgba(30, 58, 138, 0.94) 100%);
     border: 1px solid rgba(192, 132, 252, 0.4);
@@ -309,170 +139,38 @@ body {
     box-shadow: 0 10px 30px rgba(192, 132, 252, 0.35);
 }
 
-.timer-card {
-    background: rgba(15, 23, 42, 0.90);
+.trophy-card-unlocked {
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.90) 0%, rgba(15, 23, 42, 0.94) 100%);
     border: 1px solid rgba(255, 255, 255, 0.12);
-    border-top: 3px solid var(--team-color, #fbbf24);
-    padding: 18px;
-    border-radius: 16px;
-    text-align: center;
-    backdrop-filter: blur(16px);
-    box-shadow: 0 10px 35px rgba(0,0,0,0.5);
-    margin-bottom: 22px;
+    padding: 16px;
+    border-radius: 14px;
+    margin-bottom: 14px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.4);
 }
 
-/* ==========================================
-   FORMS & INPUT FIELDS (Streamlit Native Look)
-   ========================================== */
-
-.auth-tabs {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 25px;
+.trophy-card-locked {
+    background: rgba(15, 23, 42, 0.55);
+    border: 1px dashed rgba(255, 255, 255, 0.18);
+    padding: 16px;
+    border-radius: 14px;
+    margin-bottom: 14px;
+    opacity: 0.55;
 }
-
-.tab-btn {
-    flex: 1;
-    background: rgba(30, 41, 59, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: #94a3b8;
-    padding: 10px;
-    border-radius: 8px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.tab-btn.active {
-    background: #1e3a8a;
-    color: #ffffff;
-    border-color: #38bdf8;
-}
-
-.form-group {
-    margin-bottom: 16px;
-}
-
-.form-row {
-    display: flex;
-    gap: 10px;
-}
-
-.form-group label {
-    display: block;
-    color: #cbd5e1;
-    font-size: 13px;
-    font-weight: 600;
-    margin-bottom: 6px;
-}
-
-.form-group input, .form-group select, .form-group textarea, .form-input {
-    width: 100%;
-    background: rgba(15, 23, 42, 0.9);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 8px;
-    padding: 10px 14px;
-    color: #ffffff;
-    box-sizing: border-box;
-    font-family: 'Inter', sans-serif;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.form-group input:focus, .form-group select:focus, .form-input:focus {
-    outline: none;
-    border-color: var(--team-color, #fbbf24);
-    box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.2);
-}
-
-.terms-box {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    font-size: 12px;
-    color: #94a3b8;
-    margin-bottom: 20px;
-}
-
-/* ==========================================
-   BUTTONS & ACTIONS
-   ========================================== */
-
-.submit-btn, .auth-submit-btn, .btn-primary {
-    background: linear-gradient(135deg, var(--team-color, #fbbf24) 0%, #d97706 100%);
-    color: #000000;
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 22px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    border-radius: 10px;
-    border: none;
-    padding: 12px;
-    width: 100%;
-    cursor: pointer;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.4);
-    transition: transform 0.2s ease, filter 0.2s ease;
-}
-
-.submit-btn:hover, .auth-submit-btn:hover, .btn-primary:hover {
-    transform: translateY(-2px);
-    filter: brightness(1.1);
-}
-
-.secondary-btn {
-    background: rgba(30, 41, 59, 0.9);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: #ffffff;
-    padding: 8px 16px;
-    border-radius: 10px;
-    font-size: 14px;
-    font-weight: 600;
-    text-decoration: none;
-    transition: all 0.2s ease;
-    display: inline-block;
-}
-
-.secondary-btn:hover {
-    border-color: #38bdf8;
-    color: #38bdf8;
-}
-
-/* ==========================================
-   ALERTS & NOTIFICATIONS
-   ========================================== */
-
-.alert-box {
-    padding: 10px 14px;
-    border-radius: 8px;
-    font-size: 13px;
-    margin-bottom: 15px;
-}
-.alert-box.error { 
-    background: rgba(239, 68, 68, 0.2); 
-    border: 1px solid #ef4444; 
-    color: #fca5a5; 
-}
-.alert-box.success { 
-    background: rgba(16, 185, 129, 0.2); 
-    border: 1px solid #10b981; 
-    color: #6ee7b7; 
-}
-
-/* ==========================================
-   LEADERBOARD ROWS & PODIUMS
-   ========================================== */
 
 .leaderboard-row {
     background: rgba(15, 23, 42, 0.85);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    padding: 12px 18px;
-    margin-bottom: 8px;
+    border-radius: 10px;
+    padding: 6px 12px;
+    margin-bottom: 6px;
     backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    transition: all 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-    transition: transform 0.2s ease;
 }
 
 .leaderboard-row:hover {
@@ -481,257 +179,213 @@ body {
 }
 
 .podium-rank-1 {
-    border: 1px solid rgba(251, 191, 36, 0.6) !important;
+    border: 1px solid rgba(251, 191, 36, 0.5) !important;
     border-left: 4px solid #fbbf24 !important;
-    background: linear-gradient(135deg, rgba(251, 191, 36, 0.15) 0%, rgba(15, 23, 42, 0.90) 100%) !important;
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.12) 0%, rgba(15, 23, 42, 0.90) 100%) !important;
 }
 
 .podium-rank-2 {
-    border: 1px solid rgba(148, 163, 184, 0.6) !important;
+    border: 1px solid rgba(148, 163, 184, 0.5) !important;
     border-left: 4px solid #94a3b8 !important;
-    background: linear-gradient(135deg, rgba(148, 163, 184, 0.15) 0%, rgba(15, 23, 42, 0.90) 100%) !important;
+    background: linear-gradient(135deg, rgba(148, 163, 184, 0.12) 0%, rgba(15, 23, 42, 0.90) 100%) !important;
 }
 
 .podium-rank-3 {
-    border: 1px solid rgba(180, 83, 9, 0.6) !important;
+    border: 1px solid rgba(180, 83, 9, 0.5) !important;
     border-left: 4px solid #b45309 !important;
-    background: linear-gradient(135deg, rgba(180, 83, 9, 0.15) 0%, rgba(15, 23, 42, 0.90) 100%) !important;
+    background: linear-gradient(135deg, rgba(180, 83, 9, 0.12) 0%, rgba(15, 23, 42, 0.90) 100%) !important;
 }
 
-/* ==========================================
-   MODERN GLOSSY RULES HUB STYLING
-   ========================================== */
-
-.rules-hero {
-    background: linear-gradient(135deg, rgba(30, 58, 138, 0.4) 0%, rgba(15, 23, 42, 0.8) 100%);
-    backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-top: 4px solid var(--team-color, #fbbf24);
-    border-radius: 20px;
-    padding: 32px;
-    margin-bottom: 30px;
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+.stat-pill-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 2px;
 }
 
-.rule-card-glossy {
-    background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.6) 100%);
-    backdrop-filter: blur(12px);
+.stat-pill {
+    background: rgba(30, 41, 59, 0.85);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    border-top: 3px solid var(--team-color, #fbbf24);
-    border-radius: 16px;
-    padding: 26px;
-    margin-bottom: 20px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-    transition: transform 0.2s ease, border-color 0.2s ease;
+    border-radius: 12px;
+    padding: 0px 6px;
+    font-size: 9px;
+    font-weight: 600;
+    color: #cbd5e1;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
 }
 
-.rule-card-glossy:hover {
-    transform: translateY(-2px);
-    border-color: rgba(251, 191, 36, 0.4);
+.vs-card, .timer-card {
+    background: rgba(15, 23, 42, 0.90);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    padding: 22px;
+    border-radius: 16px;
+    text-align: center;
+    backdrop-filter: blur(16px);
+    box-shadow: 0 10px 35px rgba(0,0,0,0.5);
+}
+
+.timer-card {
+    margin-bottom: 22px;
+    padding: 18px;
+}
+
+.chat-bubble {
+    background-color: rgba(15, 23, 42, 0.88);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    padding: 14px 18px;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    border: 1px solid rgba(255,255,255,0.1);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+}
+
+.summary-box {
+    background-color: rgba(15, 23, 42, 0.88) !important;
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    border-radius: 14px;
+    color: #f8fafc !important;
+    margin-top: 16px;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.35);
+}
+
+.rule-card {
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.82) 0%, rgba(15, 23, 42, 0.92) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 20px;
+    backdrop-filter: blur(16px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
 }
 
 .rule-step-num {
     font-family: 'Bebas Neue', sans-serif;
-    color: var(--team-color, #fbbf24);
-    font-size: 15px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    margin-bottom: 8px;
-    opacity: 0.9;
-}
-
-/* Collapsible FAQ Accordion Styles */
-.faq-accordion {
-    background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.6) 100%);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-left: 4px solid #38bdf8;
-    border-radius: 16px;
-    padding: 22px 26px;
-    margin-top: 30px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-}
-
-.faq-accordion details {
-    cursor: pointer;
-}
-
-.faq-accordion summary {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 24px;
-    color: var(--team-color, #fbbf24);
-    letter-spacing: 1.5px;
-    outline: none;
-    list-style: none;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.faq-accordion summary::-webkit-details-marker {
-    display: none;
-}
-
-.faq-accordion summary::after {
-    content: '+';
-    font-size: 24px;
-    color: #38bdf8;
-    transition: transform 0.2s ease;
-}
-
-.faq-accordion details[open] summary::after {
-    transform: rotate(45deg);
-}
-
-.faq-item {
-    margin-top: 16px;
-    padding-top: 16px;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-    color: #cbd5e1;
-    font-size: 14px;
-    line-height: 1.6;
-}
-
-.faq-item p strong {
-    color: #ffffff;
-    font-size: 15px;
-}
-
-/* ==========================================
-   GLOBAL FOOTER
-   ========================================== */
-
-.footer {
-    text-align: center;
-    padding: 30px 20px;
-    margin-top: 60px;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-    color: #94a3b8;
-    font-size: 13px;
-    background: rgba(7, 13, 25, 0.6);
-}
-
-.footer p {
-    margin: 4px 0;
-}
-
-.footer span {
-    color: #fbbf24;
-    font-weight: 600;
-}
-/* ==========================================
-   PROFILE, ADMIN, & LEAGUES SPECIFIC STYLING
-   ========================================== */
-
-/* Profile Avatar Selection Grid */
-.avatar-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
-    gap: 15px;
-    margin-top: 15px;
-}
-
-.avatar-option {
-    background: rgba(15, 23, 42, 0.6);
-    border: 2px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    padding: 10px;
     font-size: 28px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
+    letter-spacing: 2px;
+    margin-bottom: 4px;
 }
 
-.avatar-option:hover, .avatar-option input[type="radio"]:checked + span {
-    background: rgba(56, 189, 248, 0.2);
-    border-color: #38bdf8;
-    transform: scale(1.1);
-}
-
-.avatar-option input[type="radio"] {
-    display: none;
-}
-
-/* Data Tables for Leagues & Admin */
-.table-responsive {
-    overflow-x: auto;
-    background: rgba(15, 23, 42, 0.85);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 12px;
-    backdrop-filter: blur(14px);
-    margin-bottom: 20px;
-}
-
-.data-table {
-    width: 100%;
-    border-collapse: collapse;
-    color: #f8fafc;
-    font-size: 14px;
-}
-
-.data-table th {
-    background: rgba(30, 41, 59, 0.9);
-    padding: 12px 16px;
-    text-align: left;
-    font-family: 'Bebas Neue', sans-serif;
-    letter-spacing: 1px;
-    font-size: 18px;
-    color: var(--team-color, #fbbf24);
-    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
-}
-
-.data-table td {
-    padding: 12px 16px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.data-table tr:last-child td {
-    border-bottom: none;
-}
-
-.data-table tr:hover {
-    background: rgba(255, 255, 255, 0.03);
-}
-
-/* ==========================================
-   ADMIN RADIO SUB-NAVIGATION BAR
-   ========================================== */
-
-.admin-nav-bar {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    background: rgba(11, 15, 25, 0.6);
-    padding: 8px;
+div[data-testid="stHorizontalBlock"] div[data-baseweb="tab-list"], div[data-baseweb="tab-list"] {
+    gap: 6px;
+    background-color: rgba(11, 15, 25, 0.6);
+    padding: 6px;
     border-radius: 16px;
     border: 1px solid rgba(255, 255, 255, 0.08);
     backdrop-filter: blur(14px);
-    margin-bottom: 25px;
+    -webkit-backdrop-filter: blur(14px);
+    margin-bottom: 20px;
+    overflow-x: auto;
 }
 
-.admin-tab-btn {
-    background: rgba(15, 23, 42, 0.75);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 10px;
-    padding: 8px 14px;
-    color: #94a3b8;
-    font-family: 'Inter', sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    text-decoration: none;
-    transition: all 0.25s ease;
+button[data-baseweb="tab"] {
+    background: rgba(15, 23, 42, 0.75) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 10px !important;
+    padding: 8px 14px !important;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
-.admin-tab-btn:hover {
-    background: rgba(30, 41, 59, 0.9);
-    color: #ffffff;
+button[data-baseweb="tab"]:hover {
+    background: rgba(30, 41, 59, 0.9) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
     transform: translateY(-1px);
 }
 
-.admin-tab-btn.active {
-    background: linear-gradient(135deg, rgba(30, 58, 138, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%);
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    border-top: 3px solid var(--team-color, #fbbf24);
-    color: #ffffff;
-    font-weight: 700;
+button[data-baseweb="tab"] * {
+    font-family: 'Teko', sans-serif !important;
+    font-size: 19px !important;
+    letter-spacing: 1.2px !important;
+    color: #94a3b8 !important;
+}
+
+button[aria-selected="true"] {
+    background: linear-gradient(135deg, rgba(30, 58, 138, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.4) !important;
+}
+
+button[aria-selected="true"] * {
+    color: #ffffff !important;
+    font-weight: 700 !important;
+}
+
+.stSelectbox div[data-baseweb="select"] > div, div[data-baseweb="select"] > div, div[data-baseweb="base-input"], [data-baseweb="input"], [data-baseweb="tag"] {
+    background-color: rgba(15, 23, 42, 0.90) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+div[data-baseweb="select"] span, div[data-baseweb="select"] div, ul[data-baseweb="menu"], li[data-baseweb="option"], div[role="listbox"], div[role="dialog"] {
+    background-color: #0f172a !important;
+    color: #ffffff !important;
+}
+
+div[role="option"]:hover {
+    background-color: #1e3a8a !important;
+    color: #38bdf8 !important;
+}
+
+div.stButton > button, div.stButton > button:active, div.stButton > button:focus, button[kind="secondary"], button[kind="secondary"]:active, button[kind="secondary"]:focus {
+    background-color: rgba(30, 41, 59, 0.9) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 12px !important;
+    font-family: 'Teko', sans-serif !important;
+    font-size: 22px !important;
+}
+
+div.stButton > button:hover {
+    border-color: #38bdf8 !important;
+    color: #38bdf8 !important;
+}
+
+div.stButton > button[kind="primary"], div.stFormSubmitButton > button {
+    background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%) !important;
+    color: #000000 !important;
+    font-family: 'Teko', sans-serif !important;
+    font-size: 25px !important;
+    letter-spacing: 2px !important;
+    text-transform: uppercase !important;
+    border-radius: 12px !important;
+    border: none !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+}
+
+div.stButton > button[kind="primary"]:hover, div.stFormSubmitButton > button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(251, 191, 36, 0.6) !important;
+}
+
+details[data-testid="stExpander"] {
+    background-color: rgba(15, 23, 42, 0.85) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 12px !important;
+}
+
+details[data-testid="stExpander"] summary {
+    color: #f8fafc !important;
+}
+
+details[data-testid="stExpander"] summary:hover {
+    color: #38bdf8 !important;
+}
+
+.stTextInput > label, .stNumberInput > label, .stRadio > label, .stSelectbox > label {
+    color: #f8fafc !important;
+    font-weight: 600 !important;
+    font-size: 16px !important;
+    letter-spacing: 0.5px;
+}
+
+.stTextInput input, .stNumberInput input {
+    background-color: rgba(15, 23, 42, 0.92) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-radius: 12px !important;
 }
