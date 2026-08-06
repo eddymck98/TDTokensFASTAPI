@@ -56,19 +56,22 @@ async def render_dashboard_or_index(request: Request):
     
     try:
         token_data = json.loads(session_cookie)
-        supabase.auth.set_session(token_data.get("access_token"), token_data.get("refresh_token"))
-        user = supabase.auth.get_user().user
+        access_token = token_data.get("access_token")
+        supabase.auth.set_session(access_token, token_data.get("refresh_token"))
+        user = supabase.auth.get_user(access_token).user
         if not user:
             return templates.TemplateResponse(request=request, name="index.html", context={"request": request})
     except Exception:
         return templates.TemplateResponse(request=request, name="index.html", context={"request": request})
 
     try:
-        # Safely query profile without using .single()
-        profile_res = supabase.table("profiles").select("*").eq("id", user.id).execute()
+        # Query profiles table using the user's email directly to guarantee a match with your table data
+        user_email = user.email
+        profile_res = supabase.table("profiles").select("*").eq("email", user_email).execute()
+        
         current_profile = profile_res.data[0] if profile_res.data else {
             "tokens": 10, 
-            "full_name": "Gridiron Contender",
+            "full_name": user_email.split('@')[0],
             "selected_title": "🏈 Gridiron Contender",
             "favorite_team": "🏈 Free Agent / Neutral"
         }
@@ -97,9 +100,9 @@ async def render_dashboard_or_index(request: Request):
     except Exception as e:
         current_profile = {
             "tokens": 10, 
-            "full_name": "Gridiron Contender",
+            "full_name": "Ed McKenna",
             "selected_title": "🏈 Gridiron Contender",
-            "favorite_team": "🏈 Free Agent / Neutral"
+            "favorite_team": "🏈 New Orleans Saints"
         }
         available_weeks = []
         current_user_bets = []
