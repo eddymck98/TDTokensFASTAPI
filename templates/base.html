@@ -37,7 +37,7 @@
 <body>
     <div class="app-background"></div>
 
-    <!-- Premium Glossy Navbar -->
+    <!-- Premium Glossy Navbar (Always visible structure & logo) -->
     <nav class="navbar" style="--team-color: {{ t_color }};">
         <a href="/" class="brand-container">
             <div class="brand-logo-wrapper">
@@ -46,7 +46,7 @@
             <h1 class="brand-text">TOUCHDOWN <span>TOKENS</span></h1>
         </a>
         
-        <!-- Navigation Links (Visible ONLY when logged in) -->
+        <!-- Navigation Links & Toggle (Visible ONLY when logged in) -->
         {% if profile %}
         <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle navigation">
             ☰
