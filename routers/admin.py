@@ -50,7 +50,7 @@ def recalculate_all_user_balances(supabase_client: Client):
 @router.get("/", response_class=HTMLResponse)
 async def admin_portal_landing(request: Request):
     """Renders the central admin tab view or control hub."""
-    return templates.TemplateResponse("admin.html", {"request": request})
+    return templates.TemplateResponse(request=request, name="admin.html", context={"request": request})
 
 @router.post("/questions/publish")
 async def admin_publish_questions(
