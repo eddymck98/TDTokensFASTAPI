@@ -221,4 +221,42 @@
     // Optional: Fetch or filter cabinet view dynamically via AJAX if inspecting other users' cabinets
   }
 </script>
+
+<!-- ⚙️ Account Settings Section -->
+  <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-left: 4px solid #64748b; border-radius: 16px; padding: 24px; margin-top: 30px; backdrop-filter: blur(14px); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+    <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: #ffffff; letter-spacing: 1px; margin-top: 0; margin-bottom: 5px;">⚙️ ACCOUNT SETTINGS</h3>
+    <p style="color: #94a3b8; font-size: 14px; margin-bottom: 20px;">Manage your account credentials and notification preferences.</p>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+      
+      <!-- Password Reset -->
+      <div style="background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 16px;">
+        <h4 style="color: #f8fafc; font-size: 16px; margin: 0 0 10px 0;">Security</h4>
+        <p style="color: #94a3b8; font-size: 13px; margin: 0 0 15px 0;">Need to update your password? A reset link will be sent to <b>{{ profile.email | default('your email') }}</b>.</p>
+        <button onclick="alert('Password reset link sent to your email!')" style="background: rgba(255,255,255,0.1); color: #fff; padding: 8px 16px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.2s;">Send Reset Link 📧</button>
+      </div>
+
+      <!-- Notification Toggles -->
+      <div style="background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 16px;">
+        <h4 style="color: #f8fafc; font-size: 16px; margin: 0 0 10px 0;">Email Notifications</h4>
+        
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+          <span style="color: #cbd5e1; font-size: 13px;">Weekly Matchup Reminders</span>
+          <label style="position: relative; display: inline-block; width: 40px; height: 20px;">
+            <input type="checkbox" checked style="opacity: 0; width: 0; height: 0;" onchange="this.nextElementSibling.style.background = this.checked ? '#38bdf8' : '#64748b'">
+            <span style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #38bdf8; border-radius: 20px; transition: .4s;"></span>
+          </label>
+        </div>
+
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <span style="color: #cbd5e1; font-size: 13px;">League Grading Updates</span>
+          <label style="position: relative; display: inline-block; width: 40px; height: 20px;">
+            <input type="checkbox" checked style="opacity: 0; width: 0; height: 0;" onchange="this.nextElementSibling.style.background = this.checked ? '#38bdf8' : '#64748b'">
+            <span style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #38bdf8; border-radius: 20px; transition: .4s;"></span>
+          </label>
+        </div>
+      </div>
+
+    </div>
+  </div>
 {% endblock %}
