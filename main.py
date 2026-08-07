@@ -88,9 +88,13 @@ async def render_dashboard_or_index(request: Request):
         }
         active_tokens = 10
 
-    # --- 2. ISOLATED BETS & WEEKS FETCH ---
+    # --- 2. ISOLATED BETS, CONSENSUS & STATS FETCH ---
     available_weeks = []
     current_user_bets = []
+    td_pick = None
+    consensus_data = []
+    personal_stats = {"total_bets": 0, "wins": 0, "losses": 0, "pending": 0, "tokens_wagered": 0}
+    share_text = "🏈 Weekly Lock-Ins Loaded 🏈\n\nNo picks submitted yet."
     
     try:
         weeks_res = supabase.table("weekly_questions").select("week_number").neq("week_number", 999).neq("week_number", 998).neq("week_number", 997).neq("week_number", 96).execute()
@@ -103,16 +107,16 @@ async def render_dashboard_or_index(request: Request):
             # Fetch bets without the risky relational join
             bets_res = supabase.table("user_bets").select("*").eq("user_id", user.id).eq("week_number", latest_week).execute()
             
+            # Fetch questions manually to map them perfectly in Python
+            q_res = supabase.table("weekly_questions").select("*").eq("week_number", latest_week).execute()
+            questions_map = {q["id"]: q for q in q_res.data} if q_res.data else {}
+            
             if bets_res.data:
-                # Fetch questions manually to map them perfectly in Python
-                q_res = supabase.table("weekly_questions").select("*").eq("week_number", latest_week).execute()
-                questions_map = {q["id"]: q for q in q_res.data} if q_res.data else {}
-                
                 for b in bets_res.data:
                     q_id = b.get("question_id")
                     wq = questions_map.get(q_id, {})
                     
-                    b["question_number"] = wq.get("question_number", "?")
+                    b["question_number"] = wq.get("question_number", 99)
                     b["question_text"] = wq.get("question_text", "Unknown Matchup")
                     
                     w_ans = wq.get("winning_answer", "Pending")
@@ -122,9 +126,73 @@ async def render_dashboard_or_index(request: Request):
                         b["status_label"] = "Pending ⏳"
                         
                     current_user_bets.append(b)
+                    
+                    # Update personal stats
+                    personal_stats["tokens_wagered"] += b.get("wager_amount", 0)
+                    if "Won" in b["status_label"]:
+                        personal_stats["wins"] += 1
+                    elif "Lost" in b["status_label"]:
+                        personal_stats["losses"] += 1
+                    else:
+                        personal_stats["pending"] += 1
                 
-                # Sort bets so Q1, Q2, Q3 display in order
-                current_user_bets = sorted(current_user_bets, key=lambda x: str(x.get("question_number", "0")))
+                # FIX: Sort bets via integer (fixes Q1, Q10, Q2 issue)
+                current_user_bets = sorted(current_user_bets, key=lambda x: int(x.get("question_number", 99)) if str(x.get("question_number")).isdigit() else 99)
+                personal_stats["total_bets"] = len(current_user_bets)
+                
+                # Generate Share Text
+                share_lines = ["🏈 Weekly Lock-Ins Loaded 🏈\n"]
+                for b in current_user_bets:
+                    share_lines.append(f"Q{b['question_number']}: {b['pick']} ({b['wager_amount']} 🪙)")
+                share_text = "\n".join(share_lines)
+            
+            # Fetch Touchdown Scorer Bonus
+            td_res = supabase.table("touchdown_picks").select("*").eq("user_id", user.id).eq("week_number", latest_week).execute()
+            if td_res.data:
+                td_pick = td_res.data[0]
+                td_status = td_pick.get("is_correct")
+                if td_status is True:
+                    td_pick["status_label"] = "Won ✅"
+                    personal_stats["wins"] += 1
+                elif td_status is False:
+                    td_pick["status_label"] = "Lost ❌"
+                    personal_stats["losses"] += 1
+                else:
+                    td_pick["status_label"] = "Pending ⏳"
+                    personal_stats["pending"] += 1
+                
+                share_text += f"\n\nTD Bonus: {td_pick.get('player_name', '')}"
+
+            # Fetch League Consensus
+            all_bets = supabase.table("user_bets").select("question_id, pick, wager_amount").eq("week_number", latest_week).execute()
+            if all_bets.data:
+                q_stats = {}
+                for b in all_bets.data:
+                    qid = b["question_id"]
+                    if qid not in q_stats:
+                        q_stats[qid] = {
+                            "yes_count": 0, "no_count": 0, "total_wager": 0, 
+                            "q_num": questions_map.get(qid, {}).get("question_number", 99), 
+                            "text": questions_map.get(qid, {}).get("question_text", "")
+                        }
+                    
+                    if b["pick"] == "Yes":
+                        q_stats[qid]["yes_count"] += 1
+                    elif b["pick"] == "No":
+                        q_stats[qid]["no_count"] += 1
+                        
+                    q_stats[qid]["total_wager"] += b.get("wager_amount", 0)
+                
+                for qid, stats in q_stats.items():
+                    total_picks = stats["yes_count"] + stats["no_count"]
+                    if total_picks > 0:
+                        stats["yes_pct"] = int((stats["yes_count"] / total_picks) * 100)
+                        stats["no_pct"] = int((stats["no_count"] / total_picks) * 100)
+                    else:
+                        stats["yes_pct"], stats["no_pct"] = 0, 0
+                    consensus_data.append(stats)
+                
+                consensus_data = sorted(consensus_data, key=lambda x: int(x["q_num"]) if str(x["q_num"]).isdigit() else 99)
                 
     except Exception as e:
         print(f"Bets Fetch Error: {e}")
@@ -137,7 +205,11 @@ async def render_dashboard_or_index(request: Request):
             "profile": current_profile,
             "active_tokens": active_tokens,
             "available_weeks": available_weeks,
-            "current_user_bets": current_user_bets
+            "current_user_bets": current_user_bets,
+            "td_pick": td_pick,
+            "personal_stats": personal_stats,
+            "consensus_data": consensus_data,
+            "share_text": share_text
         }
     )
 
