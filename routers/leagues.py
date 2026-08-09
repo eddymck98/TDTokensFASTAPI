@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, Form, Request, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
+from typing import Optional
 from supabase import Client
 
 router = APIRouter()
@@ -13,7 +14,7 @@ def get_supabase(request: Request) -> Client:
     return request.app.state.supabase
 
 @router.get("/", response_class=HTMLResponse)
-async def get_leagues_page(request: Request, supabase: Client = Depends(get_supabase)):
+async def get_leagues_page(request: Request, league_id: Optional[str] = None, supabase: Client = Depends(get_supabase)):
     # Session verification logic matching main.py cookie management
     session_cookie = request.cookies.get("td_tokens_session")
     if not session_cookie:
@@ -30,25 +31,102 @@ async def get_leagues_page(request: Request, supabase: Client = Depends(get_supa
     except Exception:
         return RedirectResponse(url="/", status_code=303)
 
-    # Fetch user profile, joined leagues, and global stats
+    # Fetch user profile, joined leagues, and rankings
     try:
         profile = supabase.table("profiles").select("*").eq("id", user.id).single().execute().data
-        memberships = supabase.table("league_members").select("league_id, leagues(id, league_name, invite_code, created_by)").eq("user_id", user.id).execute().data
-        all_my_leagues = [m for m in memberships if m.get("leagues")]
+        memberships = supabase.table("league_members").select("league_id, leagues(id, league_name, invite_code, created_by, announcement, commissioner_id)").eq("user_id", user.id).execute().data
+        all_my_leagues = [m.get("leagues") for m in memberships if m.get("leagues")]
         
-        profiles_res = supabase.table("profiles").select("id, full_name, tokens, favorite_team, is_admin, avatar_emoji, avatar_border, avatar_color, selected_title, featured_badges, unlocked_badges").execute()
-        all_profiles = profiles_res.data if profiles_res.data else []
-    except Exception:
+        # Determine view state: Global vs specific Mini-League
+        is_global = (not league_id or league_id == "global" or league_id == "00000000-0000-0000-0000-000000000001")
+        selected_league = None
+
+        if not is_global:
+            selected_league = next((l for l in all_my_leagues if l["id"] == league_id), None)
+            if not selected_league:
+                is_global = True
+
+        # Fetch touchdown pick counts for tie-breakers across profiles
+        td_res = supabase.table("touchdown_picks").select("user_id, is_correct").eq("is_correct", True).execute()
+        td_counts = {}
+        if td_res.data:
+            for td in td_res.data:
+                uid = td["user_id"]
+                td_counts[uid] = td_counts.get(uid, 0) + 1
+
+        leaderboard_rows = []
+
+        if is_global:
+            profiles_res = supabase.table("profiles").select("id, full_name, tokens, favorite_team, is_admin, avatar_emoji, avatar_border, avatar_color, selected_title, featured_badges, unlocked_badges").execute()
+            raw_profiles = profiles_res.data if profiles_res.data else []
+            for p in raw_profiles:
+                uid = p["id"]
+                leaderboard_rows.append({
+                    "user_id": uid,
+                    "full_name": p.get("full_name", "Unknown"),
+                    "tokens": p.get("tokens", 10),
+                    "favorite_team": p.get("favorite_team", "Free Agent"),
+                    "avatar_emoji": p.get("avatar_emoji", "🏈"),
+                    "avatar_border": p.get("avatar_border", "default"),
+                    "avatar_color": p.get("avatar_color", "#1e3a8a"),
+                    "correct_tds": td_counts.get(uid, 0)
+                })
+        else:
+            members_res = supabase.table("league_members").select("user_id, profiles(id, full_name, tokens, favorite_team, is_admin, avatar_emoji, avatar_border, avatar_color)").eq("league_id", selected_league["id"]).execute()
+            if members_res.data:
+                for m in members_res.data:
+                    p = m.get("profiles")
+                    if p:
+                        uid = p["id"]
+                        leaderboard_rows.append({
+                            "user_id": uid,
+                            "full_name": p.get("full_name", "Unknown"),
+                            "tokens": p.get("tokens", 10),
+                            "favorite_team": p.get("favorite_team", "Free Agent"),
+                            "avatar_emoji": p.get("avatar_emoji", "🏈"),
+                            "avatar_border": p.get("avatar_border", "default"),
+                            "avatar_color": p.get("avatar_color", "#1e3a8a"),
+                            "correct_tds": td_counts.get(uid, 0)
+                        })
+
+        # Sort Leaderboard: Primary by Tokens (desc), Secondary by Correct TDs (desc)
+        leaderboard_rows = sorted(leaderboard_rows, key=lambda x: (x["tokens"], x["correct_tds"]), reverse=True)
+
+        # Assign ranks handling ties correctly (e.g., 1, 2, 3, 3, 5)
+        ranked_leaderboard = []
+        current_rank = 1
+        for i, row in enumerate(leaderboard_rows):
+            if i > 0:
+                prev = leaderboard_rows[i - 1]
+                if row["tokens"] != prev["tokens"] or row["correct_tds"] != prev["correct_tds"]:
+                    current_rank = i + 1
+            row["rank"] = current_rank
+            ranked_leaderboard.append(row)
+
+        # Fetch trash talk feed for the active view
+        chat_filter_id = "00000000-0000-0000-0000-000000000001" if is_global else selected_league["id"]
+        chat_res = supabase.table("trash_talk").select("*, profiles(full_name, avatar_emoji)").eq("league_id", chat_filter_id).order("created_at", desc=True).limit(20).execute()
+        trash_talk_messages = chat_res.data if chat_res.data else []
+
+    except Exception as e:
+        print(f"Leagues page error: {e}")
         profile = {}
         all_my_leagues = []
-        all_profiles = []
+        ranked_leaderboard = []
+        selected_league = None
+        is_global = True
+        trash_talk_messages = []
 
     return templates.TemplateResponse(request=request, name="leagues.html", context={
         "request": request,
         "user": user,
         "profile": profile,
         "all_my_leagues": all_my_leagues,
-        "all_profiles": all_profiles
+        "selected_league": selected_league,
+        "is_global": is_global,
+        "leaderboard": ranked_leaderboard,
+        "trash_talk_messages": trash_talk_messages,
+        "active_league_id": league_id or "global"
     })
 
 @router.post("/create")
@@ -82,6 +160,7 @@ async def create_league(
             "league_name": league_name.strip(),
             "invite_code": invite_code,
             "created_by": user.id,
+            "commissioner_id": user.id,
             "league_password": league_password.strip() if league_password else ""
         }).execute()
         
@@ -92,7 +171,7 @@ async def create_league(
                 "user_id": user.id
             }).execute()
 
-        return RedirectResponse(url="/leagues?success=league_created", status_code=303)
+        return RedirectResponse(url=f"/leagues?league_id={new_league_id}&success=league_created", status_code=303)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -131,14 +210,31 @@ async def join_league(
 
         already_member = supabase.table("league_members").select("id").eq("league_id", target_league["id"]).eq("user_id", user.id).execute().data
         if already_member:
-            return RedirectResponse(url="/leagues?info=already_member", status_code=303)
+            return RedirectResponse(url=f"/leagues?league_id={target_league['id']}&info=already_member", status_code=303)
 
         supabase.table("league_members").insert({
             "league_id": target_league["id"],
             "user_id": user.id
         }).execute()
 
-        return RedirectResponse(url="/leagues?success=joined_league", status_code=303)
+        return RedirectResponse(url=f"/leagues?league_id={target_league['id']}&success=joined_league", status_code=303)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@router.post("/announcement")
+async def post_mini_league_announcement(
+    request: Request,
+    league_id: str = Form(...),
+    announcement_text: str = Form(...),
+    supabase: Client = Depends(get_supabase)
+):
+    session_cookie = request.cookies.get("td_tokens_session")
+    if not session_cookie:
+        raise HTTPException(status_code=401, detail="Unauthorized session.")
+    
+    try:
+        supabase.table("leagues").update({"announcement": announcement_text.strip()}).eq("id", league_id).execute()
+        return RedirectResponse(url=f"/leagues?league_id={league_id}&success=announcement_posted", status_code=303)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -172,6 +268,7 @@ async def post_trash_talk(
             "league_id": league_id
         }).execute()
 
-        return RedirectResponse(url=f"/leagues?success=message_posted", status_code=303)
+        redirect_param = f"league_id={league_id}" if league_id != "00000000-0000-0000-0000-000000000001" else "league_id=global"
+        return RedirectResponse(url=f"/leagues?{redirect_param}&success=message_posted", status_code=303)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
