@@ -23,19 +23,32 @@
         <h3 style="color: #fbbf24; font-family: 'Bebas Neue', sans-serif; font-size: 28px; margin: 0 0 5px 0;">WEEKLY QUESTIONS & MATCHUPS HUB</h3>
         <p style="color: #cbd5e1; font-size: 14px; margin: 0;">Configure and publish the 10 weekly prediction prompts and match pairings for Week {{ target_week }}.</p>
       </div>
+      {% if not is_week_closed %}
       <button type="button" onclick="loadRandomTemplates()" style="background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%); color: #fff; border: none; padding: 10px 18px; border-radius: 10px; font-family: 'Teko', sans-serif; font-size: 18px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);">
         ✨ Load Random Templates
       </button>
+      {% endif %}
     </div>
 
-    {% if available_weeks %}
-      <!-- Week Selector Pills for Questions Tab -->
-      <div style="display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px;">
+    <!-- Week Selector Pills & Create New Week Button -->
+    <div style="display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; align-items: center;">
+      {% if available_weeks %}
         {% for w in available_weeks %}
           <a href="/admin?week={{ w }}" style="padding: 8px 18px; border-radius: 8px; font-family: 'Teko', sans-serif; font-size: 20px; text-decoration: none; font-weight: bold; letter-spacing: 1px; transition: all 0.2s ease; {% if w == target_week %}background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000; box-shadow: 0 4px 12px rgba(251,191,36,0.3);{% else %}background: rgba(15, 23, 42, 0.75); color: #94a3b8; border: 1px solid rgba(255,255,255,0.08);{% endif %}">
             Week {{ w }}
           </a>
         {% endfor %}
+      {% endif %}
+      <form action="/admin/create-week" method="POST" style="margin: 0;">
+        <button type="submit" style="padding: 8px 16px; border-radius: 8px; font-family: 'Teko', sans-serif; font-size: 20px; background: #10b981; color: #000; font-weight: bold; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
+          ➕ Create New Week
+        </button>
+      </form>
+    </div>
+
+    {% if is_week_closed %}
+      <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); padding: 15px 20px; border-radius: 12px; margin-bottom: 20px; color: #fca5a5; font-weight: 600;">
+        🔒 Week {{ target_week }} is officially locked. Question editing and publishing are disabled.
       </div>
     {% endif %}
 
@@ -49,7 +62,7 @@
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; margin-bottom: 10px;">
           <div>
             <label style="font-size: 13px; color: #94a3b8;">Away Team (Q{{ i }})</label>
-            <select name="away_{{ i }}" style="width: 100%; padding: 8px; background: #0f172a; color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px;">
+            <select name="away_{{ i }}" style="width: 100%; padding: 8px; background: #0f172a; color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px;" {% if is_week_closed %}disabled{% endif %}>
               <option value="{{ q.get('away_team', '🏈 Free Agent / Neutral') }}" selected>{{ q.get('away_team', '🏈 Free Agent / Neutral') }}</option>
               <option value="🏈 Free Agent / Neutral">🏈 Free Agent / Neutral</option>
               <option value="Arizona Cardinals">Arizona Cardinals</option>
@@ -88,7 +101,7 @@
           </div>
           <div>
             <label style="font-size: 13px; color: #94a3b8;">Home Team (Q{{ i }})</label>
-            <select name="home_{{ i }}" style="width: 100%; padding: 8px; background: #0f172a; color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px;">
+            <select name="home_{{ i }}" style="width: 100%; padding: 8px; background: #0f172a; color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px;" {% if is_week_closed %}disabled{% endif %}>
               <option value="{{ q.get('home_team', '🏈 Free Agent / Neutral') }}" selected>{{ q.get('home_team', '🏈 Free Agent / Neutral') }}</option>
               <option value="🏈 Free Agent / Neutral">🏈 Free Agent / Neutral</option>
               <option value="Arizona Cardinals">Arizona Cardinals</option>
@@ -127,12 +140,14 @@
           </div>
         </div>
         <div>
-          <input type="text" id="prompt-input-{{ i }}" name="prompt_{{ i }}" value="{{ q.get('question_text', '') }}" placeholder="Enter scenario prompt text (e.g., Will QB throw for 250+ yards?)..." required style="width: 100%; padding: 10px; background: rgba(15, 23, 42, 0.92); color: #fff; border: 1px solid rgba(255,255,255,0.15); border-radius: 12px;">
+          <input type="text" id="prompt-input-{{ i }}" name="prompt_{{ i }}" value="{{ q.get('question_text', '') }}" placeholder="Enter scenario prompt text (e.g., Will QB throw for 250+ yards?)..." required style="width: 100%; padding: 10px; background: rgba(15, 23, 42, 0.92); color: #fff; border: 1px solid rgba(255,255,255,0.15); border-radius: 12px;" {% if is_week_closed %}disabled{% endif %}>
         </div>
       </div>
       {% endfor %}
 
+      {% if not is_week_closed %}
       <button type="submit" style="background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000; padding: 14px 28px; font-family: 'Teko', sans-serif; font-size: 22px; font-weight: bold; border-radius: 12px; border: none; cursor: pointer; width: 100%; margin-top: 15px;">Save & Publish All Questions 💾</button>
+      {% endif %}
     </form>
   </div>
 
@@ -143,16 +158,21 @@
       <p style="color: #cbd5e1; font-size: 14px; margin: 0;">Configure precise kickoff lockout ISO timestamps so picks automatically lock prior to kickoff.</p>
     </div>
 
-    {% if available_weeks %}
-      <!-- Week Selector Pills for Lockout Tab -->
-      <div style="display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px;">
+    <!-- Week Selector Pills & Create New Week Button -->
+    <div style="display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; align-items: center;">
+      {% if available_weeks %}
         {% for w in available_weeks %}
           <a href="/admin?week={{ w }}" style="padding: 8px 18px; border-radius: 8px; font-family: 'Teko', sans-serif; font-size: 20px; text-decoration: none; font-weight: bold; letter-spacing: 1px; transition: all 0.2s ease; {% if w == target_week %}background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000; box-shadow: 0 4px 12px rgba(251,191,36,0.3);{% else %}background: rgba(15, 23, 42, 0.75); color: #94a3b8; border: 1px solid rgba(255,255,255,0.08);{% endif %}">
             Week {{ w }}
           </a>
         {% endfor %}
-      </div>
-    {% endif %}
+      {% endif %}
+      <form action="/admin/create-week" method="POST" style="margin: 0;">
+        <button type="submit" style="padding: 8px 16px; border-radius: 8px; font-family: 'Teko', sans-serif; font-size: 20px; background: #10b981; color: #000; font-weight: bold; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
+          ➕ Create New Week
+        </button>
+      </form>
+    </div>
 
     <form action="/admin/schedule" method="POST">
       <input type="hidden" name="week_number" value="{{ target_week }}">
@@ -171,16 +191,21 @@
       <p style="color: #cbd5e1; font-size: 14px; margin: 0;">Set winning answers for questions to evaluate user token balances instantly.</p>
     </div>
 
-    {% if available_weeks %}
-      <!-- Week Selector Pills for Grading Tab -->
-      <div style="display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px;">
+    <!-- Week Selector Pills & Create New Week Button -->
+    <div style="display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; align-items: center;">
+      {% if available_weeks %}
         {% for w in available_weeks %}
           <a href="/admin?week={{ w }}" style="padding: 8px 18px; border-radius: 8px; font-family: 'Teko', sans-serif; font-size: 20px; text-decoration: none; font-weight: bold; letter-spacing: 1px; transition: all 0.2s ease; {% if w == target_week %}background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000; box-shadow: 0 4px 12px rgba(251,191,36,0.3);{% else %}background: rgba(15, 23, 42, 0.75); color: #94a3b8; border: 1px solid rgba(255,255,255,0.08);{% endif %}">
             Week {{ w }}
           </a>
         {% endfor %}
-      </div>
-    {% endif %}
+      {% endif %}
+      <form action="/admin/create-week" method="POST" style="margin: 0;">
+        <button type="submit" style="padding: 8px 16px; border-radius: 8px; font-family: 'Teko', sans-serif; font-size: 20px; background: #10b981; color: #000; font-weight: bold; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
+          ➕ Create New Week
+        </button>
+      </form>
+    </div>
 
     <!-- Week Status Banner & Toggle Control (Close / Reopen) -->
     <div style="background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(255,255,255,0.12); border-left: 4px solid {% if is_week_closed %}#ef4444{% else %}#10b981{% endif %}; padding: 16px 20px; border-radius: 14px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
