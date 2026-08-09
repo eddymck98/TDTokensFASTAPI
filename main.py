@@ -76,6 +76,13 @@ app.include_router(profile.router, prefix="/profile", tags=["Profile Management"
 app.include_router(admin.router, prefix="/admin", tags=["Admin Portal"])
 app.include_router(commish.router, prefix="/commish", tags=["Commissioner Portal"])
 
+@app.get("/logout")
+async def logout(request: Request):
+    """Clears the session cookie and redirects user to home/login page."""
+    response = RedirectResponse(url="/", status_code=303)
+    response.delete_cookie(key="td_tokens_session")
+    return response
+
 async def render_dashboard_or_index(request: Request):
     """Core logic to render either the dashboard (if logged in) or index (if logged out)."""
     session_cookie = request.cookies.get("td_tokens_session")
