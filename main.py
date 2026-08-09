@@ -117,7 +117,10 @@ async def render_dashboard_or_index(request: Request):
                     wq = questions_map.get(q_id, {})
                     
                     b["question_number"] = wq.get("question_number", 99)
-                    b["question_text"] = wq.get("question_text", "Unknown Matchup")
+                    
+                    # Strip Matchup logic for a shorter dashboard card
+                    raw_text = wq.get("question_text", "Unknown Matchup")
+                    b["question_text"] = raw_text.split(" | MATCHUP: ")[0] if " | MATCHUP: " in raw_text else raw_text
                     
                     w_ans = wq.get("winning_answer", "Pending")
                     if w_ans in ["Yes", "No"]:
@@ -136,7 +139,7 @@ async def render_dashboard_or_index(request: Request):
                     else:
                         personal_stats["pending"] += 1
                 
-                # FIX: Sort bets via integer (fixes Q1, Q10, Q2 issue)
+                # Sort bets via integer
                 current_user_bets = sorted(current_user_bets, key=lambda x: int(x.get("question_number", 99)) if str(x.get("question_number")).isdigit() else 99)
                 personal_stats["total_bets"] = len(current_user_bets)
                 
@@ -169,11 +172,16 @@ async def render_dashboard_or_index(request: Request):
                 q_stats = {}
                 for b in all_bets.data:
                     qid = b["question_id"]
+                    
                     if qid not in q_stats:
+                        # Apply strip logic for consensus view
+                        raw_q_text = questions_map.get(qid, {}).get("question_text", "")
+                        q_text = raw_q_text.split(" | MATCHUP: ")[0] if " | MATCHUP: " in raw_q_text else raw_q_text
+                        
                         q_stats[qid] = {
                             "yes_count": 0, "no_count": 0, "total_wager": 0, 
                             "q_num": questions_map.get(qid, {}).get("question_number", 99), 
-                            "text": questions_map.get(qid, {}).get("question_text", "")
+                            "text": q_text
                         }
                     
                     if b["pick"] == "Yes":
@@ -192,6 +200,8 @@ async def render_dashboard_or_index(request: Request):
                         stats["yes_pct"], stats["no_pct"] = 0, 0
                     consensus_data.append(stats)
                 
+                # Sort by heaviest action (top 3 highest token wagers), then re-sort by Question Number
+                consensus_data = sorted(consensus_data, key=lambda x: x.get("total_wager", 0), reverse=True)[:3]
                 consensus_data = sorted(consensus_data, key=lambda x: int(x["q_num"]) if str(x["q_num"]).isdigit() else 99)
                 
     except Exception as e:
