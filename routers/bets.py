@@ -1,6 +1,7 @@
 import os
 import json
 import re
+from typing import Optional
 from fastapi import APIRouter, Depends, Form, Request, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
@@ -59,7 +60,7 @@ def extract_team_logo(team_str: str) -> str:
     return TEAM_LOGOS.get(clean_name, DEFAULT_LOGO)
 
 @router.get("/", response_class=HTMLResponse)
-async def get_bets_page(request: Request, supabase: Client = Depends(get_supabase)):
+async def get_bets_page(request: Request, week: Optional[int] = None, supabase: Client = Depends(get_supabase)):
     session_cookie = request.cookies.get("td_tokens_session")
     if not session_cookie:
         return RedirectResponse(url="/auth/login", status_code=303)
@@ -80,6 +81,8 @@ async def get_bets_page(request: Request, supabase: Client = Depends(get_supabas
     questions = []
     touchdown_pick = ""
     lockout_time = ""
+    target_week = 1
+    is_week_closed = False
 
     try:
         # Fetch profile by email
@@ -95,14 +98,29 @@ async def get_bets_page(request: Request, supabase: Client = Depends(get_supabas
         available_weeks = sorted(list(set([r["week_number"] for r in weeks_res.data]))) if weeks_res.data else []
         
         if available_weeks:
-            latest_week = available_weeks[-1]
+            # Determine target week (default to requested or newest)
+            target_week = week if week and week in available_weeks else available_weeks[-1]
 
-            # Fetch Admin Lockout Time
+            # Check if this specific week is closed by admin
+            try:
+                status_res = (
+                    supabase.table("weekly_questions")
+                    .select("winning_answer")
+                    .eq("week_number", target_week)
+                    .eq("question_number", 98)
+                    .execute()
+                )
+                if status_res.data and status_res.data[0].get("winning_answer") == "CLOSED":
+                    is_week_closed = True
+            except Exception:
+                pass
+
+            # Fetch Admin Lockout Time for target week
             try:
                 lockout_res = (
                     supabase.table("weekly_questions")
                     .select("winning_answer")
-                    .eq("week_number", latest_week)
+                    .eq("week_number", target_week)
                     .eq("question_number", 99)
                     .execute()
                 )
@@ -113,17 +131,17 @@ async def get_bets_page(request: Request, supabase: Client = Depends(get_supabas
             except Exception as e:
                 print(f"Error fetching lockout time: {e}")
 
-            # Fetch existing user bets
-            user_bets_res = supabase.table("user_bets").select("*").eq("user_id", user.id).eq("week_number", latest_week).execute()
+            # Fetch existing user bets for target week
+            user_bets_res = supabase.table("user_bets").select("*").eq("user_id", user.id).eq("week_number", target_week).execute()
             user_bets_map = {b["question_id"]: b for b in user_bets_res.data} if user_bets_res.data else {}
 
-            # Fetch existing touchdown pick
-            td_res = supabase.table("touchdown_picks").select("player_name").eq("user_id", user.id).eq("week_number", latest_week).execute()
+            # Fetch existing touchdown pick for target week
+            td_res = supabase.table("touchdown_picks").select("player_name").eq("user_id", user.id).eq("week_number", target_week).execute()
             if td_res.data:
                 touchdown_pick = td_res.data[0].get("player_name", "")
 
-            # Fetch weekly question slate
-            q_res = supabase.table("weekly_questions").select("id, question_number, question_text").eq("week_number", latest_week).lt("question_number", 11).order("question_number").execute()
+            # Fetch weekly question slate for target week
+            q_res = supabase.table("weekly_questions").select("id, question_number, question_text, winning_answer").eq("week_number", target_week).lt("question_number", 11).order("question_number").execute()
             
             if q_res.data:
                 for q in q_res.data:
@@ -148,6 +166,7 @@ async def get_bets_page(request: Request, supabase: Client = Depends(get_supabas
                         "id": q_id,
                         "question_number": q.get("question_number", "?"),
                         "prompt": prompt,
+                        "winning_answer": q.get("winning_answer", "Pending"),
                         "away_team": away_team,
                         "home_team": home_team,
                         "away_logo": extract_team_logo(away_team),
@@ -168,6 +187,8 @@ async def get_bets_page(request: Request, supabase: Client = Depends(get_supabas
             "profile": profile,
             "active_tokens": profile.get("tokens", 10),
             "available_weeks": available_weeks,
+            "target_week": target_week,
+            "is_week_closed": is_week_closed,
             "questions": questions,
             "existing_touchdown_pick": touchdown_pick,
             "lockout_time": lockout_time,
@@ -262,7 +283,7 @@ async def submit_weekly_bets(
                 "is_correct": None
             }).execute()
 
-        return RedirectResponse(url="/admin?week={week_number}&success=week_closed", status_code=303) if False else RedirectResponse(url="/bets?success=bets_locked", status_code=303)
+        return RedirectResponse(url=f"/bets?week={week_number}&success=bets_locked", status_code=303)
     except Exception as e:
         print(f"Bet Submission Error: {e}")
         raise HTTPException(status_code=400, detail=str(e))
