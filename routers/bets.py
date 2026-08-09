@@ -95,13 +95,21 @@ async def get_bets_page(request: Request, supabase: Client = Depends(get_supabas
             latest_week = available_weeks[-1]
 
             # Fetch Admin Lockout Time for the timer
-            try:
-                admin_res = supabase.table("admin_settings").select("lockout_time").eq("week_number", latest_week).execute()
-                if admin_res.data:
-                    lockout_time = admin_res.data[0].get("lockout_time", "")
-            except Exception as e:
-                print(f"Error fetching lockout time: {e}")
-
+try:
+    lockout_res = (
+        supabase.table("weekly_questions")
+        .select("winning_answer")
+        .eq("week_number", latest_week)
+        .eq("question_number", 99)
+        .execute()
+    )
+    if lockout_res.data:
+        ans = lockout_res.data[0].get("winning_answer", "")
+        if ans.startswith("LOCKTIME:"):
+            lockout_time = ans.replace("LOCKTIME:", "")
+except Exception as e:
+    print(f"Error fetching lockout time: {e}")
+    
             # Fetch existing user bets for latest week
             user_bets_res = supabase.table("user_bets").select("*").eq("user_id", user.id).eq("week_number", latest_week).execute()
             user_bets_map = {b["question_id"]: b for b in user_bets_res.data} if user_bets_res.data else {}
