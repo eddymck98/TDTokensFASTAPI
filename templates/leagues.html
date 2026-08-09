@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="leagues-container" style="max-width: 1000px; margin: 0 auto; padding-bottom: 40px;">
+<div class="leagues-container" style="max-width: 1000px; margin: 0 auto; padding-bottom: 40px; padding-left: 12px; padding-right: 12px;">
 
   <!-- Header Section -->
   <div style="margin-bottom: 25px;">
@@ -11,7 +11,7 @@
 
   <!-- Standings View Selection & Default League Setter -->
   <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-left: 4px solid #fbbf24; border-radius: 16px; padding: 20px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 15px;">
-    <div style="flex: 1; min-width: 280px;">
+    <div style="flex: 1; min-width: 100%;">
       <label for="league-view-select" style="font-weight: 600; font-size: 15px; color: #f8fafc; display: block; margin-bottom: 8px;">Select Standings View:</label>
       <select id="league-view-select" onchange="window.location.href='/leagues?league_id=' + this.value" style="width: 100%; padding: 12px; background: rgba(30, 41, 59, 0.9); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; font-size: 15px; font-weight: bold;">
         <option value="global" {% if is_global %}selected{% endif %}>🏆 Global Leaderboard</option>
@@ -22,10 +22,10 @@
     </div>
 
     <!-- Set Default League Form -->
-    <div>
-      <form action="/leagues/set-default" method="POST" style="display: flex; gap: 8px; align-items: center;">
+    <div style="width: 100%;">
+      <form action="/leagues/set-default" method="POST" style="display: flex; gap: 8px; align-items: center; width: 100%;">
         <input type="hidden" name="default_league_id" value="{{ active_league_id }}">
-        <button type="submit" style="background: rgba(251, 191, 36, 0.15); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.4); padding: 12px 16px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 13px; white-space: nowrap;">
+        <button type="submit" style="width: 100%; background: rgba(251, 191, 36, 0.15); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.4); padding: 12px 16px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 13px; text-align: center;">
           ⭐ {% if profile.default_league_id == active_league_id or (is_global and not profile.default_league_id) %}Default View Set{% else %}Set as Default View{% endif %}
         </button>
       </form>
@@ -33,7 +33,7 @@
   </div>
 
   <!-- Standings Table Container -->
-  <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px; padding: 20px; margin-bottom: 25px;">
+  <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px; padding: 15px; margin-bottom: 25px;">
     <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: #fbbf24; letter-spacing: 1px; margin-top: 0; margin-bottom: 15px;">Leaderboard Rankings</h3>
     
     <div id="standings-list-container">
@@ -53,44 +53,44 @@
                 {% else %}
                   background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255, 255, 255, 0.08);
                 {% endif %}
-                border-radius: 12px; padding: 12px 16px; flex-wrap: wrap; gap: 12px;">
+                border-radius: 12px; padding: 12px; flex-wrap: wrap; gap: 10px;">
                 
                 <!-- Left: Rank Badge & Profile Details -->
-                <div style="display: flex; align-items: center; gap: 14px;">
+                <div style="display: flex; align-items: center; gap: 10px; flex: 1; min-width: 220px;">
                   <!-- Rank with Shared Tie Coloring -->
-                  <div style="min-width: 45px; text-align: center; font-family: 'Bebas Neue', sans-serif; font-size: 22px; {% if row.rank == 1 %}color: #fbbf24;{% elif row.rank == 2 %}color: #cbd5e1;{% elif row.rank == 3 %}color: #d97706;{% else %}color: #64748b;{% endif %}">
+                  <div style="min-width: 35px; text-align: center; font-family: 'Bebas Neue', sans-serif; font-size: 20px; {% if row.rank == 1 %}color: #fbbf24;{% elif row.rank == 2 %}color: #cbd5e1;{% elif row.rank == 3 %}color: #d97706;{% else %}color: #64748b;{% endif %}">
                     {% if row.rank == 1 %}🥇 1{% elif row.rank == 2 %}🥈 2{% elif row.rank == 3 %}🥉 3{% else %}#{{ row.rank }}{% endif %}
                   </div>
 
                   <!-- Avatar Box with Custom Background Color & Border -->
-                  <div style="width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; background-color: {{ row.avatar_color | default('#1e3a8a') }}; border: 2px solid {% if row.avatar_border == 'gold' %}#fbbf24{% elif row.avatar_border == 'neon' %}#38bdf8{% elif row.avatar_border == 'fire' %}#ef4444{% else %}rgba(255,255,255,0.3)%}{% endif %}; flex-shrink: 0; box-shadow: 0 0 8px rgba(0,0,0,0.3);">
+                  <div style="width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; background-color: {{ row.avatar_color | default('#1e3a8a') }}; border: 2px solid {% if row.avatar_border == 'gold' %}#fbbf24{% elif row.avatar_border == 'neon' %}#38bdf8{% elif row.avatar_border == 'fire' %}#ef4444{% else %}rgba(255,255,255,0.3)%}{% endif %}; flex-shrink: 0; box-shadow: 0 0 8px rgba(0,0,0,0.3);">
                     {{ row.avatar_emoji | default('👤') }}
                   </div>
 
-                  <div>
-                    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                      <b style="font-size: 15px; color: #ffffff;">{{ row.full_name }}</b>
+                  <div style="overflow: hidden;">
+                    <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                      <b style="font-size: 14px; color: #ffffff; word-break: break-word;">{{ row.full_name }}</b>
                       {% if row.selected_title %}
-                        <span style="background: rgba(251, 191, 36, 0.15); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.3); border-radius: 6px; padding: 1px 6px; font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">{{ row.selected_title }}</span>
+                        <span style="background: rgba(251, 191, 36, 0.15); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.3); border-radius: 6px; padding: 1px 5px; font-size: 9px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">{{ row.selected_title }}</span>
                       {% endif %}
                       {% if row.user_id == user.id %}
-                        <span style="color: #38bdf8; font-size: 12px; font-weight: bold;">(You)</span>
+                        <span style="color: #38bdf8; font-size: 11px; font-weight: bold;">(You)</span>
                       {% endif %}
                     </div>
 
-                    <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px;">
-                      <span style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 2px 8px; font-size: 11px; font-weight: 600; color: #cbd5e1;">🏈 {{ row.favorite_team | replace('🏈 ', '') | replace('Team ', '') }}</span>
+                    <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px;">
+                      <span style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 2px 6px; font-size: 10px; font-weight: 600; color: #cbd5e1;">🏈 {{ row.favorite_team | replace('🏈 ', '') | replace('Team ', '') }}</span>
                       {% if row.favorite_player %}
-                        <span style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(251, 191, 36, 0.2); border-radius: 8px; padding: 2px 8px; font-size: 11px; font-weight: 600; color: #fbbf24;">⭐ {{ row.favorite_player }}</span>
+                        <span style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(251, 191, 36, 0.2); border-radius: 6px; padding: 2px 6px; font-size: 10px; font-weight: 600; color: #fbbf24;">⭐ {{ row.favorite_player }}</span>
                       {% endif %}
-                      <span style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 8px; padding: 2px 8px; font-size: 11px; font-weight: 600; color: #38bdf8;">🎯 Correct TDs: {{ row.correct_tds }}</span>
+                      <span style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 6px; padding: 2px 6px; font-size: 10px; font-weight: 600; color: #38bdf8;">🎯 TDs: {{ row.correct_tds }}</span>
                     </div>
                   </div>
                 </div>
 
                 <!-- Right: Token Count -->
-                <div style="text-align: right; flex-shrink: 0; margin-left: auto;">
-                  <span style="font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: #fbbf24;">{{ row.tokens }} 🪙</span>
+                <div style="text-align: right; flex-shrink: 0;">
+                  <span style="font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: #fbbf24;">{{ row.tokens }} 🪙</span>
                 </div>
 
               </div>
@@ -104,14 +104,14 @@
   </div>
 
   <!-- Trash Talk / League Chat Feed Section -->
-  <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px; padding: 20px; margin-bottom: 25px;">
+  <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px; padding: 15px; margin-bottom: 25px;">
     <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: #ffffff; letter-spacing: 1px; margin-top: 0; margin-bottom: 15px;">💬 League Trash Talk Feed</h3>
     
     <form action="/leagues/chat" method="POST" style="margin-bottom: 20px;">
       <input type="hidden" name="league_id" value="{{ active_league_id }}">
       <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-        <input type="text" name="message" placeholder="Post a message to this league's feed..." required style="flex: 1; min-width: 250px; padding: 12px; background: rgba(15, 23, 42, 0.92); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; font-size: 14px;">
-        <button type="submit" style="background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000; padding: 10px 20px; font-family: 'Teko', sans-serif; font-size: 20px; font-weight: bold; border-radius: 12px; border: none; cursor: pointer;">Post Message 💬</button>
+        <input type="text" name="message" placeholder="Post a message to this league's feed..." required style="flex: 1; min-width: 200px; padding: 12px; background: rgba(15, 23, 42, 0.92); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; font-size: 14px;">
+        <button type="submit" style="width: 100%; background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000; padding: 10px 20px; font-family: 'Teko', sans-serif; font-size: 20px; font-weight: bold; border-radius: 12px; border: none; cursor: pointer;">Post Message 💬</button>
       </div>
     </form>
 
@@ -134,8 +134,8 @@
     {% endif %}
   </div>
 
-  <!-- Create or Join Custom Leagues Section -->
-  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px;">
+  <!-- Create or Join Custom Leagues Section (Mobile Responsive Grid) -->
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 25px;">
     
     <!-- Create League Box -->
     <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-left: 4px solid #38bdf8; border-radius: 16px; padding: 20px;">
@@ -172,17 +172,17 @@
   </div>
 
   <!-- Your Joined Mini-Leagues Roster List -->
-  <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px; padding: 20px;">
+  <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px; padding: 15px;">
     <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: #ffffff; letter-spacing: 1px; margin-top: 0; margin-bottom: 15px;">📋 Your Joined Mini-Leagues</h3>
     
     {% if user_leagues %}
       {% for l in user_leagues %}
-        <div style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255,255,255,0.1); border-left: 3px solid #38bdf8; padding: 14px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-          <div>
-            <b style="color: #fff; font-size: 16px;">🛡️ {{ l.name }}</b>
-            <div style="color: #94a3b8; font-size: 13px; margin-top: 2px;">Invite Code: <span style="color: #38bdf8; font-weight: bold; letter-spacing: 1px;">{{ l.invite_code }}</span></div>
+        <div style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255,255,255,0.1); border-left: 3px solid #38bdf8; padding: 12px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+          <div style="overflow: hidden;">
+            <b style="color: #fff; font-size: 15px; word-break: break-word;">🛡️ {{ l.name }}</b>
+            <div style="color: #94a3b8; font-size: 12px; margin-top: 2px;">Invite Code: <span style="color: #38bdf8; font-weight: bold; letter-spacing: 1px;">{{ l.invite_code }}</span></div>
           </div>
-          <a href="/leagues?league_id={{ l.id }}" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); padding: 6px 14px; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: bold;">View Standings ➔</a>
+          <a href="/leagues?league_id={{ l.id }}" style="width: 100%; text-align: center; background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: bold;">View Standings ➔</a>
         </div>
       {% endfor %}
     {% else %}
