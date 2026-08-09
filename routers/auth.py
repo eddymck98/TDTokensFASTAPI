@@ -58,14 +58,12 @@ async def login_user(
     try:
         lock_check = supabase.table("weekly_questions").select("winning_answer").eq("week_number", 998).execute().data
         if lock_check and lock_check[0].get("winning_answer") == "LOCKED":
-            raise HTTPException(status_code=403, detail="Sign-in is currently locked by the administrator.")
-    except HTTPException as he:
-        raise he
+            return RedirectResponse(url="/auth/login?error=admin_locked", status_code=303)
     except Exception:
         pass
 
     try:
-        auth_response = supabase.auth.sign_in_with_password({"email": email, "password": password})
+        auth_response = supabase.auth.sign_in_with_password({"email": email.strip(), "password": password})
         user = auth_response.user
         if user and user.email_confirmed_at:
             response = RedirectResponse(url="/", status_code=303)
@@ -77,9 +75,9 @@ async def login_user(
                 response.set_cookie(key="td_tokens_session", value=session_data, max_age=2592000, httponly=True, secure=True)
             return response
         else:
-            raise HTTPException(status_code=400, detail="Please authorise your email address before logging in.")
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+            return RedirectResponse(url="/auth/login?error=email_unverified", status_code=303)
+    except Exception:
+        return RedirectResponse(url="/auth/login?error=invalid_credentials", status_code=303)
 
 @router.post("/signup")
 async def signup_user(
