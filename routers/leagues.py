@@ -15,7 +15,6 @@ def get_supabase(request: Request) -> Client:
 
 @router.get("/", response_class=HTMLResponse)
 async def get_leagues_page(request: Request, league_id: Optional[str] = None, supabase: Client = Depends(get_supabase)):
-    # Session verification logic matching main.py cookie management
     session_cookie = request.cookies.get("td_tokens_session")
     if not session_cookie:
         return RedirectResponse(url="/", status_code=303)
@@ -31,18 +30,33 @@ async def get_leagues_page(request: Request, league_id: Optional[str] = None, su
     except Exception:
         return RedirectResponse(url="/", status_code=303)
 
-    # Fetch user profile, joined leagues, and rankings
+    profile = {}
+    user_leagues = []
+    ranked_leaderboard = []
+    selected_league = None
+    is_global = True
+    trash_talk_messages = []
+
     try:
-        profile = supabase.table("profiles").select("*").eq("id", user.id).single().execute().data
-        memberships = supabase.table("league_members").select("league_id, leagues(id, league_name, invite_code, created_by, announcement, commissioner_id)").eq("user_id", user.id).execute().data
-        all_my_leagues = [m.get("leagues") for m in memberships if m.get("leagues")]
-        
-        # Determine view state: Global vs specific Mini-League
+        # Fetch user profile
+        prof_res = supabase.table("profiles").select("*").eq("id", user.id).execute()
+        if prof_res.data:
+            profile = prof_res.data[0]
+
+        # Fetch joined leagues and normalize names for safety
+        memberships = supabase.table("league_members").select("league_id, leagues(*)").eq("user_id", user.id).execute()
+        if memberships.data:
+            for m in memberships.data:
+                l_data = m.get("leagues")
+                if l_data:
+                    l_data["name"] = l_data.get("name") or l_data.get("league_name") or "Unnamed League"
+                    user_leagues.append(l_data)
+
+        # Determine active view state: Global vs specific Mini-League
         is_global = (not league_id or league_id == "global" or league_id == "00000000-0000-0000-0000-000000000001")
-        selected_league = None
 
         if not is_global:
-            selected_league = next((l for l in all_my_leagues if l["id"] == league_id), None)
+            selected_league = next((l for l in user_leagues if l["id"] == league_id), None)
             if not selected_league:
                 is_global = True
 
@@ -63,7 +77,7 @@ async def get_leagues_page(request: Request, league_id: Optional[str] = None, su
                 uid = p["id"]
                 leaderboard_rows.append({
                     "user_id": uid,
-                    "full_name": p.get("full_name", "Unknown"),
+                    "full_name": p.get("full_name") or "Unknown",
                     "tokens": p.get("tokens", 10),
                     "favorite_team": p.get("favorite_team", "Free Agent"),
                     "avatar_emoji": p.get("avatar_emoji", "🏈"),
@@ -80,7 +94,7 @@ async def get_leagues_page(request: Request, league_id: Optional[str] = None, su
                         uid = p["id"]
                         leaderboard_rows.append({
                             "user_id": uid,
-                            "full_name": p.get("full_name", "Unknown"),
+                            "full_name": p.get("full_name") or "Unknown",
                             "tokens": p.get("tokens", 10),
                             "favorite_team": p.get("favorite_team", "Free Agent"),
                             "avatar_emoji": p.get("avatar_emoji", "🏈"),
@@ -93,7 +107,6 @@ async def get_leagues_page(request: Request, league_id: Optional[str] = None, su
         leaderboard_rows = sorted(leaderboard_rows, key=lambda x: (x["tokens"], x["correct_tds"]), reverse=True)
 
         # Assign ranks handling ties correctly (e.g., 1, 2, 3, 3, 5)
-        ranked_leaderboard = []
         current_rank = 1
         for i, row in enumerate(leaderboard_rows):
             if i > 0:
@@ -110,18 +123,12 @@ async def get_leagues_page(request: Request, league_id: Optional[str] = None, su
 
     except Exception as e:
         print(f"Leagues page error: {e}")
-        profile = {}
-        all_my_leagues = []
-        ranked_leaderboard = []
-        selected_league = None
-        is_global = True
-        trash_talk_messages = []
 
     return templates.TemplateResponse(request=request, name="leagues.html", context={
         "request": request,
         "user": user,
         "profile": profile,
-        "all_my_leagues": all_my_leagues,
+        "user_leagues": user_leagues,
         "selected_league": selected_league,
         "is_global": is_global,
         "leaderboard": ranked_leaderboard,
@@ -158,6 +165,7 @@ async def create_league(
     try:
         res_l = supabase.table("leagues").insert({
             "league_name": league_name.strip(),
+            "name": league_name.strip(),
             "invite_code": invite_code,
             "created_by": user.id,
             "commissioner_id": user.id,
@@ -200,7 +208,7 @@ async def join_league(
         raise HTTPException(status_code=400, detail="Invite code cannot be blank.")
 
     try:
-        found_league = supabase.table("leagues").select("id, league_name, league_password").eq("invite_code", clean_code).execute().data
+        found_league = supabase.table("leagues").select("id, league_name, name, league_password").eq("invite_code", clean_code).execute().data
         if not found_league:
             raise HTTPException(status_code=404, detail="Invalid invite code.")
 
