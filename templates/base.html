@@ -61,7 +61,6 @@
             <a href="/rules" class="{% if request.url.path == '/rules' %}active{% endif %}">📖 Rules</a>
             <a href="/profile" class="{% if request.url.path == '/profile' %}active{% endif %}">👤 Profile</a>
             <a href="/bets" class="{% if request.url.path == '/bets' %}active{% endif %}">🎯 Bets</a>
-            <a href="/history" class="{% if request.url.path == '/history' %}active{% endif %}">📜 History</a>
             <a href="/leagues" class="{% if request.url.path == '/leagues' %}active{% endif %}">🛡️ Leagues</a>         
                     
             {% if request.state.is_commissioner or profile.is_admin %}
