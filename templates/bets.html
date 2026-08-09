@@ -142,14 +142,16 @@
           
           {% if is_week_closed %}
             <div style="margin-top: 10px; padding: 12px 16px; background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; flex-wrap: wrap; gap: 6px;">
-              <span style="color: #94a3b8;">Official Winning Scorer: <b style="color: #fff;">{{ official_td_winner | default('Pending') }}</b></span>
-              <span style="font-weight: bold; {% if user_td_won %}color: #4ade80;{% elif official_td_winner == 'Pending' or not official_td_winner %}color: #fbbf24;{% else %}color: #f87171;{% endif %}">
-                {% if official_td_winner == 'Pending' or not official_td_winner %}
-                  ⏳ Graded Pending
-                {% elif user_td_won %}
-                  Won (+5 🪙) ✅
+              <span style="color: #94a3b8;">Touchdown Scorer Status:</span>
+              <span style="font-weight: bold;">
+                {% if td_scorer_graded %}
+                  {% if user_td_won %}
+                    <span style="color: #4ade80;">Won (+5 🪙) ✅</span>
+                  {% else %}
+                    <span style="color: #f87171;">Lost ❌</span>
+                  {% endif %}
                 {% else %}
-                  Lost ❌
+                  <span style="color: #fbbf24;">⏳ Graded Pending</span>
                 {% endif %}
               </span>
             </div>
