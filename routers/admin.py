@@ -177,12 +177,40 @@ async def admin_portal_landing(request: Request, week: Optional[int] = None):
         }
     )
 
+@router.post("/create-week")
+async def admin_create_new_week(
+    request: Request,
+    supabase: Client = Depends(get_supabase)
+):
+    """Creates the next consecutive week number in the database."""
+    try:
+        weeks_res = supabase.table("weekly_questions").select("week_number").neq("week_number", 999).neq("week_number", 998).neq("week_number", 997).neq("week_number", 96).execute()
+        existing_weeks = sorted(list(set([r["week_number"] for r in weeks_res.data]))) if weeks_res.data else [1]
+        next_week = existing_weeks[-1] + 1 if existing_weeks else 1
+
+        supabase.table("weekly_questions").insert({
+            "week_number": next_week,
+            "question_number": 1,
+            "question_text": f"Week {next_week} Opening Matchup | MATCHUP: 🏈 Free Agent / Neutral @ 🏈 Free Agent / Neutral",
+            "winning_answer": "Pending"
+        }).execute()
+
+        return RedirectResponse(url=f"/admin?week={next_week}", status_code=303)
+    except Exception as e:
+        print(f"Error creating new week: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
+
 @router.post("/publish")
 async def admin_publish_questions(
     request: Request,
     week_number: int = Form(...),
     supabase: Client = Depends(get_supabase)
 ):
+    # Guard check: prevent publishing/editing if the week is closed
+    status_res = supabase.table("weekly_questions").select("winning_answer").eq("week_number", week_number).eq("question_number", 98).execute()
+    if status_res.data and status_res.data[0].get("winning_answer") == "CLOSED":
+        raise HTTPException(status_code=403, detail="Cannot modify questions for a closed/locked week.")
+
     form_data = await request.form()
     for i in range(1, 11):
         prompt = form_data.get(f"prompt_{i}", "")
