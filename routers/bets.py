@@ -302,14 +302,19 @@ async def submit_weekly_bets(
         for bet in bets_to_insert:
             supabase.table("user_bets").insert(bet).execute()
 
-        # Update Touchdown Bonus Pick
+        # Update Touchdown Bonus Pick safely without wiping an existing grade if present
         if touchdown_pick.strip():
+            existing_td = supabase.table("touchdown_picks").select("is_correct").eq("user_id", user.id).eq("week_number", week_number).execute()
+            current_is_correct = None
+            if existing_td.data and existing_td.data[0].get("is_correct") is not None:
+                current_is_correct = existing_td.data[0].get("is_correct")
+
             supabase.table("touchdown_picks").delete().eq("user_id", user.id).eq("week_number", week_number).execute()
             supabase.table("touchdown_picks").insert({
                 "user_id": user.id,
-                "week_number": week_number,
+                "week_number", week_number,
                 "player_name": touchdown_pick.strip(),
-                "is_correct": None
+                "is_correct": current_is_correct
             }).execute()
 
         return RedirectResponse(url=f"/bets?week={week_number}&success=bets_locked", status_code=303)
