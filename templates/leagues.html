@@ -1,75 +1,89 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="leagues-container" style="max-width: 900px; margin: 0 auto; padding-bottom: 40px;">
+<div class="leagues-container" style="max-width: 1000px; margin: 0 auto; padding-bottom: 40px;">
 
   <!-- Header Section -->
   <div style="margin-bottom: 25px;">
-    <h2 style="font-family: 'Bebas Neue', sans-serif; font-size: 38px; color: #ffffff; letter-spacing: 2px; margin: 0;">LEAGUE STANDINGS & MINI-LEAGUES</h2>
+    <h2 style="font-family: 'Bebas Neue', sans-serif; font-size: 38px; color: #fbbf24; letter-spacing: 2px; margin: 0;">LEAGUE STANDINGS & MINI-LEAGUES</h2>
     <p style="color: #94a3b8; font-size: 14px; margin: 0;">Track your standings across the Global Leaderboard and your custom mini-leagues.</p>
   </div>
 
-  <!-- Standings View Selection Form / Dropdown -->
-  <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-left: 4px solid var(--team-color); border-radius: 16px; padding: 20px; margin-bottom: 25px;">
+  <!-- Standings View Selection Dropdown -->
+  <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-left: 4px solid #fbbf24; border-radius: 16px; padding: 20px; margin-bottom: 25px;">
     <label for="league-view-select" style="font-weight: 600; font-size: 15px; color: #f8fafc; display: block; margin-bottom: 8px;">Select Standings View:</label>
-    <select id="league-view-select" onchange="switchLeagueView(this.value)" style="width: 100%; max-width: 350px; padding: 12px; background: rgba(15, 23, 42, 0.92); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; font-size: 15px;">
-      <option value="00000000-0000-0000-0000-000000000001">🏆 Global Leaderboard</option>
-      {% for m in all_my_leagues %}
-        {% if m.leagues.id != "00000000-0000-0000-0000-000000000001" %}
-          <option value="{{ m.leagues.id }}">🛡️ {{ m.leagues.league_name }} (Mini-League)</option>
-        {% endif %}
+    <select id="league-view-select" onchange="window.location.href='/leagues?league_id=' + this.value" style="width: 100%; max-width: 400px; padding: 12px; background: rgba(30, 41, 59, 0.9); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; font-size: 15px; font-weight: bold;">
+      <option value="global" {% if is_global %}selected{% endif %}>🏆 Global Leaderboard</option>
+      {% for l in user_leagues %}
+        <option value="{{ l.id }}" {% if not is_global and selected_league and selected_league.id == l.id %}selected{% endif %}>🛡️ Mini-League: {{ l.name }}</option>
       {% endfor %}
     </select>
   </div>
 
+  {% if not is_global and selected_league %}
+    <!-- Scoped Mini-League Announcement Board & Trash Talk Feed -->
+    <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255,255,255,0.12); border-left: 4px solid #38bdf8; padding: 22px; border-radius: 16px; margin-bottom: 25px;">
+      <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: #38bdf8; margin: 0 0 6px 0;">📢 {{ selected_league.name }} ANNOUNCEMENT BOARD</h3>
+      <p style="color: #cbd5e1; font-size: 13px; margin-bottom: 15px;">Commissioner broadcast and trash-talk messages specific to this mini-league.</p>
+      
+      {% if selected_league.announcement %}
+        <div style="background: rgba(30, 41, 59, 0.6); border: 1px dashed rgba(56, 189, 248, 0.4); padding: 12px 16px; border-radius: 10px; color: #f8fafc; font-size: 14px; margin-bottom: 15px;">
+          "{{ selected_league.announcement }}"
+        </div>
+      {% endif %}
+
+      {% if selected_league.commissioner_id == profile.id %}
+        <form action="/leagues/announcement" method="POST">
+          <input type="hidden" name="league_id" value="{{ selected_league.id }}">
+          <textarea name="announcement_text" placeholder="Post a league announcement or trash talk..." required style="width: 100%; height: 75px; background: rgba(30, 41, 59, 0.9); color: #fff; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 10px; font-size: 13px; resize: none; margin-bottom: 10px;"></textarea>
+          <button type="submit" style="background: #38bdf8; color: #000; padding: 8px 18px; font-family: 'Teko', sans-serif; font-size: 18px; font-weight: bold; border-radius: 8px; border: none; cursor: pointer;">Post Announcement 📣</button>
+        </form>
+      {% endif %}
+    </div>
+  {% endif %}
+
   <!-- Standings Table Container -->
   <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px; padding: 20px; margin-bottom: 25px;">
-    <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: #ffffff; letter-spacing: 1px; margin-top: 0; margin-bottom: 15px;">Leaderboard Rankings</h3>
+    <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: #fbbf24; letter-spacing: 1px; margin-top: 0; margin-bottom: 15px;">Leaderboard Rankings</h3>
     
     <div id="standings-list-container">
-      {% if all_profiles %}
-        {% for p in all_profiles %}
-          <div class="leaderboard-row {% if loop.index == 1 %}podium-rank-1{% elif loop.index == 2 %}podium-rank-2{% elif loop.index == 3 %}podium-rank-3{% endif %}" style="display: flex; align-items: center; justify-content: space-between; background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px; padding: 10px 14px; margin-bottom: 8px;">
-            <div style="display: flex; align-items: center; gap: 12px; overflow: hidden;">
-              <span style="font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: #fbbf24; min-width: 30px;">
-                {% if loop.index == 1 %}🥇 1{% elif loop.index == 2 %}🥈 2{% elif loop.index == 3 %}🥉 3{% else %}#{{ loop.index }}{% endif %}
-              </span>
-              <div style="border: 2px solid {{ p.avatar_color | default('#1e3a8a') }}; border-radius: 8px; padding: 2px 6px; background: {{ p.avatar_color | default('#1e3a8a') }}; flex-shrink: 0;">
-                <span style="font-size: 18px;">{{ p.avatar_emoji | default('🏈') }}</span>
-              </div>
-              <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                <b style="font-size: 14px; color: #ffffff;">{{ p.full_name }}</b>
-                <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 3px;">
-                  <span style="background: rgba(30, 41, 59, 0.85); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 1px 8px; font-size: 10px; font-weight: 600; color: #cbd5e1;">🪙 <b>{{ p.tokens | default(10) }}</b></span>
-                  <span style="background: rgba(30, 41, 59, 0.85); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 1px 8px; font-size: 10px; font-weight: 600; color: #cbd5e1;">🏈 Team: {{ p.favorite_team | default('Free Agent') }}</span>
+      {% if leaderboard %}
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          {% for row in leaderboard %}
+            <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 12px 16px; flex-wrap: wrap; gap: 12px;">
+              
+              <!-- Left: Rank Badge & Profile Details -->
+              <div style="display: flex; align-items: center; gap: 14px;">
+                <!-- Rank with Shared Tie Coloring -->
+                <div style="min-width: 45px; text-align: center; font-family: 'Bebas Neue', sans-serif; font-size: 22px; {% if row.rank == 1 %}color: #fbbf24;{% elif row.rank == 2 %}color: #94a3b8;{% elif row.rank == 3 %}color: #b45309;{% else %}color: #64748b;{% endif %}">
+                  {% if row.rank == 1 %}🥇 1{% elif row.rank == 2 %}🥈 2{% elif row.rank == 3 %}🥉 3{% else %}#{{ row.rank }}{% endif %}
+                </div>
+
+                <!-- Avatar Box with Custom Border & Emoji Support -->
+                <div style="width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; background: #0f172a; border: 2px solid {% if row.avatar_border == 'gold' %}#fbbf24{% elif row.avatar_border == 'neon' %}#38bdf8{% elif row.avatar_border == 'fire' %}#ef4444{% else %}rgba(255,255,255,0.2)%}{% endif %}; flex-shrink: 0;">
+                  {{ row.avatar_emoji | default('👤') }}
+                </div>
+
+                <div>
+                  <b style="font-size: 15px; color: #ffffff;">{{ row.full_name }}</b>
+                  <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 3px;">
+                    <span style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 2px 8px; font-size: 11px; font-weight: 600; color: #cbd5e1;">🏈 Team: {{ row.favorite_team }}</span>
+                    <span style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 8px; padding: 2px 8px; font-size: 11px; font-weight: 600; color: #38bdf8;">🎯 Correct TDs: {{ row.correct_tds }}</span>
+                  </div>
                 </div>
               </div>
+
+              <!-- Right: Token Count -->
+              <div style="text-align: right; flex-shrink: 0; margin-left: auto;">
+                <span style="font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: #fbbf24;">{{ row.tokens }} 🪙</span>
+              </div>
+
             </div>
-            <div style="text-align: right; flex-shrink: 0; margin-left: 10px;">
-              <span style="font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: #38bdf8;">{{ p.tokens | default(10) }} 🪙</span>
-            </div>
-          </div>
-        {% endfor %}
+          {% endfor %}
+        </div>
       {% else %}
         <p style="color: #94a3b8; font-size: 14px; text-align: center; padding: 20px;">No player profiles found.</p>
       {% endif %}
-    </div>
-  </div>
-
-  <!-- Trash Talk / League Chat Feed Section -->
-  <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px; padding: 20px; margin-bottom: 25px;">
-    <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: #ffffff; letter-spacing: 1px; margin-top: 0; margin-bottom: 15px;">💬 League Trash Talk Feed</h3>
-    
-    <form action="/leagues/chat" method="POST" style="margin-bottom: 20px;">
-      <input type="hidden" name="league_id" id="chat-league-id" value="00000000-0000-0000-0000-000000000001">
-      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-        <input type="text" name="message" placeholder="Post a message to the league feed..." required style="flex: 1; min-width: 250px; padding: 12px; background: rgba(15, 23, 42, 0.92); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; font-size: 14px;">
-        <button type="submit" style="background: linear-gradient(135deg, var(--team-color) 0%, #d97706 100%); color: #000; padding: 10px 20px; font-family: 'Teko', sans-serif; font-size: 20px; font-weight: bold; border-radius: 12px; border: none; cursor: pointer;">Post Message 💬</button>
-      </div>
-    </form>
-
-    <div style="background: rgba(30, 41, 59, 0.5); padding: 16px; border-radius: 12px; text-align: center;">
-      <p style="color: #cbd5e1; font-size: 14px; margin: 0;">Type a message above to start bantering with your league members!</p>
     </div>
   </div>
 
@@ -94,7 +108,7 @@
 
     <!-- Join League Box -->
     <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-left: 4px solid #fbbf24; border-radius: 16px; padding: 20px;">
-      <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: #fbbf24; margin-top: 0; margin-bottom: template; margin-bottom: 12px;">Join a League</h3>
+      <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: #fbbf24; margin-top: 0; margin-bottom: 12px;">Join a League</h3>
       <form action="/leagues/join" method="POST">
         <div style="margin-bottom: 12px;">
           <label style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 4px;">Invite Code:</label>
@@ -104,7 +118,7 @@
           <label style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 4px;">League Password (if required):</label>
           <input type="password" name="league_password" placeholder="Enter password" style="width: 100%; padding: 10px; background: rgba(30, 41, 59, 0.9); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px;">
         </div>
-        <button type="submit" style="background: linear-gradient(135deg, var(--team-color) 0%, #d97706 100%); color: #000; padding: 10px 20px; font-family: 'Teko', sans-serif; font-size: 20px; font-weight: bold; border-radius: 10px; border:none; cursor: pointer; width: 100%;">Join League 🤝</button>
+        <button type="submit" style="background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000; padding: 10px 20px; font-family: 'Teko', sans-serif; font-size: 20px; font-weight: bold; border-radius: 10px; border:none; cursor: pointer; width: 100%;">Join League 🤝</button>
       </form>
     </div>
 
@@ -114,16 +128,15 @@
   <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px; padding: 20px;">
     <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: #ffffff; letter-spacing: 1px; margin-top: 0; margin-bottom: 15px;">📋 Your Joined Mini-Leagues</h3>
     
-    {% if all_my_leagues %}
-      {% for m in all_my_leagues %}
-        {% if m.leagues %}
-          <div style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255,255,255,0.1); border-left: 3px solid #38bdf8; padding: 14px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <div>
-              <b style="color: #fff; font-size: 16px;">🛡️ {{ m.leagues.league_name }}</b>
-              <div style="color: #94a3b8; font-size: 13px; margin-top: 2px;">Invite Code: <span style="color: #38bdf8; font-weight: bold; letter-spacing: 1px;">{{ m.leagues.invite_code }}</span></div>
-            </div>
+    {% if user_leagues %}
+      {% for l in user_leagues %}
+        <div style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255,255,255,0.1); border-left: 3px solid #38bdf8; padding: 14px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+          <div>
+            <b style="color: #fff; font-size: 16px;">🛡️ {{ l.name }}</b>
+            <div style="color: #94a3b8; font-size: 13px; margin-top: 2px;">Invite Code: <span style="color: #38bdf8; font-weight: bold; letter-spacing: 1px;">{{ l.invite_code }}</span></div>
           </div>
-        {% endif %}
+          <a href="/leagues?league_id={{ l.id }}" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); padding: 6px 14px; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: bold;">View Standings ➔</a>
+        </div>
       {% endfor %}
     {% else %}
       <p style="color: #94a3b8; font-size: 14px; text-align: center; padding: 10px;">You haven't joined any custom mini-leagues yet.</p>
@@ -131,12 +144,4 @@
   </div>
 
 </div>
-
-<script>
-  function switchLeagueView(leagueId) {
-    document.getElementById('chat-league-id').value = leagueId;
-    // Note: If you want switching the dropdown to dynamically filter the standings table via AJAX without a full page reload, 
-    // you would add an fetch() request here to update innerHTML of 'standings-list-container'.
-  }
-</script>
 {% endblock %}
