@@ -96,7 +96,7 @@ async def admin_portal_landing(request: Request, week: int = 1):
         )
         existing_questions = q_res.data if q_res.data else []
     except Exception as e:
-        print(f"Admin Questions Fetch Error: {e}")
+        print(f"Admin Questions FetchError: {e}")
 
     # Map fetched questions and parse out the Away/Home teams from the saved string
     questions_map = {}
@@ -124,7 +124,7 @@ async def admin_portal_landing(request: Request, week: int = 1):
         }
 
     return templates.TemplateResponse(
-        request=request,
+        request,
         name="admin.html",
         context={
             "request": request,
@@ -175,6 +175,26 @@ async def admin_save_lockout(
     }).execute()
     return RedirectResponse(url="/admin?success=lockout_saved", status_code=303)
 
+@router.post("/close-week")
+async def close_weekly_slate(
+    request: Request,
+    week_number: int = Form(...),
+    supabase: Client = Depends(get_supabase)
+):
+    """Marks a week as CLOSED to prevent users from altering or submitting bets after grading."""
+    try:
+        supabase.table("weekly_questions").upsert({
+            "week_number": week_number,
+            "question_number": 98,
+            "question_text": "WEEK STATUS",
+            "winning_answer": "CLOSED"
+        }, on_conflict="week_number,question_number").execute()
+        
+        return RedirectResponse(url=f"/admin?week={week_number}&success=week_closed", status_code=303)
+    except Exception as e:
+        print(f"Error closing week: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
+
 @router.post("/live")
 async def admin_grade_live(
     request: Request,
@@ -190,7 +210,7 @@ async def admin_grade_live(
             supabase.table("weekly_questions").update({"winning_answer": ans}).eq("id", q["id"]).execute()
             
     recalculate_all_user_balances(supabase)
-    return RedirectResponse(url="/admin?success=week_graded", status_code=303)
+    return RedirectResponse(url=f"/admin?week={week_number}&success=week_graded", status_code=303)
 
 @router.post("/adjust")
 async def admin_bulk_adjust_tokens(
