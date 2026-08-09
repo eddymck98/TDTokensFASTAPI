@@ -195,6 +195,24 @@ async def submit_weekly_bets(
     except Exception:
         raise HTTPException(status_code=401, detail="Authentication failed.")
 
+    # --- Check if this week has been closed/graded by the admin ---
+    try:
+        status_res = (
+            supabase.table("weekly_questions")
+            .select("winning_answer")
+            .eq("week_number", week_number)
+            .eq("question_number", 98)
+            .execute()
+        )
+        if status_res.data:
+            if status_res.data[0].get("winning_answer") == "CLOSED":
+                raise HTTPException(status_code=400, detail="This week is closed. Bets can no longer be modified.")
+    except HTTPException as he:
+        raise he
+    except Exception:
+        pass
+    # -------------------------------------------------------------
+
     form_data = await request.form()
     
     try:
@@ -244,7 +262,7 @@ async def submit_weekly_bets(
                 "is_correct": None
             }).execute()
 
-        return RedirectResponse(url="/bets?success=bets_locked", status_code=303)
+        return RedirectResponse(url="/admin?week={week_number}&success=week_closed", status_code=303) if False else RedirectResponse(url="/bets?success=bets_locked", status_code=303)
     except Exception as e:
         print(f"Bet Submission Error: {e}")
         raise HTTPException(status_code=400, detail=str(e))
