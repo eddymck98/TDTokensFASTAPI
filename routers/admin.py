@@ -12,7 +12,6 @@ from supabase import Client
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
 
-# Dependency injection for Supabase and Authentication
 def get_supabase(request: Request) -> Client:
     return request.app.state.supabase
 
@@ -28,10 +27,8 @@ def recalculate_all_user_balances(supabase_client: Client):
         if not all_profiles: return
         for prof in all_profiles:
             uid = prof["id"]
-            # Fetch bets safely
             u_bets = supabase_client.table("user_bets").select("week_number, wager_amount, pick, question_id").eq("user_id", uid).execute().data
             
-            # Fetch questions for winning answer matching independently
             questions_res = supabase_client.table("weekly_questions").select("id, week_number, winning_answer").execute().data
             q_winning_map = {q["id"]: q["winning_answer"] for q in questions_res} if questions_res else {}
 
@@ -42,7 +39,6 @@ def recalculate_all_user_balances(supabase_client: Client):
             if u_bets or td_wins_map:
                 for w in sorted(list(set([b["week_number"] for b in u_bets] + list(td_wins_map.keys())))):
                     for b in [b for b in u_bets if b["week_number"] == w]:
-                        # Map winning answer safely via dictionary lookup using question_id
                         w_ans = q_winning_map.get(b.get("question_id"))
                         if w_ans in ["Yes", "No"]:
                             curr_tokens += b["wager_amount"] if b["pick"] == w_ans else -b["wager_amount"]
@@ -52,14 +48,12 @@ def recalculate_all_user_balances(supabase_client: Client):
 
 @router.get("/", response_class=HTMLResponse)
 async def admin_portal_landing(request: Request, week: int = 1):
-    """Renders the central admin tab view or control hub."""
     session_cookie = request.cookies.get("td_tokens_session")
     if not session_cookie:
         return RedirectResponse(url="/auth/login", status_code=303)
 
     supabase = request.app.state.supabase
 
-    # 1. Fetch Profile so base.html renders navbar & admin badges correctly
     try:
         token_data = json.loads(session_cookie)
         access_token = token_data.get("access_token")
@@ -76,7 +70,6 @@ async def admin_portal_landing(request: Request, week: int = 1):
             "tokens": 10
         }
         
-        # Verify Admin Privileges
         if not current_profile.get("is_admin", False):
             return RedirectResponse(url="/dashboard", status_code=303)
 
@@ -84,7 +77,15 @@ async def admin_portal_landing(request: Request, week: int = 1):
         print(f"Admin Auth Error: {e}")
         return RedirectResponse(url="/auth/login", status_code=303)
 
-    # 2. Fetch Existing Questions for Target Week
+    # Fetch all profiles to populate user dropdowns in the UI
+    all_profiles = []
+    try:
+        prof_res = supabase.table("profiles").select("id, full_name, email").execute()
+        all_profiles = prof_res.data if prof_res.data else []
+    except Exception as e:
+        print(f"Error fetching profiles for admin: {e}")
+
+    # Fetch Existing Questions for Target Week
     existing_questions = []
     try:
         q_res = (
@@ -98,13 +99,11 @@ async def admin_portal_landing(request: Request, week: int = 1):
     except Exception as e:
         print(f"Admin Questions Fetch Error: {e}")
 
-    # Map fetched questions and parse out the Away/Home teams from the saved string
     questions_map = {}
     for q in existing_questions:
         qn = q.get("question_number")
         q_text = q.get("question_text", "")
         
-        # Default extraction states
         prompt = q_text
         away_team = "🏈 Free Agent / Neutral"
         home_team = "🏈 Free Agent / Neutral"
@@ -126,16 +125,18 @@ async def admin_portal_landing(request: Request, week: int = 1):
             "home_team": home_team
         }
 
-    # 3. Fetch User Touchdown Picks for the target week so admin can grade them
+    # Fetch User Touchdown Picks and attach names map
     user_td_picks = []
     try:
-        td_res = (
-            supabase.table("touchdown_picks")
-            .select("*")
-            .eq("week_number", week)
-            .execute()
-        )
-        user_td_picks = td_res.data if td_res.data else []
+        td_res = supabase.table("touchdown_picks").select("*").eq("week_number", week).execute()
+        raw_tds = td_res.data if td_res.data else []
+        
+        # Build profile name map
+        profile_name_map = {p["id"]: p.get("full_name", p.get("email", "Unknown")) for p in all_profiles}
+        
+        for td in raw_tds:
+            td["user_name"] = profile_name_map.get(td["user_id"], "Unknown User")
+            user_td_picks.append(td)
     except Exception as e:
         print(f"Admin TD Picks Fetch Error: {e}")
 
@@ -148,7 +149,8 @@ async def admin_portal_landing(request: Request, week: int = 1):
             "active_tokens": current_profile.get("tokens", 10),
             "target_week": week,
             "questions_map": questions_map,
-            "user_td_picks": user_td_picks
+            "user_td_picks": user_td_picks,
+            "all_profiles": all_profiles
         }
     )
 
@@ -197,7 +199,6 @@ async def close_weekly_slate(
     week_number: int = Form(...),
     supabase: Client = Depends(get_supabase)
 ):
-    """Marks a week as CLOSED to prevent users from altering or submitting bets after grading."""
     try:
         supabase.table("weekly_questions").upsert({
             "week_number": week_number,
@@ -219,19 +220,16 @@ async def admin_grade_live(
 ):
     form_data = await request.form()
     
-    # 1. Extract regular matchup question results (Yes/No/Pending)
     questions = supabase.table("weekly_questions").select("id, question_number").eq("week_number", week_number).lt("question_number", 11).execute().data
     for q in questions:
         ans = form_data.get(f"win_ans_{q['id']}")
         if ans in ["Yes", "No", "Pending"]:
             supabase.table("weekly_questions").update({"winning_answer": ans}).eq("id", q["id"]).execute()
             
-    # 2. Extract and update user Touchdown Scorer Bonus grades if submitted
     for key, val in form_data.items():
         if key.startswith("td_grade_"):
             try:
                 td_record_id = key.replace("td_grade_", "")
-                # val can be "True", "False", or "" (Pending)
                 if val == "True":
                     is_correct_val = True
                 elif val == "False":
