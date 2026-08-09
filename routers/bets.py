@@ -76,6 +76,7 @@ async def get_bets_page(request: Request, supabase: Client = Depends(get_supabas
     profile = {}
     questions = []
     touchdown_pick = ""
+    lockout_time = ""  # Initialize lockout time for the frontend timer
 
     try:
         # Fetch profile by email to guarantee database match
@@ -92,6 +93,14 @@ async def get_bets_page(request: Request, supabase: Client = Depends(get_supabas
         
         if available_weeks:
             latest_week = available_weeks[-1]
+
+            # Fetch Admin Lockout Time for the timer
+            try:
+                admin_res = supabase.table("admin_settings").select("lockout_time").eq("week_number", latest_week).execute()
+                if admin_res.data:
+                    lockout_time = admin_res.data[0].get("lockout_time", "")
+            except Exception as e:
+                print(f"Error fetching lockout time: {e}")
 
             # Fetch existing user bets for latest week
             user_bets_res = supabase.table("user_bets").select("*").eq("user_id", user.id).eq("week_number", latest_week).execute()
@@ -148,7 +157,8 @@ async def get_bets_page(request: Request, supabase: Client = Depends(get_supabas
             "active_tokens": profile.get("tokens", 10),
             "available_weeks": available_weeks,
             "questions": questions,
-            "existing_touchdown_pick": touchdown_pick
+            "existing_touchdown_pick": touchdown_pick,
+            "lockout_time": lockout_time  # Passed to bets.html
         }
     )
 
