@@ -82,7 +82,20 @@ async def post_league_announcement(
     supabase: Client = Depends(get_supabase)
 ):
     try:
+        # 1. Update league announcement text
         supabase.table("leagues").update({"announcement": announcement_text.strip()}).eq("id", league_id).execute()
+        
+        # 2. Automatically push commissioner announcement into the mini-league's Trash Talk feed
+        league_res = supabase.table("leagues").select("commissioner_id").eq("id", league_id).single().execute()
+        if league_res.data:
+            commish_id = league_res.data.get("commissioner_id")
+            if commish_id:
+                supabase.table("trash_talk").insert({
+                    "user_id": commish_id,
+                    "league_id": league_id,
+                    "message": f"📢 [COMMISSIONER ANNOUNCEMENT]: {announcement_text.strip()}"
+                }).execute()
+
         return RedirectResponse(url=f"/commish?league_id={league_id}&success=announcement_posted", status_code=303)
     except Exception as e:
         print(f"Error posting announcement: {e}")
