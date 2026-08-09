@@ -52,17 +52,23 @@
         <!-- League Settings Panel -->
         <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-left: 4px solid #a855f7; border-radius: 16px; padding: 20px; backdrop-filter: blur(14px);">
           <h4 style="font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: #c084fc; margin: 0 0 8px 0;">⚙️ LEAGUE SETTINGS</h4>
-          <p style="color: #94a3b8; font-size: 13px; margin-bottom: 12px;">Update league name or security password.</p>
+          <p style="color: #94a3b8; font-size: 13px; margin-bottom: 12px;">Update league name, invite code, or security password.</p>
           
           <form action="/commish/update-settings" method="POST">
             <input type="hidden" name="league_id" value="{{ selected_league.id }}">
             <div style="margin-bottom: 8px;">
+              <label style="font-size: 11px; color: #94a3b8; display: block; margin-bottom: 2px;">League Name:</label>
               <input type="text" name="league_name" value="{{ selected_league.name }}" required style="width: 100%; padding: 8px 12px; background: rgba(30, 41, 59, 0.9); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; font-size: 14px;">
             </div>
-            <div style="margin-bottom: 10px;">
-              <input type="text" name="league_password" placeholder="New Password (optional)" style="width: 100%; padding: 8px 12px; background: rgba(30, 41, 59, 0.9); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; font-size: 14px;">
+            <div style="margin-bottom: 8px;">
+              <label style="font-size: 11px; color: #94a3b8; display: block; margin-bottom: 2px;">Invite Code:</label>
+              <input type="text" name="invite_code" value="{{ selected_league.invite_code }}" required style="width: 100%; padding: 8px 12px; background: rgba(30, 41, 59, 0.9); color: #fbbf24; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; font-size: 14px; font-weight: bold;">
             </div>
-            <button type="submit" style="background: #9333ea; color: #fff; padding: 8px 16px; border-radius: 8px; font-weight: bold; border: none; cursor: pointer; font-size: 14px;">Save Settings 💾</button>
+            <div style="margin-bottom: 10px;">
+              <label style="font-size: 11px; color: #94a3b8; display: block; margin-bottom: 2px;">Security Password:</label>
+              <input type="text" name="league_password" value="{{ selected_league.league_password or '' }}" placeholder="Enter password (optional)" style="width: 100%; padding: 8px 12px; background: rgba(30, 41, 59, 0.9); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; font-size: 14px;">
+            </div>
+            <button type="submit" style="background: #9333ea; color: #fff; padding: 8px 16px; border-radius: 8px; font-weight: bold; border: none; cursor: pointer; font-size: 14px; width: 100%;">Save Settings 💾</button>
           </form>
         </div>
 
@@ -113,12 +119,12 @@
       <!-- Archive Season & Hall of Fame Panel -->
       <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-left: 4px solid #10b981; border-radius: 16px; padding: 24px; backdrop-filter: blur(14px);">
         <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: #34d399; letter-spacing: 1px; margin-top: 0; margin-bottom: 8px;">🏆 ARCHIVE SEASON & HALL OF FAME</h3>
-        <p style="color: #94a3b8; font-size: 13px; margin-bottom: 16px;">Finalize the current competition, crown the champion with the highest token balance, and record them in the league's Hall of Fame.</p>
+        <p style="color: #94a3b8; font-size: 13px; margin-bottom: 16px;">Finalize the current competition, snapshot standings, and record them in the league's Hall of Fame Archives.</p>
         
-        <form action="/commish/archive-season" method="POST" onsubmit="return confirm('Are you sure you want to archive this season? This will log the current top token leader into the Hall of Fame.');">
+        <form action="/commish/archive-season" method="POST" onsubmit="return confirm('Are you sure you want to archive this season? This will save a snapshot of the current standings to the Hall of Fame.');">
           <input type="hidden" name="league_id" value="{{ selected_league.id }}">
           <div style="display: flex; gap: 12px; align-items: center; max-width: 450px; flex-wrap: wrap;">
-            <input type="text" name="season_year" placeholder="Season Label (e.g., 2026 Season)" required style="flex: 1; min-width: 200px; padding: 10px 12px; background: rgba(30, 41, 59, 0.9); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; font-size: 14px;">
+            <input type="text" name="season_label" placeholder="Season Label (e.g., 2026 Season)" required style="flex: 1; min-width: 200px; padding: 10px 12px; background: rgba(30, 41, 59, 0.9); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; font-size: 14px;">
             <button type="submit" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; padding: 10px 20px; font-family: 'Teko', sans-serif; font-size: 20px; font-weight: bold; border-radius: 8px; border: none; cursor: pointer;">Archive Season 🌟</button>
           </div>
         </form>
