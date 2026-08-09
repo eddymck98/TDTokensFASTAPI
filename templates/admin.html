@@ -1,11 +1,22 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="admin-portal-container">
+<div class="admin-portal-container" style="max-width: 1000px; margin: 0 auto; padding-bottom: 40px;">
   <div class="nfl-header">
     <h1 style="font-family: 'Bebas Neue', sans-serif; color: #fbbf24; font-size: 38px; letter-spacing: 2px; margin-bottom: 5px;">SYSTEM ADMIN MANAGEMENT PORTAL</h1>
     <p class="nfl-subtitle">Platform Control Hub</p>
   </div>
+
+  {% if available_weeks %}
+    <!-- Week Selection Pill Buttons -->
+    <div style="display: flex; gap: 10px; margin-bottom: 25px; overflow-x: auto; padding-bottom: 5px;">
+      {% for w in available_weeks %}
+        <a href="/admin?week={{ w }}" style="padding: 10px 22px; border-radius: 10px; font-family: 'Teko', sans-serif; font-size: 22px; text-decoration: none; font-weight: bold; letter-spacing: 1px; transition: all 0.2s ease; {% if w == target_week %}background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000; box-shadow: 0 4px 15px rgba(251,191,36,0.3);{% else %}background: rgba(15, 23, 42, 0.75); color: #94a3b8; border: 1px solid rgba(255,255,255,0.08);{% endif %}">
+          Week {{ w }}
+        </a>
+      {% endfor %}
+    </div>
+  {% endif %}
 
   <!-- Admin Navigation Tabs -->
   <div class="admin-tabs" style="display: flex; gap: 8px; margin-bottom: 25px; overflow-x: auto; padding-bottom: 5px;">
@@ -18,9 +29,14 @@
 
   <!-- Tab 1: Manage Questions -->
   <div id="questions" class="admin-tab-content" style="display: block;">
-    <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255,255,255,0.12); border-left: 4px solid #fbbf24; padding: 20px; border-radius: 16px; margin-bottom: 25px;">
-      <h3 style="color: #fbbf24; font-family: 'Bebas Neue', sans-serif; font-size: 28px; margin: 0 0 5px 0;">WEEKLY QUESTIONS & MATCHUPS HUB</h3>
-      <p style="color: #cbd5e1; font-size: 14px; margin: 0;">Configure and publish the 10 weekly prediction prompts and match pairings.</p>
+    <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255,255,255,0.12); border-left: 4px solid #fbbf24; padding: 20px; border-radius: 16px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+      <div>
+        <h3 style="color: #fbbf24; font-family: 'Bebas Neue', sans-serif; font-size: 28px; margin: 0 0 5px 0;">WEEKLY QUESTIONS & MATCHUPS HUB</h3>
+        <p style="color: #cbd5e1; font-size: 14px; margin: 0;">Configure and publish the 10 weekly prediction prompts and match pairings for Week {{ target_week }}.</p>
+      </div>
+      <button type="button" onclick="loadRandomTemplates()" style="background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%); color: #fff; border: none; padding: 10px 18px; border-radius: 10px; font-family: 'Teko', sans-serif; font-size: 18px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);">
+        ✨ Load Random Templates
+      </button>
     </div>
 
     <form action="/admin/publish" method="POST">
@@ -115,7 +131,7 @@
           </div>
         </div>
         <div>
-          <input type="text" name="prompt_{{ i }}" value="{{ q.get('question_text', '') }}" placeholder="Enter scenario prompt text (e.g., Will QB throw for 250+ yards?)..." required style="width: 100%; padding: 10px; background: rgba(15, 23, 42, 0.92); color: #fff; border: 1px solid rgba(255,255,255,0.15); border-radius: 12px;">
+          <input type="text" id="prompt-input-{{ i }}" name="prompt_{{ i }}" value="{{ q.get('question_text', '') }}" placeholder="Enter scenario prompt text (e.g., Will QB throw for 250+ yards?)..." required style="width: 100%; padding: 10px; background: rgba(15, 23, 42, 0.92); color: #fff; border: 1px solid rgba(255,255,255,0.15); border-radius: 12px;">
         </div>
       </div>
       {% endfor %}
@@ -149,6 +165,28 @@
     <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255,255,255,0.12); border-left: 4px solid #10b981; padding: 20px; border-radius: 16px; margin-bottom: 25px;">
       <h3 style="color: #34d399; font-family: 'Bebas Neue', sans-serif; font-size: 28px; margin: 0 0 5px 0;">LIVE GAME GRADING & TOKEN CALCULATOR</h3>
       <p style="color: #cbd5e1; font-size: 14px; margin: 0;">Set winning answers for questions to evaluate user token balances instantly.</p>
+    </div>
+
+    <!-- Week Status Banner & Toggle Control (Close / Reopen) -->
+    <div style="background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(255,255,255,0.12); border-left: 4px solid {% if is_week_closed %}#ef4444{% else %}#10b981{% endif %}; padding: 16px 20px; border-radius: 14px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+      <div>
+        <h4 style="margin: 0; font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: #fff;">WEEK {{ target_week }} STATUS: 
+          <span style="color: {% if is_week_closed %}#ef4444{% else %}#10b981{% endif %};">{% if is_week_closed %}CLOSED & LOCKED 🔒{% else %}OPEN FOR BETTING 🟢{% endif %}</span>
+        </h4>
+        <p style="margin: 4px 0 0 0; color: #94a3b8; font-size: 13px;">{% if is_week_closed %}Users can review their locked bets and results for this week.{% else %}Users can freely submit and modify their weekly token wagers.{% endif %}</p>
+      </div>
+      <div>
+        <form action="/admin/toggle-week-status" method="POST">
+          <input type="hidden" name="week_number" value="{{ target_week }}">
+          {% if is_week_closed %}
+            <input type="hidden" name="action" value="reopen">
+            <button type="submit" style="background: #10b981; color: #000; padding: 10px 20px; border-radius: 10px; font-weight: bold; border: none; cursor: pointer; font-family: 'Teko', sans-serif; font-size: 18px;">🔓 Reopen Week</button>
+          {% else %}
+            <input type="hidden" name="action" value="close">
+            <button type="submit" style="background: #ef4444; color: #fff; padding: 10px 20px; border-radius: 10px; font-weight: bold; border: none; cursor: pointer; font-family: 'Teko', sans-serif; font-size: 18px;">🔒 Close & Lock Week</button>
+          {% endif %}
+        </form>
+      </div>
     </div>
 
     <!-- Week Selector Form -->
@@ -217,16 +255,6 @@
 
       <button type="submit" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; padding: 14px 28px; font-family: 'Teko', sans-serif; font-size: 22px; font-weight: bold; border-radius: 12px; border: none; cursor: pointer; margin-top: 10px;">Save Live Results & Recalculate Tokens 🚀</button>
     </form>
-
-    <!-- Close / Lock Week Form -->
-    <div style="margin-top: 25px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
-      <form action="/admin/close-week" method="POST" onsubmit="return confirm('Are you sure you want to close Week {{ target_week }}? Users will no longer be able to submit or modify bets.');">
-        <input type="hidden" name="week_number" value="{{ target_week }}">
-        <button type="submit" style="background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); color: #fff; padding: 12px 20px; font-family: 'Teko', sans-serif; font-size: 20px; font-weight: bold; border-radius: 12px; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);">
-          🔒 Close / Lock Week {{ target_week }} to Further Edits
-        </button>
-      </form>
-    </div>
   </div>
 
   <!-- Tab 4: Token Adjuster (Now using a Player Dropdown instead of raw UUID) -->
@@ -296,6 +324,29 @@ function switchAdminTab(evt, tabName) {
   }
   document.getElementById(tabName).style.display = "block";
   evt.currentTarget.className += " active";
+}
+
+const templatePools = [
+  "Will the total combined score in this game exceed 48.5 points?",
+  "Will the starting quarterback throw for over 275.5 passing yards?",
+  "Will either team score a defensive or special teams touchdown?",
+  "Will the game be decided by a field goal or less (3 points or fewer)?",
+  "Will the team win by a margin of 10 points or more?",
+  "Will the leading rusher record over 89.5 rushing yards?",
+  "Will both teams successfully convert a 4th-down attempt?",
+  "Will a 50+ yard field goal be successfully kicked during the matchup?",
+  "Will the team commit more than 5.5 total penalties in the match?",
+  "Will the trailing team at halftime complete a second-half comeback win?"
+];
+
+function loadRandomTemplates() {
+  for (let i = 1; i <= 10; i++) {
+    const input = document.getElementById(`prompt-input-${i}`);
+    if (input) {
+      const randomPrompt = templatePools[Math.floor(Math.random() * templatePools.length)];
+      input.value = randomPrompt;
+    }
+  }
 }
 </script>
 
