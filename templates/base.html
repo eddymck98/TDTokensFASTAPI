@@ -14,7 +14,7 @@
     <!-- Extract Team Info safely with robust fallbacks for logged-out users -->
     {% set current_team = profile.favorite_team if profile and profile.favorite_team else "🏈 Free Agent / Neutral" %}
     {% set t_color = team_data[current_team].color if team_data and current_team in team_data else "#fbbf24" %}
-    {% set t_logo = team_data[current_team].logo if team_data and current_team in team_data else "https://github.com/eddymck98/TD-Tokens-Render-/blob/main/TD%20Tokens%207.png?raw=true" %}
+    {% set t_logo = "https://github.com/eddymck98/TD-Tokens-Render-/blob/main/TD%20Tokens%207.png?raw=true" %}
     {% set t_stadium = team_data[current_team].stadium if team_data and current_team in team_data and team_data[current_team].stadium else "https://images.unsplash.com/photo-1566577739112-5180d4bf9390?auto=format&fit=crop&w=1920&q=80" %}
 
     <style>
