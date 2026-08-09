@@ -6,9 +6,36 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from supabase import create_client
+from starlette.middleware.base import BaseHTTPMiddleware
 
 # Import your modular routers
 from routers import auth, bets, leagues, profile, admin
+
+class CommissionerCheckMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        # Default state
+        request.state.is_commissioner = False
+        
+        session_cookie = request.cookies.get("td_tokens_session")
+        if session_cookie:
+            try:
+                token_data = json.loads(session_cookie)
+                supabase = request.app.state.supabase
+                access_token = token_data.get("access_token")
+                
+                # Get the current user session safely
+                user_res = supabase.auth.get_user(access_token)
+                if user_res and user_res.user:
+                    user = user_res.user
+                    # Check if they own any league as commissioner
+                    league_res = supabase.table("leagues").select("id").eq("commissioner_id", user.id).execute()
+                    if league_res.data and len(league_res.data) > 0:
+                        request.state.is_commissioner = True
+            except Exception as e:
+                print(f"Middleware Commish Check Error: {e}")
+                
+        response = await call_next(request)
+        return response
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -27,6 +54,9 @@ app = FastAPI(
     version="2.0.0",
     lifespan=lifespan
 )
+
+# Register Global Middleware for Commissioner Status
+app.add_middleware(CommissionerCheckMiddleware)
 
 # Get the absolute directory where main.py resides
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -299,7 +329,6 @@ async def history_page(request: Request):
             # Fetch all past bets for the logged-in user
             bets_res = supabase.table("user_bets").select("*").eq("user_id", user.id).execute()
             if bets_res.data:
-                # Add sorting or additional mapping here if you want to embellish the history
                 user_bets = sorted(bets_res.data, key=lambda x: x.get("week_number", 0), reverse=True)
     except Exception as e:
         print(f"History Page Error: {e}")
