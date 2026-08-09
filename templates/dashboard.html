@@ -32,49 +32,49 @@
       </div>
     {% else %}
       
-      <!-- Pick Cards - Now Optimized for Less Scrolling -->
-      <div style="display: grid; gap: 8px; margin-bottom: 25px;">
+      <!-- Compressed Pick Cards for Reduced Scrolling -->
+      <div style="display: grid; gap: 6px; margin-bottom: 20px;">
         {% for b in current_user_bets %}
           {% set is_won = 'Won' in b.status_label %}
           {% set is_lost = 'Lost' in b.status_label %}
           {% set border_color = '#10b981' if is_won else ('#ef4444' if is_lost else '#38bdf8') %}
-          {% set bg_color = 'rgba(16, 185, 129, 0.1)' if is_won else ('rgba(239, 68, 68, 0.1)' if is_lost else 'rgba(30, 41, 59, 0.4)') %}
+          {% set bg_color = 'rgba(16, 185, 129, 0.08)' if is_won else ('rgba(239, 68, 68, 0.08)' if is_lost else 'rgba(30, 41, 59, 0.4)') %}
           
-          <div style="background: {{ bg_color }}; border: 1px solid rgba(255, 255, 255, 0.1); border-left: 4px solid {{ border_color }}; border-radius: 10px; padding: 10px 14px; transition: transform 0.2s;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-              <span style="font-family: 'Bebas Neue'; font-size: 16px; color: {{ border_color }}; letter-spacing: 1px;">Q{{ b.question_number }}</span>
-              <span style="font-size: 12px; font-weight: 700; color: {{ border_color }}; background: rgba(0,0,0,0.2); padding: 3px 8px; border-radius: 6px; letter-spacing: 0.5px;">{{ b.status_label }}</span>
+          <div style="background: {{ bg_color }}; border: 1px solid rgba(255, 255, 255, 0.08); border-left: 3px solid {{ border_color }}; border-radius: 8px; padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+            <div style="display: flex; align-items: center; gap: 10px; flex: 1; min-width: 260px;">
+              <span style="font-family: 'Bebas Neue'; font-size: 15px; color: {{ border_color }}; letter-spacing: 1px; min-width: 24px;">Q{{ b.question_number }}</span>
+              <span style="font-size: 13px; font-weight: 500; color: #ffffff; line-height: 1.3;">{{ b.question_text }}</span>
             </div>
-            <div style="font-size: 15px; font-weight: 600; color: #ffffff; margin-bottom: 8px; line-height: 1.4;">{{ b.question_text }}</div>
-            <div style="display: flex; gap: 15px; font-size: 13px;">
-              <span style="background: rgba(0,0,0,0.3); padding: 4px 10px; border-radius: 6px; color: #cbd5e1;">Pick: <b style="color: #fff; font-size: 14px;">{{ b.pick }}</b></span>
-              <span style="background: rgba(0,0,0,0.3); padding: 4px 10px; border-radius: 6px; color: #cbd5e1;">Wager: <b style="color: #fbbf24; font-size: 14px;">{{ b.wager_amount }} 🪙</b></span>
+            <div style="display: flex; align-items: center; gap: 10px; font-size: 12px;">
+              <span style="background: rgba(0,0,0,0.3); padding: 3px 8px; border-radius: 6px; color: #cbd5e1;">Pick: <b style="color: #fff;">{{ b.pick }}</b></span>
+              <span style="background: rgba(0,0,0,0.3); padding: 3px 8px; border-radius: 6px; color: #cbd5e1;">Wager: <b style="color: #fbbf24;">{{ b.wager_amount }} 🪙</b></span>
+              <span style="font-weight: 700; color: {{ border_color }}; background: rgba(0,0,0,0.2); padding: 3px 8px; border-radius: 6px; letter-spacing: 0.5px;">{{ b.status_label }}</span>
             </div>
           </div>
         {% endfor %}
 
-        <!-- TD Scorer Block -->
+        <!-- Compressed TD Scorer Block -->
         {% if td_pick %}
           {% set td_won = 'Won' in td_pick.status_label %}
           {% set td_lost = 'Lost' in td_pick.status_label %}
           {% set td_border = '#10b981' if td_won else ('#ef4444' if td_lost else '#fbbf24') %}
-          {% set td_bg = 'rgba(16, 185, 129, 0.1)' if td_won else ('rgba(239, 68, 68, 0.1)' if td_lost else 'rgba(30, 41, 59, 0.4)') %}
+          {% set td_bg = 'rgba(16, 185, 129, 0.08)' if td_won else ('rgba(239, 68, 68, 0.08)' if td_lost else 'rgba(30, 41, 59, 0.4)') %}
           
-          <div style="background: {{ td_bg }}; border: 1px solid rgba(255, 255, 255, 0.1); border-left: 4px solid {{ td_border }}; border-radius: 10px; padding: 10px 14px; margin-top: 4px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-              <span style="font-family: 'Bebas Neue'; font-size: 16px; color: {{ td_border }}; letter-spacing: 1px;">BONUS TD SCORER</span>
-              <span style="font-size: 12px; font-weight: 700; color: {{ td_border }}; background: rgba(0,0,0,0.2); padding: 3px 8px; border-radius: 6px; letter-spacing: 0.5px;">{{ td_pick.status_label }}</span>
+          <div style="background: {{ td_bg }}; border: 1px solid rgba(255, 255, 255, 0.08); border-left: 3px solid {{ td_border }}; border-radius: 8px; padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; margin-top: 2px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span style="font-family: 'Bebas Neue'; font-size: 15px; color: {{ td_border }}; letter-spacing: 1px;">BONUS TD</span>
+              <span style="font-size: 14px; font-weight: bold; color: #ffffff;">{{ td_pick.player_name }}</span>
             </div>
-            <div style="font-size: 16px; font-weight: bold; color: #ffffff; letter-spacing: 0.5px;">{{ td_pick.player_name }}</div>
+            <span style="font-size: 12px; font-weight: 700; color: {{ td_border }}; background: rgba(0,0,0,0.2); padding: 3px 8px; border-radius: 6px;">{{ td_pick.status_label }}</span>
           </div>
         {% endif %}
       </div>
 
       <!-- Group Chat Share -->
-      <div style="background: rgba(0,0,0,0.2); padding: 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
-        <h4 style="font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: #ffffff; letter-spacing: 1px; margin: 0 0 10px 0;">📋 Group Chat Share Text</h4>
-        <textarea id="share-text-box" readonly style="width: 100%; height: 110px; background: rgba(15, 23, 42, 0.95); color: #cbd5e1; border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; padding: 12px; font-family: monospace; font-size: 13px; resize: none;">{{ share_text }}</textarea>
-        <button onclick="copyShareText()" style="margin-top: 10px; background: linear-gradient(135deg, var(--team-color) 0%, #d97706 100%); color: #000; padding: 8px 20px; font-family: 'Teko', sans-serif; font-size: 18px; font-weight: bold; border-radius: 8px; border: none; cursor: pointer;">Copy Share Text 📋</button>
+      <div style="background: rgba(0,0,0,0.2); padding: 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+        <h4 style="font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: #ffffff; letter-spacing: 1px; margin: 0 0 8px 0;">📋 Group Chat Share Text</h4>
+        <textarea id="share-text-box" readonly style="width: 100%; height: 90px; background: rgba(15, 23, 42, 0.95); color: #cbd5e1; border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; padding: 10px; font-family: monospace; font-size: 13px; resize: none;">{{ share_text }}</textarea>
+        <button onclick="copyShareText()" style="margin-top: 8px; background: linear-gradient(135deg, var(--team-color) 0%, #d97706 100%); color: #000; padding: 6px 16px; font-family: 'Teko', sans-serif; font-size: 18px; font-weight: bold; border-radius: 8px; border: none; cursor: pointer;">Copy Share Text 📋</button>
       </div>
     {% endif %}
   </div>
@@ -110,6 +110,16 @@
     </div>
   </div>
 
+  <!-- Weekly Token Progression Graph Section -->
+  <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px; padding: 24px; margin-bottom: 25px; backdrop-filter: blur(14px); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+    <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: #ffffff; letter-spacing: 1px; margin-top: 0; margin-bottom: 5px;">📈 TOKEN PROGRESSION HISTORY</h3>
+    <p style="color: #94a3b8; font-size: 14px; margin-bottom: 20px;">Your token balance progression across officially closed and graded weeks.</p>
+    
+    <div style="position: relative; height: 260px; width: 100%;">
+      <canvas id="tokenProgressionChart"></canvas>
+    </div>
+  </div>
+
   <!-- Quick Navigation Grid -->
   <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-top: 30px;">
     <a href="/bets" style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-left: 4px solid #38bdf8; padding: 20px; border-radius: 14px; display: block; transition: transform 0.2s ease; text-decoration: none;">
@@ -128,6 +138,8 @@
 
 </div>
 
+<!-- Include Chart.js from CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
   function copyShareText() {
     const textBox = document.getElementById('share-text-box');
@@ -136,5 +148,53 @@
     navigator.clipboard.writeText(textBox.value);
     alert("Share text copied to clipboard!");
   }
+
+  // Render Token Progression Chart
+  document.addEventListener("DOMContentLoaded", function() {
+    const chartData = JSON.parse('{{ token_history_json | safe }}');
+    
+    if (chartData && chartData.labels && chartData.labels.length > 0) {
+      const ctx = document.getElementById('tokenProgressionChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: chartData.labels,
+          datasets: [{
+            label: 'Token Balance',
+            data: chartData.values,
+            borderColor: '#fbbf24',
+            backgroundColor: 'rgba(251, 191, 36, 0.1)',
+            borderWidth: 3,
+            pointBackgroundColor: '#fbbf24',
+            pointBorderColor: '#0f172a',
+            pointBorderWidth: 2,
+            pointRadius: 5,
+            fill: true,
+            tension: 0.2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            x: {
+              grid: { color: 'rgba(255, 255, 255, 0.05)' },
+              ticks: { color: '#94a3b8', font: { family: 'sans-serif' } }
+            },
+            y: {
+              grid: { color: 'rgba(255, 255, 255, 0.05)' },
+              ticks: { color: '#94a3b8', font: { family: 'sans-serif' } },
+              beginAtZero: false
+            }
+          }
+        }
+      });
+    } else {
+      document.getElementById('tokenProgressionChart').parentElement.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #94a3b8; font-size: 14px;">No closed week data available for progression tracking yet.</div>';
+    }
+  });
 </script>
 {% endblock %}
