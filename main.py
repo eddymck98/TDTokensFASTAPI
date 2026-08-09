@@ -8,8 +8,8 @@ from fastapi.templating import Jinja2Templates
 from supabase import create_client
 from starlette.middleware.base import BaseHTTPMiddleware
 
-# Import your modular routers
-from routers import auth, bets, leagues, profile, admin
+# Import your modular routers (including commish)
+from routers import auth, bets, leagues, profile, admin, commish
 
 class CommissionerCheckMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
@@ -74,6 +74,7 @@ app.include_router(bets.router, prefix="/bets", tags=["Bets & Gameplay"])
 app.include_router(leagues.router, prefix="/leagues", tags=["Leagues & Standings"])
 app.include_router(profile.router, prefix="/profile", tags=["Profile Management"])
 app.include_router(admin.router, prefix="/admin", tags=["Admin Portal"])
+app.include_router(commish.router, prefix="/commish", tags=["Commissioner Portal"])
 
 async def render_dashboard_or_index(request: Request):
     """Core logic to render either the dashboard (if logged in) or index (if logged out)."""
@@ -348,36 +349,3 @@ async def history_page(request: Request):
 async def settings_page(request: Request):
     """Redirects Settings tab directly to Profile customization hub."""
     return RedirectResponse(url="/profile", status_code=303)
-
-@app.get("/commish", response_class=HTMLResponse)
-async def commish_page(request: Request):
-    """Renders Commissioner hub for league owners and admins."""
-    session_cookie = request.cookies.get("td_tokens_session")
-    if not session_cookie:
-        return RedirectResponse(url="/auth/login", status_code=303)
-        
-    supabase = request.app.state.supabase
-    profile = None
-    
-    try:
-        token_data = json.loads(session_cookie)
-        access_token = token_data.get("access_token")
-        supabase.auth.set_session(access_token, token_data.get("refresh_token"))
-        user = supabase.auth.get_user(access_token).user
-        
-        if user:
-            profile_res = supabase.table("profiles").select("*").eq("email", user.email).execute()
-            if profile_res.data:
-                profile = profile_res.data[0]
-    except Exception as e:
-        print(f"Commish Page Error: {e}")
-
-    return templates.TemplateResponse(
-        request=request, 
-        name="commish.html", 
-        context={
-            "request": request, 
-            "profile": profile, 
-            "active_tokens": profile.get("tokens", 10) if profile else 10
-        }
-    )
