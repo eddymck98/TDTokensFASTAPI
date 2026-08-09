@@ -119,13 +119,14 @@ async def render_dashboard_or_index(request: Request):
         }
         active_tokens = 10
 
-    # --- 2. ISOLATED BETS, CONSENSUS & STATS FETCH ---
+    # --- 2. ISOLATED BETS, CONSENSUS, STATS & GRAPH HISTORY FETCH ---
     available_weeks = []
     current_user_bets = []
     td_pick = None
     consensus_data = []
     personal_stats = {"total_bets": 0, "wins": 0, "losses": 0, "pending": 0, "tokens_wagered": 0}
     share_text = "🏈 Weekly Lock-Ins Loaded 🏈\n\nNo picks submitted yet."
+    token_history_data = {"labels": [], "values": []}
     
     try:
         weeks_res = supabase.table("weekly_questions").select("week_number").neq("week_number", 999).neq("week_number", 998).neq("week_number", 997).neq("week_number", 96).execute()
@@ -205,7 +206,6 @@ async def render_dashboard_or_index(request: Request):
                     qid = b["question_id"]
                     
                     if qid not in q_stats:
-                        # Apply strip logic for consensus view
                         raw_q_text = questions_map.get(qid, {}).get("question_text", "")
                         q_text = raw_q_text.split(" | MATCHUP: ")[0] if " | MATCHUP: " in raw_q_text else raw_q_text
                         
@@ -231,10 +231,48 @@ async def render_dashboard_or_index(request: Request):
                         stats["yes_pct"], stats["no_pct"] = 0, 0
                     consensus_data.append(stats)
                 
-                # Sort by heaviest action (top 3 highest token wagers), then re-sort by Question Number
                 consensus_data = sorted(consensus_data, key=lambda x: x.get("total_wager", 0), reverse=True)[:3]
                 consensus_data = sorted(consensus_data, key=lambda x: int(x["q_num"]) if str(x["q_num"]).isdigit() else 99)
+
+        # --- 3. COMPUTE CLOSED WEEKS TOKEN PROGRESSION GRAPH HISTORY ---
+        graph_labels = []
+        graph_values = []
+        running_tokens = 10  # Starting baseline balance
+        
+        for w in available_weeks:
+            try:
+                status_res = supabase.table("weekly_questions").select("winning_answer").eq("week_number", w).eq("question_number", 98).execute()
+                is_closed = status_res.data and status_res.data[0].get("winning_answer") == "CLOSED"
                 
+                if is_closed:
+                    week_bets = supabase.table("user_bets").select("question_id, pick, wager_amount").eq("user_id", user.id).eq("week_number", w).execute().data
+                    week_qs = {q["id"]: q.get("winning_answer") for q in supabase.table("weekly_questions").select("id, winning_answer").eq("week_number", w).execute().data}
+                    
+                    week_delta = 0
+                    if week_bets:
+                        for wb in week_bets:
+                            wager = wb.get("wager_amount", 0)
+                            pick = wb.get("pick")
+                            winning_ans = week_qs.get(wb.get("question_id"))
+                            
+                            if winning_ans in ["Yes", "No"]:
+                                if pick == winning_ans:
+                                    week_delta += wager
+                                else:
+                                    week_delta -= wager
+                    
+                    td_record = supabase.table("touchdown_picks").select("is_correct").eq("user_id", user.id).eq("week_number", w).execute().data
+                    if td_record and td_record[0].get("is_correct") is True:
+                        week_delta += 5
+                        
+                    running_tokens += week_delta
+                    graph_labels.append(f"Week {w}")
+                    graph_values.append(running_tokens)
+            except Exception as graph_err:
+                print(f"Error computing graph for week {w}: {graph_err}")
+                
+        token_history_data = {"labels": graph_labels, "values": graph_values}
+
     except Exception as e:
         print(f"Bets Fetch Error: {e}")
 
@@ -250,7 +288,8 @@ async def render_dashboard_or_index(request: Request):
             "td_pick": td_pick,
             "personal_stats": personal_stats,
             "consensus_data": consensus_data,
-            "share_text": share_text
+            "share_text": share_text,
+            "token_history_json": json.dumps(token_history_data)
         }
     )
 
@@ -327,7 +366,6 @@ async def history_page(request: Request):
             if profile_res.data:
                 profile = profile_res.data[0]
                 
-            # Fetch all past bets for the logged-in user
             bets_res = supabase.table("user_bets").select("*").eq("user_id", user.id).execute()
             if bets_res.data:
                 user_bets = sorted(bets_res.data, key=lambda x: x.get("week_number", 0), reverse=True)
