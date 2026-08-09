@@ -445,4 +445,26 @@
   }
 
   function updateRadioStyles(radio) {
-    const container =
+    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+          
+          if (timerDisplay) {
+            timerDisplay.innerHTML = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+          }
+        }
+      }, 1000);
+    } else {
+      const timerDisplay = document.getElementById("timer-display");
+      if (timerDisplay) {
+        timerDisplay.innerHTML = "TBA";
+      }
+    }
+  });
+
+  // Re-calculate tokens if a user types directly into the wager inputs
+  document.addEventListener('input', function (event) {
+    if (event.target && event.target.name && event.target.name.startsWith('wager_')) {
+      updateTokenAllocation();
+    }
+  });
+</script>
+{% endblock %}
