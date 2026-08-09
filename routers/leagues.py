@@ -78,7 +78,7 @@ async def get_leagues_page(request: Request, league_id: Optional[str] = None, su
         leaderboard_rows = []
 
         if is_global:
-            profiles_res = supabase.table("profiles").select("id, full_name, tokens, favorite_team, is_admin, avatar_emoji, avatar_border, avatar_color").execute()
+            profiles_res = supabase.table("profiles").select("id, full_name, tokens, favorite_team, favorite_player, is_admin, avatar_emoji, avatar_border, avatar_color, selected_title").execute()
             raw_profiles = profiles_res.data if profiles_res.data else []
             for p in raw_profiles:
                 uid = p["id"]
@@ -87,12 +87,15 @@ async def get_leagues_page(request: Request, league_id: Optional[str] = None, su
                     "full_name": p.get("full_name") or "Unknown",
                     "tokens": p.get("tokens", 10),
                     "favorite_team": p.get("favorite_team", "Free Agent"),
+                    "favorite_player": p.get("favorite_player", ""),
                     "avatar_emoji": p.get("avatar_emoji", "🏈"),
                     "avatar_border": p.get("avatar_border", "default"),
+                    "avatar_color": p.get("avatar_color", "#1e3a8a"),
+                    "selected_title": p.get("selected_title", ""),
                     "correct_tds": td_counts.get(uid, 0)
                 })
         else:
-            members_res = supabase.table("league_members").select("user_id, profiles(id, full_name, tokens, favorite_team, is_admin, avatar_emoji, avatar_border)").eq("league_id", selected_league["id"]).execute()
+            members_res = supabase.table("league_members").select("user_id, profiles(id, full_name, tokens, favorite_team, favorite_player, is_admin, avatar_emoji, avatar_border, avatar_color, selected_title)").eq("league_id", selected_league["id"]).execute()
             if members_res.data:
                 for m in members_res.data:
                     p = m.get("profiles")
@@ -103,8 +106,11 @@ async def get_leagues_page(request: Request, league_id: Optional[str] = None, su
                             "full_name": p.get("full_name") or "Unknown",
                             "tokens": p.get("tokens", 10),
                             "favorite_team": p.get("favorite_team", "Free Agent"),
+                            "favorite_player": p.get("favorite_player", ""),
                             "avatar_emoji": p.get("avatar_emoji", "🏈"),
                             "avatar_border": p.get("avatar_border", "default"),
+                            "avatar_color": p.get("avatar_color", "#1e3a8a"),
+                            "selected_title": p.get("selected_title", ""),
                             "correct_tds": td_counts.get(uid, 0)
                         })
 
