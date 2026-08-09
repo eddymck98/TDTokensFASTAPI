@@ -105,13 +105,18 @@ async def post_league_announcement(
 async def update_league_settings(
     league_id: str = Form(...),
     league_name: str = Form(...),
+    invite_code: str = Form(...),
     league_password: Optional[str] = Form(None),
     supabase: Client = Depends(get_supabase)
 ):
     try:
-        update_data = {"name": league_name.strip()}
+        update_data = {
+            "name": league_name.strip(),
+            "league_name": league_name.strip(),
+            "invite_code": invite_code.strip().upper()
+        }
         if league_password:
-            update_data["password"] = league_password.strip()
+            update_data["league_password"] = league_password.strip()
         
         supabase.table("leagues").update(update_data).eq("id", league_id).execute()
         return RedirectResponse(url=f"/commish?league_id={league_id}&success=settings_updated", status_code=303)
@@ -148,23 +153,67 @@ async def transfer_commissioner_ownership(
 
 @router.post("/archive-season")
 async def archive_league_season(
+    request: Request,
     league_id: str = Form(...),
-    season_year: str = Form(...),
+    season_label: str = Form(...),
     supabase: Client = Depends(get_supabase)
 ):
     try:
-        members_res = supabase.table("league_members").select("user_id, profiles(full_name, tokens)").eq("league_id", league_id).execute()
-        if members_res.data:
-            sorted_members = sorted(members_res.data, key=lambda x: (x.get("profiles") or {}).get("tokens", 0), reverse=True)
-            winner = sorted_members[0]
-            winner_name = (winner.get("profiles") or {}).get("full_name", "Champion")
+        session_cookie = request.cookies.get("td_tokens_session")
+        if session_cookie:
+            token_data = json.loads(session_cookie)
+            supabase.auth.set_session(token_data.get("access_token"), token_data.get("refresh_token"))
+            user = supabase.auth.get_user().user
+            if user:
+                league_check = supabase.table("leagues").select("commissioner_id").eq("id", league_id).execute()
+                if not league_check.data or league_check.data[0].get("commissioner_id") != user.id:
+                    raise HTTPException(status_code=403, detail="Only the league commissioner can archive seasons.")
 
-            supabase.table("hall_of_fame").insert({
-                "league_id": league_id,
-                "season": season_year,
-                "champion_id": winner["user_id"],
-                "champion_name": winner_name
-            }).execute()
+        members_res = supabase.table("league_members").select("user_id, profiles(id, full_name, tokens)").eq("league_id", league_id).execute()
+        
+        td_res = supabase.table("touchdown_picks").select("user_id, is_correct").eq("is_correct", True).execute()
+        td_counts = {}
+        if td_res.data:
+            for td in td_res.data:
+                uid = td["user_id"]
+                td_counts[uid] = td_counts.get(uid, 0) + 1
+
+        rows = []
+        if members_res.data:
+            for m in members_res.data:
+                p = m.get("profiles")
+                if p:
+                    uid = p["id"]
+                    rows.append({
+                        "user_id": uid,
+                        "full_name": p.get("full_name") or "Unknown",
+                        "tokens": p.get("tokens", 10),
+                        "correct_tds": td_counts.get(uid, 0)
+                    })
+
+        rows = sorted(rows, key=lambda x: (x["tokens"], x["correct_tds"]), reverse=True)
+        
+        snapshot = []
+        current_rank = 1
+        for i, row in enumerate(rows):
+            if i > 0:
+                prev = rows[i - 1]
+                if row["tokens"] != prev["tokens"] or row["correct_tds"] != prev["correct_tds"]:
+                    current_rank = i + 1
+            
+            rank_display = f"🥇" if current_rank == 1 else (f"🥈" if current_rank == 2 else (f"🥉" if current_rank == 3 else f"#{current_rank}"))
+            
+            snapshot.append({
+                "Rank": rank_display,
+                "full_name": row["full_name"],
+                "tokens": row["tokens"]
+            })
+
+        supabase.table("archived_seasons").insert({
+            "league_id": league_id,
+            "season_label": season_label.strip(),
+            "standings_json": snapshot
+        }).execute()
 
         return RedirectResponse(url=f"/commish?league_id={league_id}&success=season_archived", status_code=303)
     except Exception as e:
