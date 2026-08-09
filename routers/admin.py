@@ -12,9 +12,9 @@ from supabase import Client
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
 
-# Dependency injection for Supabase and Authentication (adjust according to your project setup)
+# Dependency injection for Supabase and Authentication
 def get_supabase(request: Request) -> Client:
-    return request.app.state.supabase # or reference your global client instance
+    return request.app.state.supabase
 
 def contains_profanity(text: str) -> bool:
     PROFANITY_FILTER = ["damn", "hell", "crap", "shit", "fuck", "bitch", "asshole", "dick", "cunt", "bastard"]
@@ -28,7 +28,7 @@ def recalculate_all_user_balances(supabase_client: Client):
         if not all_profiles: return
         for prof in all_profiles:
             uid = prof["id"]
-            # Fetch bets safely without relying on broken embedded resource joins
+            # Fetch bets safely
             u_bets = supabase_client.table("user_bets").select("week_number, wager_amount, pick, question_id").eq("user_id", uid).execute().data
             
             # Fetch questions for winning answer matching independently
@@ -96,7 +96,7 @@ async def admin_portal_landing(request: Request, week: int = 1):
         )
         existing_questions = q_res.data if q_res.data else []
     except Exception as e:
-        print(f"Admin Questions FetchError: {e}")
+        print(f"Admin Questions Fetch Error: {e}")
 
     # Map fetched questions and parse out the Away/Home teams from the saved string
     questions_map = {}
@@ -118,10 +118,26 @@ async def admin_portal_landing(request: Request, week: int = 1):
                 home_team = teams[1]
                 
         questions_map[qn] = {
+            "id": q.get("id"),
+            "question_number": qn,
             "question_text": prompt,
+            "winning_answer": q.get("winning_answer", "Pending"),
             "away_team": away_team,
             "home_team": home_team
         }
+
+    # 3. Fetch User Touchdown Picks for the target week so admin can grade them
+    user_td_picks = []
+    try:
+        td_res = (
+            supabase.table("touchdown_picks")
+            .select("*")
+            .eq("week_number", week)
+            .execute()
+        )
+        user_td_picks = td_res.data if td_res.data else []
+    except Exception as e:
+        print(f"Admin TD Picks Fetch Error: {e}")
 
     return templates.TemplateResponse(
         request,
@@ -131,7 +147,8 @@ async def admin_portal_landing(request: Request, week: int = 1):
             "profile": current_profile,
             "active_tokens": current_profile.get("tokens", 10),
             "target_week": week,
-            "questions_map": questions_map
+            "questions_map": questions_map,
+            "user_td_picks": user_td_picks
         }
     )
 
@@ -142,7 +159,6 @@ async def admin_publish_questions(
     supabase: Client = Depends(get_supabase)
 ):
     form_data = await request.form()
-    # Process and publish 10 weekly question payloads mirroring the Streamlit form logic
     for i in range(1, 11):
         prompt = form_data.get(f"prompt_{i}", "")
         away_t = form_data.get(f"away_{i}", "🏈 Free Agent / Neutral")
@@ -157,7 +173,7 @@ async def admin_publish_questions(
         else:
             supabase.table("weekly_questions").insert({"week_number": week_number, "question_number": i, "question_text": combined_text, "winning_answer": "Pending"}).execute()
     
-    return RedirectResponse(url="/admin?success=questions_published", status_code=303)
+    return RedirectResponse(url=f"/admin?week={week_number}&success=questions_published", status_code=303)
 
 @router.post("/schedule")
 async def admin_save_lockout(
@@ -173,7 +189,7 @@ async def admin_save_lockout(
         "question_text": "LOCKTIME SCHEDULER",
         "winning_answer": f"LOCKTIME:{lockout_iso}"
     }).execute()
-    return RedirectResponse(url="/admin?success=lockout_saved", status_code=303)
+    return RedirectResponse(url=f"/admin?week={week_number}&success=lockout_saved", status_code=303)
 
 @router.post("/close-week")
 async def close_weekly_slate(
@@ -202,13 +218,31 @@ async def admin_grade_live(
     supabase: Client = Depends(get_supabase)
 ):
     form_data = await request.form()
-    # Extract question results and evaluate user token balances
+    
+    # 1. Extract regular matchup question results (Yes/No/Pending)
     questions = supabase.table("weekly_questions").select("id, question_number").eq("week_number", week_number).lt("question_number", 11).execute().data
     for q in questions:
         ans = form_data.get(f"win_ans_{q['id']}")
-        if ans in ["Yes", "No"]:
+        if ans in ["Yes", "No", "Pending"]:
             supabase.table("weekly_questions").update({"winning_answer": ans}).eq("id", q["id"]).execute()
             
+    # 2. Extract and update user Touchdown Scorer Bonus grades if submitted
+    for key, val in form_data.items():
+        if key.startswith("td_grade_"):
+            try:
+                td_record_id = key.replace("td_grade_", "")
+                # val can be "True", "False", or "" (Pending)
+                if val == "True":
+                    is_correct_val = True
+                elif val == "False":
+                    is_correct_val = False
+                else:
+                    is_correct_val = None
+
+                supabase.table("touchdown_picks").update({"is_correct": is_correct_val}).eq("id", td_record_id).execute()
+            except Exception as e:
+                print(f"Error updating TD pick grade: {e}")
+
     recalculate_all_user_balances(supabase)
     return RedirectResponse(url=f"/admin?week={week_number}&success=week_graded", status_code=303)
 
