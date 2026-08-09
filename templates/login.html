@@ -11,6 +11,11 @@
     </p>
   </div>
 
+  <!-- Notification Alert Banner -->
+  <div id="login-alert-banner" style="display: none; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #ef4444; padding: 12px 16px; border-radius: 12px; font-size: 13px; margin-bottom: 20px; text-align: center; font-weight: 500;">
+    <span id="alert-message"></span>
+  </div>
+
   <!-- Navigation Tabs for Login / Signup -->
   <div class="auth-tabs" style="display: flex; gap: 8px; margin-bottom: 25px;">
     <button class="auth-tab-btn active" onclick="switchAuthTab(event, 'login-section')">🔒 Log In</button>
@@ -100,7 +105,7 @@
 
 </div>
 
-<!-- Client-side script to switch between Login and Signup tabs smoothly -->
+<!-- Client-side script to switch between Login and Signup tabs smoothly and display error alerts -->
 <script>
 function switchAuthTab(evt, sectionId) {
   var i, tabContent, tabBtns;
@@ -115,6 +120,24 @@ function switchAuthTab(evt, sectionId) {
   document.getElementById(sectionId).style.display = "block";
   evt.currentTarget.className += " active";
 }
+
+document.addEventListener("DOMContentLoaded", function() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const errorType = urlParams.get('error');
+  const banner = document.getElementById('login-alert-banner');
+  const alertMessage = document.getElementById('alert-message');
+
+  if (errorType === 'invalid_credentials') {
+    alertMessage.textContent = '⚠️ Invalid login details. Please check your email and password and try again.';
+    banner.style.display = 'block';
+  } else if (errorType === 'email_unverified') {
+    alertMessage.textContent = '⚠️ Your login details are valid, but your email address has not been verified yet. Please check your inbox for the authorization link.';
+    banner.style.display = 'block';
+  } else if (errorType === 'admin_locked') {
+    alertMessage.textContent = '⚠️ Sign-in is currently locked by the administrator.';
+    banner.style.display = 'block';
+  }
+});
 </script>
 
 <style>
