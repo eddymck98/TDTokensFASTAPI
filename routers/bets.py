@@ -6,6 +6,9 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from supabase import Client
 
+# Import NFL_TEAM_DATA from your database module to satisfy base.html requirements
+from database import NFL_TEAM_DATA
+
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
 
@@ -76,10 +79,10 @@ async def get_bets_page(request: Request, supabase: Client = Depends(get_supabas
     profile = {}
     questions = []
     touchdown_pick = ""
-    lockout_time = ""  # Initialize lockout time for the frontend timer
+    lockout_time = ""
 
     try:
-        # Fetch profile by email to guarantee database match
+        # Fetch profile by email
         profile_res = supabase.table("profiles").select("*").eq("email", user.email).execute()
         profile = profile_res.data[0] if profile_res.data else {
             "tokens": 10,
@@ -94,7 +97,7 @@ async def get_bets_page(request: Request, supabase: Client = Depends(get_supabas
         if available_weeks:
             latest_week = available_weeks[-1]
 
-            # Fetch Admin Lockout Time for the timer safely inside a protected block
+            # Fetch Admin Lockout Time
             try:
                 lockout_res = (
                     supabase.table("weekly_questions")
@@ -110,11 +113,11 @@ async def get_bets_page(request: Request, supabase: Client = Depends(get_supabas
             except Exception as e:
                 print(f"Error fetching lockout time: {e}")
 
-            # Fetch existing user bets for latest week
+            # Fetch existing user bets
             user_bets_res = supabase.table("user_bets").select("*").eq("user_id", user.id).eq("week_number", latest_week).execute()
             user_bets_map = {b["question_id"]: b for b in user_bets_res.data} if user_bets_res.data else {}
 
-            # Fetch existing touchdown pick for latest week
+            # Fetch existing touchdown pick
             td_res = supabase.table("touchdown_picks").select("player_name").eq("user_id", user.id).eq("week_number", latest_week).execute()
             if td_res.data:
                 touchdown_pick = td_res.data[0].get("player_name", "")
@@ -154,10 +157,11 @@ async def get_bets_page(request: Request, supabase: Client = Depends(get_supabas
                     })
 
     except Exception as e:
-        print(f"Error loading bets page: {e}")
+        print(f"Error loading bets data: {e}")
 
+    # Pass request as positional arg & pass team_data into context for Base.html
     return templates.TemplateResponse(
-        request=request,
+        request,
         name="bets.html",
         context={
             "request": request,
@@ -166,7 +170,8 @@ async def get_bets_page(request: Request, supabase: Client = Depends(get_supabas
             "available_weeks": available_weeks,
             "questions": questions,
             "existing_touchdown_pick": touchdown_pick,
-            "lockout_time": lockout_time  # Passed to bets.html
+            "lockout_time": lockout_time,
+            "team_data": NFL_TEAM_DATA
         }
     )
 
