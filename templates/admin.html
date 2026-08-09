@@ -23,8 +23,7 @@
       <p style="color: #cbd5e1; font-size: 14px; margin: 0;">Configure and publish the 10 weekly prediction prompts and match pairings.</p>
     </div>
 
-    <!-- Ensure you add a way to swap target weeks to load different questions if needed, usually via a GET query like /admin?week=2 -->
-    <form action="/admin/questions/publish" method="POST">
+    <form action="/admin/publish" method="POST">
       <div style="margin-bottom: 20px;">
         <label for="week_number" style="font-weight: 600; font-size: 16px; color: #f8fafc;">Target Week Number:</label>
         <input type="number" id="week_number" name="week_number" value="{{ target_week | default(1) }}" min="1" max="25" required style="width: 150px; padding: 10px; background: rgba(15, 23, 42, 0.92); color: #fff; border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; margin-left: 10px;">
@@ -41,10 +40,38 @@
             <select name="away_{{ i }}" style="width: 100%; padding: 8px; background: #0f172a; color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px;">
               <option value="{{ q.get('away_team', '🏈 Free Agent / Neutral') }}" selected>{{ q.get('away_team', '🏈 Free Agent / Neutral') }}</option>
               <option value="🏈 Free Agent / Neutral">🏈 Free Agent / Neutral</option>
-              <option value="🔴 Kansas City Chiefs">🔴 Kansas City Chiefs</option>
-              <option value="🔵 Dallas Cowboys">🔵 Dallas Cowboys</option>
-              <option value="🟢 Green Bay Packers">🟢 Green Bay Packers</option>
-              <!-- Include other NFL teams as needed -->
+              <option value="Arizona Cardinals">Arizona Cardinals</option>
+              <option value="Atlanta Falcons">Atlanta Falcons</option>
+              <option value="Baltimore Ravens">Baltimore Ravens</option>
+              <option value="Buffalo Bills">Buffalo Bills</option>
+              <option value="Carolina Panthers">Carolina Panthers</option>
+              <option value="Chicago Bears">Chicago Bears</option>
+              <option value="Cincinnati Bengals">Cincinnati Bengals</option>
+              <option value="Cleveland Browns">Cleveland Browns</option>
+              <option value="Dallas Cowboys">Dallas Cowboys</option>
+              <option value="Denver Broncos">Denver Broncos</option>
+              <option value="Detroit Lions">Detroit Lions</option>
+              <option value="Green Bay Packers">Green Bay Packers</option>
+              <option value="Houston Texans">Houston Texans</option>
+              <option value="Indianapolis Colts">Indianapolis Colts</option>
+              <option value="Jacksonville Jaguars">Jacksonville Jaguars</option>
+              <option value="Kansas City Chiefs">Kansas City Chiefs</option>
+              <option value="Las Vegas Raiders">Las Vegas Raiders</option>
+              <option value="Los Angeles Chargers">Los Angeles Chargers</option>
+              <option value="Los Angeles Rams">Los Angeles Rams</option>
+              <option value="Miami Dolphins">Miami Dolphins</option>
+              <option value="Minnesota Vikings">Minnesota Vikings</option>
+              <option value="New England Patriots">New England Patriots</option>
+              <option value="New Orleans Saints">New Orleans Saints</option>
+              <option value="New York Giants">New York Giants</option>
+              <option value="New York Jets">New York Jets</option>
+              <option value="Philadelphia Eagles">Philadelphia Eagles</option>
+              <option value="Pittsburgh Steelers">Pittsburgh Steelers</option>
+              <option value="San Francisco 49ers">San Francisco 49ers</option>
+              <option value="Seattle Seahawks">Seattle Seahawks</option>
+              <option value="Tampa Bay Buccaneers">Tampa Bay Buccaneers</option>
+              <option value="Tennessee Titans">Tennessee Titans</option>
+              <option value="Washington Commanders">Washington Commanders</option>
             </select>
           </div>
           <div>
@@ -52,10 +79,38 @@
             <select name="home_{{ i }}" style="width: 100%; padding: 8px; background: #0f172a; color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px;">
               <option value="{{ q.get('home_team', '🏈 Free Agent / Neutral') }}" selected>{{ q.get('home_team', '🏈 Free Agent / Neutral') }}</option>
               <option value="🏈 Free Agent / Neutral">🏈 Free Agent / Neutral</option>
-              <option value="🔴 Kansas City Chiefs">🔴 Kansas City Chiefs</option>
-              <option value="🔵 Dallas Cowboys">🔵 Dallas Cowboys</option>
-              <option value="🟢 Green Bay Packers">🟢 Green Bay Packers</option>
-              <!-- Include other NFL teams as needed -->
+              <option value="Arizona Cardinals">Arizona Cardinals</option>
+              <option value="Atlanta Falcons">Atlanta Falcons</option>
+              <option value="Baltimore Ravens">Baltimore Ravens</option>
+              <option value="Buffalo Bills">Buffalo Bills</option>
+              <option value="Carolina Panthers">Carolina Panthers</option>
+              <option value="Chicago Bears">Chicago Bears</option>
+              <option value="Cincinnati Bengals">Cincinnati Bengals</option>
+              <option value="Cleveland Browns">Cleveland Browns</option>
+              <option value="Dallas Cowboys">Dallas Cowboys</option>
+              <option value="Denver Broncos">Denver Broncos</option>
+              <option value="Detroit Lions">Detroit Lions</option>
+              <option value="Green Bay Packers">Green Bay Packers</option>
+              <option value="Houston Texans">Houston Texans</option>
+              <option value="Indianapolis Colts">Indianapolis Colts</option>
+              <option value="Jacksonville Jaguars">Jacksonville Jaguars</option>
+              <option value="Kansas City Chiefs">Kansas City Chiefs</option>
+              <option value="Las Vegas Raiders">Las Vegas Raiders</option>
+              <option value="Los Angeles Chargers">Los Angeles Chargers</option>
+              <option value="Los Angeles Rams">Los Angeles Rams</option>
+              <option value="Miami Dolphins">Miami Dolphins</option>
+              <option value="Minnesota Vikings">Minnesota Vikings</option>
+              <option value="New England Patriots">New England Patriots</option>
+              <option value="New Orleans Saints">New Orleans Saints</option>
+              <option value="New York Giants">New York Giants</option>
+              <option value="New York Jets">New York Jets</option>
+              <option value="Philadelphia Eagles">Philadelphia Eagles</option>
+              <option value="Pittsburgh Steelers">Pittsburgh Steelers</option>
+              <option value="San Francisco 49ers">San Francisco 49ers</option>
+              <option value="Seattle Seahawks">Seattle Seahawks</option>
+              <option value="Tampa Bay Buccaneers">Tampa Bay Buccaneers</option>
+              <option value="Tennessee Titans">Tennessee Titans</option>
+              <option value="Washington Commanders">Washington Commanders</option>
             </select>
           </div>
         </div>
@@ -76,10 +131,10 @@
       <p style="color: #cbd5e1; font-size: 14px; margin: 0;">Configure precise kickoff lockout ISO timestamps so picks automatically lock prior to kickoff.</p>
     </div>
 
-    <form action="/admin/lockout/schedule" method="POST">
+    <form action="/admin/schedule" method="POST">
       <div style="margin-bottom: 15px;">
         <label for="lockout_week" style="font-weight: 600; color: #f8fafc;">Week Number:</label>
-        <input type="number" id="lockout_week" name="week_number" value="1" min="1" max="25" required style="width: 150px; padding: 10px; background: rgba(15, 23, 42, 0.92); color: #fff; border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; margin-left: 10px;">
+        <input type="number" id="lockout_week" name="week_number" value="{{ target_week | default(1) }}" min="1" max="25" required style="width: 150px; padding: 10px; background: rgba(15, 23, 42, 0.92); color: #fff; border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; margin-left: 10px;">
       </div>
       <div style="margin-bottom: 20px;">
         <label for="lockout_iso" style="font-weight: 600; color: #f8fafc;">Lockout ISO Datetime (UTC):</label>
@@ -96,14 +151,82 @@
       <p style="color: #cbd5e1; font-size: 14px; margin: 0;">Set winning answers for questions to evaluate user token balances instantly.</p>
     </div>
 
-    <form action="/admin/grade/live" method="POST">
-      <div style="margin-bottom: 20px;">
-        <label for="grade_week" style="font-weight: 600; color: #f8fafc;">Week Number to Grade:</label>
-        <input type="number" id="grade_week" name="week_number" value="1" min="1" max="25" required style="width: 150px; padding: 10px; background: rgba(15, 23, 42, 0.92); color: #fff; border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; margin-left: 10px;">
+    <!-- Week Selector Form -->
+    <div style="margin-bottom: 25px;">
+      <label for="grade_week_input" style="font-weight: 600; color: #f8fafc;">Week Number to Grade:</label>
+      <input type="number" id="grade_week_input" value="{{ target_week }}" min="1" max="25" style="width: 120px; padding: 10px; background: rgba(15, 23, 42, 0.92); color: #fff; border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; margin-left: 10px;">
+      <button type="button" onclick="window.location.href='/admin?week=' + document.getElementById('grade_week_input').value" style="margin-left: 10px; padding: 10px 15px; background: #38bdf8; border: none; border-radius: 8px; color: #000; font-weight: bold; cursor: pointer;">Load Week</button>
+    </div>
+
+    <form action="/admin/live" method="POST">
+      <input type="hidden" name="week_number" value="{{ target_week }}">
+
+      <div style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 25px;">
+        {% if questions_map %}
+          <h4 style="color: #fbbf24; font-family: 'Bebas Neue', sans-serif; font-size: 22px; margin: 0 0 5px 0;">Matchup Questions Slate</h4>
+          {% for qn, q_data in questions_map.items() %}
+            <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+              <div>
+                <span style="color: #38bdf8; font-weight: bold; margin-right: 8px;">Q{{ qn }}.</span>
+                <span style="color: #f8fafc; font-size: 15px;">{{ q_data.question_text }}</span>
+                <div style="color: #94a3b8; font-size: 12px; margin-top: 4px;">Matchup: {{ q_data.away_team }} @ {{ q_data.home_team }}</div>
+              </div>
+              
+              <div>
+                <label style="color: #cbd5e1; font-size: 13px; margin-right: 8px;">Winning Answer:</label>
+                <select name="win_ans_{{ q_data.id }}" style="padding: 8px 12px; background: rgba(30, 41, 59, 0.9); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; font-size: 14px;">
+                  <option value="Pending" {% if q_data.winning_answer == 'Pending' %}selected{% endif %}>⏳ Pending</option>
+                  <option value="Yes" {% if q_data.winning_answer == 'Yes' %}selected{% endif %}>✅ Yes</option>
+                  <option value="No" {% if q_data.winning_answer == 'No' %}selected{% endif %}>❌ No</option>
+                </select>
+              </div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <p style="color: #94a3b8; text-align: center; padding: 20px;">No questions found for Week {{ target_week }}. Publish questions first!</p>
+        {% endif %}
       </div>
-      <p style="color: #94a3b8; font-size: 13px;">* Note: In your FastAPI backend router (`admin.py`), live question answers (`win_ans_{id}`) are dynamically pulled from form elements to execute bulk grading and balance recalculation.</p>
+
+      <!-- User Touchdown Scorer Bonus Grading Section -->
+      <div style="margin-top: 30px; margin-bottom: 20px;">
+        <h4 style="color: #38bdf8; font-family: 'Bebas Neue', sans-serif; font-size: 22px; margin: 0 0 10px 0;">Touchdown Bonus Scorer Picks (Week {{ target_week }})</h4>
+        {% if user_td_picks %}
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            {% for td in user_td_picks %}
+              <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 12px 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                <div>
+                  <span style="color: #fbbf24; font-weight: bold; margin-right: 8px;">User ID:</span>
+                  <span style="color: #f8fafc; font-size: 13px;">{{ td.user_id }}</span>
+                  <div style="color: #38bdf8; font-size: 14px; margin-top: 4px;">Player Pick: <b>{{ td.player_name }}</b></div>
+                </div>
+                <div>
+                  <label style="color: #cbd5e1; font-size: 13px; margin-right: 8px;">Grade Correct (+5 pts):</label>
+                  <select name="td_grade_{{ td.id }}" style="padding: 8px 12px; background: rgba(30, 41, 59, 0.9); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; font-size: 14px;">
+                    <option value="" {% if td.is_correct is none %}selected{% endif %}>⏳ Pending</option>
+                    <option value="True" {% if td.is_correct is true %}selected{% endif %}>✅ Correct (+5)</option>
+                    <option value="False" {% if td.is_correct is false %}selected{% endif %}>❌ Incorrect (0)</option>
+                  </select>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p style="color: #94a3b8; font-size: 13px;">No user touchdown bonus picks submitted for this week yet.</p>
+        {% endif %}
+      </div>
+
       <button type="submit" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; padding: 14px 28px; font-family: 'Teko', sans-serif; font-size: 22px; font-weight: bold; border-radius: 12px; border: none; cursor: pointer; margin-top: 10px;">Save Live Results & Recalculate Tokens 🚀</button>
     </form>
+
+    <!-- Close / Lock Week Form -->
+    <div style="margin-top: 25px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
+      <form action="/admin/close-week" method="POST" onsubmit="return confirm('Are you sure you want to close Week {{ target_week }}? Users will no longer be able to submit or modify bets.');">
+        <input type="hidden" name="week_number" value="{{ target_week }}">
+        <button type="submit" style="background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); color: #fff; padding: 12px 20px; font-family: 'Teko', sans-serif; font-size: 20px; font-weight: bold; border-radius: 12px; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);">
+          🔒 Close / Lock Week {{ target_week }} to Further Edits
+        </button>
+      </form>
+    </div>
   </div>
 
   <!-- Tab 4: Token Adjuster -->
@@ -113,7 +236,7 @@
       <p style="color: #cbd5e1; font-size: 14px; margin: 0;">Directly adjust token balances for any player account.</p>
     </div>
 
-    <form action="/admin/tokens/adjust" method="POST">
+    <form action="/admin/adjust" method="POST">
       <div style="margin-bottom: 15px;">
         <label style="font-weight: 600; color: #f8fafc;">User ID:</label>
         <input type="text" name="user_id" placeholder="Enter Supabase user UUID..." required style="width: 100%; padding: 10px; background: rgba(15, 23, 42, 0.92); color: #fff; border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; margin-top: 5px;">
@@ -141,7 +264,7 @@
       <p style="color: #cbd5e1; font-size: 14px; margin: 0;">Lock or unlock sign-ins and new account registrations across the platform.</p>
     </div>
 
-    <form action="/admin/access/control" method="POST">
+    <form action="/admin/control" method="POST">
       <div style="margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
         <input type="checkbox" id="signin_locked" name="signin_locked" value="true" style="width: 20px; height: 20px;">
         <label for="signin_locked" style="font-weight: 600; color: #f8fafc;">Lock All Sign-Ins (Prevent users from logging in)</label>
