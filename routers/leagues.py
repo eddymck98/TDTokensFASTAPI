@@ -138,7 +138,7 @@ async def get_leagues_page(request: Request, league_id: Optional[str] = None, su
             displayed_leaderboard = top_ten
 
         chat_filter_id = GLOBAL_LEAGUE_ID if is_global else selected_league["id"]
-        chat_res = supabase.table("trash_talk").select("*, profiles(full_name, avatar_emoji)").eq("league_id", chat_filter_id).order("created_at", desc=True).limit(20).execute()
+        chat_res = supabase.table("trash_talk").select("*, profiles!trash_talk_user_id_fkey(full_name, avatar_emoji)").eq("league_id", chat_filter_id).order("created_at", desc=True).limit(20).execute()
         trash_talk_messages = chat_res.data if chat_res.data else []
 
     except Exception as e:
