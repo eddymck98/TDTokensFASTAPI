@@ -83,6 +83,9 @@ async def get_bets_page(request: Request, week: Optional[int] = None, supabase: 
     lockout_time = ""
     target_week = 1
     is_week_closed = False
+    is_published = True
+    user_td_won = False
+    official_td_winner = "Pending"
 
     try:
         # Fetch profile by email
@@ -100,6 +103,14 @@ async def get_bets_page(request: Request, week: Optional[int] = None, supabase: 
         if available_weeks:
             # Determine target week (default to requested or newest)
             target_week = week if week and week in available_weeks else available_weeks[-1]
+
+            # Check if this specific week is published in a 'weeks' table or status row if available
+            try:
+                week_meta_res = supabase.table("weeks").select("is_published").eq("week_number", target_week).execute()
+                if week_meta_res.data:
+                    is_published = week_meta_res.data[0].get("is_published", True)
+            except Exception:
+                pass
 
             # Check if this specific week is closed by admin
             try:
@@ -135,10 +146,21 @@ async def get_bets_page(request: Request, week: Optional[int] = None, supabase: 
             user_bets_res = supabase.table("user_bets").select("*").eq("user_id", user.id).eq("week_number", target_week).execute()
             user_bets_map = {b["question_id"]: b for b in user_bets_res.data} if user_bets_res.data else {}
 
-            # Fetch existing touchdown pick for target week
-            td_res = supabase.table("touchdown_picks").select("player_name").eq("user_id", user.id).eq("week_number", target_week).execute()
+            # Fetch existing touchdown pick for target week & grading status
+            td_res = supabase.table("touchdown_picks").select("player_name, is_correct").eq("user_id", user.id).eq("week_number", target_week).execute()
             if td_res.data:
                 touchdown_pick = td_res.data[0].get("player_name", "")
+                is_correct_val = td_res.data[0].get("is_correct")
+                if is_correct_val is not None:
+                    user_td_won = bool(is_correct_val)
+
+            # Fetch official touchdown scorer winning answer if stored in weekly_questions (e.g. question_number == 97)
+            try:
+                td_winner_res = supabase.table("weekly_questions").select("winning_answer").eq("week_number", target_week).eq("question_number", 97).execute()
+                if td_winner_res.data:
+                    official_td_winner = td_winner_res.data[0].get("winning_answer", "Pending")
+            except Exception:
+                pass
 
             # Fetch weekly question slate for target week
             q_res = supabase.table("weekly_questions").select("id, question_number, question_text, winning_answer").eq("week_number", target_week).lt("question_number", 11).order("question_number").execute()
@@ -189,8 +211,11 @@ async def get_bets_page(request: Request, week: Optional[int] = None, supabase: 
             "available_weeks": available_weeks,
             "target_week": target_week,
             "is_week_closed": is_week_closed,
+            "is_published": is_published,
             "questions": questions,
             "existing_touchdown_pick": touchdown_pick,
+            "user_td_won": user_td_won,
+            "official_td_winner": official_td_winner,
             "lockout_time": lockout_time,
             "team_data": NFL_TEAM_DATA
         }
