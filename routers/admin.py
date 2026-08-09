@@ -47,7 +47,7 @@ def recalculate_all_user_balances(supabase_client: Client):
     except Exception: pass
 
 @router.get("/", response_class=HTMLResponse)
-async def admin_portal_landing(request: Request, week: int = 1):
+async def admin_portal_landing(request: Request, week: Optional[int] = None):
     session_cookie = request.cookies.get("td_tokens_session")
     if not session_cookie:
         return RedirectResponse(url="/auth/login", status_code=303)
@@ -77,6 +77,26 @@ async def admin_portal_landing(request: Request, week: int = 1):
         print(f"Admin Auth Error: {e}")
         return RedirectResponse(url="/auth/login", status_code=303)
 
+    # Fetch all active weeks to populate pill navigation & default to newest
+    available_weeks = []
+    target_week = 1
+    is_week_closed = False
+
+    try:
+        weeks_res = supabase.table("weekly_questions").select("week_number").neq("week_number", 999).neq("week_number", 998).neq("week_number", 997).neq("week_number", 96).execute()
+        available_weeks = sorted(list(set([r["week_number"] for r in weeks_res.data]))) if weeks_res.data else [1]
+        
+        # Default to requested week or the newest/latest week
+        target_week = week if week and week in available_weeks else available_weeks[-1]
+
+        # Check if this target week is closed (Question 98 flag)
+        status_res = supabase.table("weekly_questions").select("winning_answer").eq("week_number", target_week).eq("question_number", 98).execute()
+        if status_res.data and status_res.data[0].get("winning_answer") == "CLOSED":
+            is_week_closed = True
+
+    except Exception as e:
+        print(f"Error fetching weeks for admin: {e}")
+
     # Fetch all profiles to populate user dropdowns in the UI
     all_profiles = []
     try:
@@ -91,7 +111,7 @@ async def admin_portal_landing(request: Request, week: int = 1):
         q_res = (
             supabase.table("weekly_questions")
             .select("*")
-            .eq("week_number", week)
+            .eq("week_number", target_week)
             .order("question_number")
             .execute()
         )
@@ -102,6 +122,8 @@ async def admin_portal_landing(request: Request, week: int = 1):
     questions_map = {}
     for q in existing_questions:
         qn = q.get("question_number")
+        if qn >= 98: # Skip system utility rows
+            continue
         q_text = q.get("question_text", "")
         
         prompt = q_text
@@ -128,10 +150,9 @@ async def admin_portal_landing(request: Request, week: int = 1):
     # Fetch User Touchdown Picks and attach names map
     user_td_picks = []
     try:
-        td_res = supabase.table("touchdown_picks").select("*").eq("week_number", week).execute()
+        td_res = supabase.table("touchdown_picks").select("*").eq("week_number", target_week).execute()
         raw_tds = td_res.data if td_res.data else []
         
-        # Build profile name map
         profile_name_map = {p["id"]: p.get("full_name", p.get("email", "Unknown")) for p in all_profiles}
         
         for td in raw_tds:
@@ -147,7 +168,9 @@ async def admin_portal_landing(request: Request, week: int = 1):
             "request": request,
             "profile": current_profile,
             "active_tokens": current_profile.get("tokens", 10),
-            "target_week": week,
+            "available_weeks": available_weeks,
+            "target_week": target_week,
+            "is_week_closed": is_week_closed,
             "questions_map": questions_map,
             "user_td_picks": user_td_picks,
             "all_profiles": all_profiles
@@ -192,6 +215,34 @@ async def admin_save_lockout(
         "winning_answer": f"LOCKTIME:{lockout_iso}"
     }).execute()
     return RedirectResponse(url=f"/admin?week={week_number}&success=lockout_saved", status_code=303)
+
+@router.post("/toggle-week-status")
+async def toggle_week_status(
+    request: Request,
+    week_number: int = Form(...),
+    action: str = Form(...),  # 'close' or 'reopen'
+    supabase: Client = Depends(get_supabase)
+):
+    """Closes or Reopens a week by updating Question 98 status."""
+    try:
+        status_val = "CLOSED" if action == "close" else "OPEN"
+        
+        existing = supabase.table("weekly_questions").select("id").eq("week_number", week_number).eq("question_number", 98).execute()
+        
+        if existing.data:
+            supabase.table("weekly_questions").update({"winning_answer": status_val}).eq("week_number", week_number).eq("question_number", 98).execute()
+        else:
+            supabase.table("weekly_questions").insert({
+                "week_number": week_number,
+                "question_number": 98,
+                "question_text": "WEEK STATUS",
+                "winning_answer": status_val
+            }).execute()
+
+        return RedirectResponse(url=f"/admin?week={week_number}", status_code=303)
+    except Exception as e:
+        print(f"Error toggling week status: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
 
 @router.post("/close-week")
 async def close_weekly_slate(
