@@ -72,7 +72,7 @@ templates = Jinja2Templates(directory="templates")
 app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
 app.include_router(bets.router, prefix="/bets", tags=["Bets & Gameplay"])
 app.include_router(leagues.router, prefix="/leagues", tags=["Leagues & Standings"])
-app.include_router(profile.router, prefix="/profile", tags=["Profile Management"])
+app.include_router.router(profile.router, prefix="/profile", tags=["Profile Management"]) if hasattr(profile.router, "router") else app.include_router(profile.router, prefix="/profile", tags=["Profile Management"])
 app.include_router(admin.router, prefix="/admin", tags=["Admin Portal"])
 app.include_router(commish.router, prefix="/commish", tags=["Commissioner Portal"])
 
