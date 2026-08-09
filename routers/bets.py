@@ -312,7 +312,7 @@ async def submit_weekly_bets(
             supabase.table("touchdown_picks").delete().eq("user_id", user.id).eq("week_number", week_number).execute()
             supabase.table("touchdown_picks").insert({
                 "user_id": user.id,
-                "week_number", week_number,
+                "week_number": week_number,
                 "player_name": touchdown_pick.strip(),
                 "is_correct": current_is_correct
             }).execute()
