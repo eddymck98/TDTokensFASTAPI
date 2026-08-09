@@ -135,6 +135,69 @@
       </div>
     {% endif %}
   </div>
+
+  <!-- Hall of Fame Archives Section (Collapsible Dropdown underneath Trash Talk) -->
+  <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 14px; padding: 15px; margin-bottom: 20px;">
+    <details style="cursor: pointer;">
+      <summary style="font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: #fbbf24; letter-spacing: 1px; outline: none; display: flex; align-items: center; justify-content: space-between; user-select: none;">
+        <span>🏆 Hall of Fame Archives</span>
+        <span style="font-size: 14px; font-family: 'Inter', sans-serif; color: #94a3b8; font-weight: normal;">(Click to expand)</span>
+      </summary>
+
+      <div style="margin-top: 15px; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 15px;">
+        
+        <!-- Commissioner Archive Creator Tool (Visible only if current user is the commissioner of this league) -->
+        {% if selected_league and selected_league.commissioner_id == user.id %}
+        <div style="background: rgba(30, 41, 59, 0.6); border: 1px dashed rgba(251, 191, 36, 0.4); border-radius: 10px; padding: 12px; margin-bottom: 15px;">
+          <h4 style="font-family: 'Bebas Neue', sans-serif; font-size: 18px; color: #fbbf24; margin: 0 0 8px 0; letter-spacing: 0.5px;">⭐ Commissioner: Archive Season</h4>
+          <form action="/leagues/archive-season" method="POST" style="display: flex; gap: 8px; flex-direction: column;">
+            <input type="hidden" name="league_id" value="{{ active_league_id }}">
+            <input type="text" name="season_label" placeholder="Season Label (e.g., 2025 Season)" required style="width: 100%; padding: 8px; background: rgba(15, 23, 42, 0.9); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; font-size: 12px;">
+            <button type="submit" style="background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000; padding: 6px 12px; font-family: 'Teko', sans-serif; font-size: 16px; font-weight: bold; border-radius: 8px; border: none; cursor: pointer; text-align: center;">Save Current Standings to Archives 🏛️</button>
+          </form>
+        </div>
+        {% endif %}
+
+        <!-- Render Archived Seasons List -->
+        {% if archived_seasons %}
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            {% for archive in archived_seasons %}
+              <div style="background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 10px; padding: 12px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                  <b style="color: #fbbf24; font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 0.5px;">🏛️ {{ archive.season_label }}</b>
+                  <span style="color: #64748b; font-size: 10px;">Archived: {{ archive.archived_at[:10] if archive.archived_at else '' }}</span>
+                </div>
+
+                <!-- Standings Snapshot Table/List -->
+                {% if archive.standings_json %}
+                  <div style="display: flex; flex-direction: column; gap: 4px;">
+                    {% for entry in archive.standings_json %}
+                      <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(15, 23, 42, 0.6); padding: 6px 10px; border-radius: 6px; font-size: 12px;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                          <span style="font-weight: bold; color: #38bdf8; min-width: 24px;">{{ entry.Rank | default('#') }}</span>
+                          <span style="color: #ffffff; font-weight: 500;">{{ entry.full_name | default('Member') }}</span>
+                        </div>
+                        <div style="color: #fbbf24; font-family: 'Bebas Neue', sans-serif; font-size: 16px;">
+                          {{ entry.tokens | default(0) }} 🪙
+                        </div>
+                      </div>
+                    {% endfor %}
+                  </div>
+                {% else %}
+                  <p style="color: #94a3b8; font-size: 12px; margin: 0;">No standings snapshot recorded for this season.</p>
+                {% endif %}
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div style="background: rgba(30, 41, 59, 0.4); padding: 12px; border-radius: 8px; text-align: center;">
+            <p style="color: #94a3b8; font-size: 12px; margin: 0;">No Hall of Fame archives created for this mini-league yet.</p>
+          </div>
+        {% endif %}
+
+      </div>
+    </details>
+  </div>
   {% endif %}
 
   <!-- Create or Join Custom Leagues Section -->
