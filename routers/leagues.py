@@ -36,6 +36,7 @@ async def get_leagues_page(request: Request, league_id: Optional[str] = None, su
     selected_league = None
     is_global = True
     trash_talk_messages = []
+    archived_seasons = []
 
     GLOBAL_LEAGUE_ID = "00000000-0000-0000-0000-000000000001"
 
@@ -141,6 +142,11 @@ async def get_leagues_page(request: Request, league_id: Optional[str] = None, su
         chat_res = supabase.table("trash_talk").select("*, profiles!trash_talk_user_id_fkey(full_name, avatar_emoji)").eq("league_id", chat_filter_id).order("created_at", desc=True).limit(20).execute()
         trash_talk_messages = chat_res.data if chat_res.data else []
 
+        # Fetch Hall of Fame Archives for the selected mini-league
+        if not is_global and selected_league:
+            archive_res = supabase.table("archived_seasons").select("*").eq("league_id", selected_league["id"]).order("archived_at", desc=True).execute()
+            archived_seasons = archive_res.data if archive_res.data else []
+
     except Exception as e:
         print(f"Leagues page error: {e}")
 
@@ -153,6 +159,7 @@ async def get_leagues_page(request: Request, league_id: Optional[str] = None, su
         "is_global": is_global,
         "leaderboard": displayed_leaderboard,
         "trash_talk_messages": trash_talk_messages,
+        "archived_seasons": archived_seasons,
         "active_league_id": league_id or "global"
     })
 
@@ -244,16 +251,16 @@ async def join_league(
 
     clean_code = invite_code.strip().upper()
     if not clean_code:
-        raise HTTPException(status_code=400, detail="Invite code cannot be blank.")
+        return RedirectResponse(url="/leagues?error=blank_code", status_code=303)
 
     try:
         found_league = supabase.table("leagues").select("id, league_name, name, league_password").eq("invite_code", clean_code).execute().data
         if not found_league:
-            raise HTTPException(status_code=404, detail="Invalid invite code.")
+            return RedirectResponse(url="/leagues?error=invalid_code", status_code=303)
 
         target_league = found_league[0]
         if target_league.get("league_password", "") and target_league.get("league_password", "") != league_password.strip():
-            raise HTTPException(status_code=403, detail="Incorrect league password.")
+            return RedirectResponse(url=f"/leagues?league_id={target_league['id']}&error=incorrect_password", status_code=303)
 
         already_member = supabase.table("league_members").select("id").eq("league_id", target_league["id"]).eq("user_id", user.id).execute().data
         if already_member:
@@ -266,7 +273,7 @@ async def join_league(
 
         return RedirectResponse(url=f"/leagues?league_id={target_league['id']}&success=joined_league", status_code=303)
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        return RedirectResponse(url=f"/leagues?error=server_error", status_code=303)
 
 @router.post("/announcement")
 async def post_mini_league_announcement(
@@ -315,5 +322,80 @@ async def post_trash_talk(
 
         redirect_param = f"league_id={league_id}" if league_id != "00000000-0000-0000-0000-000000000001" else "league_id=global"
         return RedirectResponse(url=f"/leagues?{redirect_param}&success=message_posted", status_code=303)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@router.post("/archive-season")
+async def archive_season(
+    request: Request,
+    league_id: str = Form(...),
+    season_label: str = Form(...),
+    supabase: Client = Depends(get_supabase)
+):
+    session_cookie = request.cookies.get("td_tokens_session")
+    if not session_cookie:
+        raise HTTPException(status_code=401, detail="Unauthorized session.")
+    try:
+        token_data = json.loads(session_cookie)
+        supabase.auth.set_session(token_data.get("access_token"), token_data.get("refresh_token"))
+        user = supabase.auth.get_user().user
+        if not user:
+            raise HTTPException(status_code=401, detail="Invalid user session.")
+
+        # Verify commissioner authorization
+        league_check = supabase.table("leagues").select("commissioner_id").eq("id", league_id).execute()
+        if not league_check.data or league_check.data[0].get("commissioner_id") != user.id:
+            raise HTTPException(status_code=403, detail="Only the league commissioner can archive seasons.")
+
+        # Fetch current standings for this mini league to build the snapshot JSON
+        members_res = supabase.table("league_members").select("user_id, profiles(id, full_name, tokens)").eq("league_id", league_id).execute()
+        
+        td_res = supabase.table("touchdown_picks").select("user_id, is_correct").eq("is_correct", True).execute()
+        td_counts = {}
+        if td_res.data:
+            for td in td_res.data:
+                uid = td["user_id"]
+                td_counts[uid] = td_counts.get(uid, 0) + 1
+
+        rows = []
+        if members_res.data:
+            for m in members_res.data:
+                p = m.get("profiles")
+                if p:
+                    uid = p["id"]
+                    rows.append({
+                        "user_id": uid,
+                        "full_name": p.get("full_name") or "Unknown",
+                        "tokens": p.get("tokens", 10),
+                        "correct_tds": td_counts.get(uid, 0)
+                    })
+
+        rows = sorted(rows, key=lambda x: (x["tokens"], x["correct_tds"]), reverse=True)
+        
+        snapshot = []
+        current_rank = 1
+        for i, row in enumerate(rows):
+            if i > 0:
+                prev = rows[i - 1]
+                if row["tokens"] != prev["tokens"] or row["correct_tds"] != prev["correct_tds"]:
+                    current_rank = i + 1
+            
+            # Format rank with emoji badge for top 3
+            rank_display = f"🥇" if current_rank == 1 else (f"🥈" if current_rank == 2 else (f"🥉" if current_rank == 3 else f"#{current_rank}"))
+            
+            snapshot.append({
+                "Rank": rank_display,
+                "full_name": row["full_name"],
+                "tokens": row["tokens"]
+            })
+
+        # Insert into archived_seasons table
+        supabase.table("archived_seasons").insert({
+            "league_id": league_id,
+            "season_label": season_label.strip(),
+            "standings_json": snapshot
+        }).execute()
+
+        return RedirectResponse(url=f"/leagues?league_id={league_id}&success=season_archived", status_code=303)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
