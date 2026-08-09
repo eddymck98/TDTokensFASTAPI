@@ -59,13 +59,13 @@
             <a href="/bets" class="{% if request.url.path == '/bets' %}active{% endif %}">🎯 Bets</a>
             <a href="/history" class="{% if request.url.path == '/history' %}active{% endif %}">📜 History</a>
             <a href="/leagues" class="{% if request.url.path == '/leagues' %}active{% endif %}">🛡️ Leagues</a>         
-                      
-            {% if is_commissioner or profile.is_admin %}
-                <a href="/commish" style="color: #fbbf24;">⭐ Commish</a>
+                    
+            {% if request.state.is_commissioner or profile.is_admin %}
+                <a href="/commish" style="color: #fbbf24;" class="{% if request.url.path == '/commish' %}active{% endif %}">⭐ Commish</a>
             {% endif %}
 
             {% if profile.is_admin %}
-                <a href="/admin" class="nav-admin-btn">🛠️ Admin</a>
+                <a href="/admin" class="nav-admin-btn {% if request.url.path == '/admin' %}active{% endif %}">🛠️ Admin</a>
             {% endif %}
             
             <a href="/logout" class="nav-logout-btn">🚪 Logout</a>
