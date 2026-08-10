@@ -21,7 +21,7 @@
     <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255,255,255,0.12); border-left: 4px solid #fbbf24; padding: 20px; border-radius: 16px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
       <div>
         <h3 style="color: #fbbf24; font-family: 'Bebas Neue', sans-serif; font-size: 28px; margin: 0 0 5px 0;">WEEKLY QUESTIONS & MATCHUPS HUB</h3>
-        <p style="color: #cbd5e1; font-size: 14px; margin: 0;">Configure and publish the 10 weekly prediction prompts and match pairings for Week {{ target_week }}.</p>
+        <p style="color: #cbd5e1; font-size: 14px; margin: 0;">Configure and save the 10 weekly prediction prompts and match pairings for Week {{ target_week }} as drafts, or publish them live.</p>
       </div>
       {% if not is_week_closed %}
       <button type="button" onclick="loadRandomTemplates()" style="background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%); color: #fff; border: none; padding: 10px 18px; border-radius: 10px; font-family: 'Teko', sans-serif; font-size: 18px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);">
@@ -41,9 +41,31 @@
       {% endif %}
       <form action="/admin/create-week" method="POST" style="margin: 0;">
         <button type="submit" style="padding: 8px 16px; border-radius: 8px; font-family: 'Teko', sans-serif; font-size: 20px; background: #10b981; color: #000; font-weight: bold; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
-          ➕ Create New Week
+          ➕ Create New Week (Draft)
         </button>
       </form>
+    </div>
+
+    <!-- Live vs Draft Publishing Header Bar -->
+    <div style="background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(255,255,255,0.12); border-left: 4px solid {% if is_published %}#10b981{% else %}#fbbf24{% endif %}; padding: 14px 20px; border-radius: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+      <div>
+        <span style="font-size: 15px; color: #fff; font-family: 'Bebas Neue'; letter-spacing: 1px;">WEEK {{ target_week }} STATUS: </span>
+        {% if is_published %}
+          <span style="color: #4ade80; font-weight: bold; font-family: 'Bebas Neue'; font-size: 18px;">🟢 LIVE & PUBLISHED</span>
+        {% else %}
+          <span style="color: #fbbf24; font-weight: bold; font-family: 'Bebas Neue'; font-size: 18px;">🟡 DRAFT MODE (Hidden from Users)</span>
+        {% endif %}
+      </div>
+      <div>
+        <form action="{% if is_published %}/admin/week/unpublish{% else %}/admin/week/publish{% endif %}" method="POST" style="margin: 0;">
+          <input type="hidden" name="week_number" value="{{ target_week }}">
+          {% if is_published %}
+            <button type="submit" style="background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.4); color: #fca5a5; padding: 8px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; font-family: 'Teko', sans-serif; font-size: 18px;">🔒 Unpublish to Draft</button>
+          {% else %}
+            <button type="submit" style="background: #10b981; color: #fff; border: none; padding: 8px 18px; border-radius: 8px; font-weight: bold; cursor: pointer; font-family: 'Teko', sans-serif; font-size: 18px;">🚀 Publish Week Live</button>
+          {% endif %}
+        </form>
+      </div>
     </div>
 
     {% if is_week_closed %}
@@ -146,7 +168,7 @@
       {% endfor %}
 
       {% if not is_week_closed %}
-      <button type="submit" style="background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000; padding: 14px 28px; font-family: 'Teko', sans-serif; font-size: 22px; font-weight: bold; border-radius: 12px; border: none; cursor: pointer; width: 100%; margin-top: 15px;">Save & Publish All Questions 💾</button>
+      <button type="submit" style="background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000; padding: 14px 28px; font-family: 'Teko', sans-serif; font-size: 22px; font-weight: bold; border-radius: 12px; border: none; cursor: pointer; width: 100%; margin-top: 15px;">Save Question Drafts 💾</button>
       {% endif %}
     </form>
   </div>
@@ -155,7 +177,7 @@
   <div id="lockout" class="admin-tab-content" style="display: none;">
     <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255,255,255,0.12); border-left: 4px solid #38bdf8; padding: 20px; border-radius: 16px; margin-bottom: 20px;">
       <h3 style="color: #38bdf8; font-family: 'Bebas Neue', sans-serif; font-size: 28px; margin: 0 0 5px 0;">KICKOFF LOCKOUT SCHEDULER</h3>
-      <p style="color: #cbd5e1; font-size: 14px; margin: 0;">Configure precise kickoff lockout ISO timestamps so picks automatically lock prior to kickoff.</p>
+      <p style="color: #cbd5e1; font-size: 14px; margin: 0;">Select precise kickoff lockout times using the calendar picker below so picks automatically lock prior to kickoff.</p>
     </div>
 
     <!-- Week Selector Pills & Create New Week Button -->
@@ -174,14 +196,21 @@
       </form>
     </div>
 
-    <form action="/admin/schedule" method="POST">
-      <input type="hidden" name="week_number" value="{{ target_week }}">
-      <div style="margin-bottom: 20px;">
-        <label for="lockout_iso" style="font-weight: 600; color: #f8fafc;">Lockout ISO Datetime (UTC) for Week {{ target_week }}:</label>
-        <input type="text" id="lockout_iso" name="lockout_iso" placeholder="2026-09-13T17:00:00" required style="width: 100%; padding: 10px; background: rgba(15, 23, 42, 0.92); color: #fff; border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; margin-top: 5px;">
-      </div>
-      <button type="submit" style="background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000; padding: 12px 24px; font-family: 'Teko', sans-serif; font-size: 20px; font-weight: bold; border-radius: 12px; border: none; cursor: pointer;">Save Lockout Schedule ⏳</button>
-    </form>
+    <!-- Lockout Scheduler Form with Visual Date-Time Picker -->
+    <div style="background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 24px;">
+      <form action="/admin/week/set-lockout" method="POST">
+        <input type="hidden" name="week_number" value="{{ target_week }}">
+        <div style="margin-bottom: 20px;">
+          <label for="lockout_time" style="font-weight: 600; color: #f8fafc; font-family: 'Bebas Neue'; font-size: 20px; letter-spacing: 1px; display: block; margin-bottom: 8px;">Select Kickoff Lockout Date & Time (Week {{ target_week }}):</label>
+          <input type="datetime-local" id="lockout_time" name="lockout_time" value="{{ lockout_time_formatted }}" required style="width: 100%; padding: 14px; background: rgba(15, 23, 42, 0.95); color: #fff; border: 1px solid rgba(56, 189, 248, 0.4); border-radius: 12px; font-size: 16px; outline: none;">
+          <p style="color: #94a3b8; font-size: 12px; margin-top: 6px;">💡 Pick date and time directly from your browser's interactive calendar/clock widget.</p>
+        </div>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+          <button type="submit" style="background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%); color: #000; padding: 12px 24px; font-family: 'Teko', sans-serif; font-size: 20px; font-weight: bold; border-radius: 12px; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);">Update / Override Schedule 🕒</button>
+          <button type="submit" formaction="/admin/week/clear-lockout" style="background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.4); color: #fca5a5; padding: 12px 20px; font-family: 'Teko', sans-serif; font-size: 20px; font-weight: bold; border-radius: 12px; cursor: pointer;">Clear / Remove Lockout ❌</button>
+        </div>
+      </form>
+    </div>
   </div>
 
   <!-- Tab 3: Grade Week -->
