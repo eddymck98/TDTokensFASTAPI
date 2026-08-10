@@ -1,32 +1,58 @@
-{% extends "base.html" %}
+import os
+import resend
+from fastapi import APIRouter, Form, Request
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
 
-{% block content %}
-<div class="admin-portal-container" style="max-width: 600px; margin: 40px auto; padding-bottom: 40px;">
-  <div class="nfl-header" style="text-align: center; margin-bottom: 25px;">
-    <h1 style="font-family: 'Bebas Neue', sans-serif; color: #fbbf24; font-size: 38px; letter-spacing: 2px; margin-bottom: 5px;">CONTACT US</h1>
-    <p class="nfl-subtitle">Have questions or feedback? Send us a message below.</p>
-  </div>
+router = APIRouter()
+templates = Jinja2Templates(directory="templates")
 
-  {% if success %}
-    <div style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); padding: 15px 20px; border-radius: 12px; margin-bottom: 20px; color: #34d399; text-align: center; font-weight: 600;">
-      ✅ Thank you! Your message has been successfully sent.
-    </div>
-  {% endif %}
+# Initialize Resend with your API key from environment variables
+resend.api_key = os.getenv("RESEND_API_KEY")
 
-  <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255,255,255,0.12); padding: 24px; border-radius: 16px;">
-    <form action="/contact" method="POST">
-      <div style="margin-bottom: 15px;">
-        <label style="font-weight: 600; color: #f8fafc; display: block; margin-bottom: 5px; font-family: 'Bebas Neue'; font-size: 18px; letter-spacing: 1px;">Your Name / Email:</label>
-        <input type="text" name="sender_email" placeholder="Enter your email or name..." required style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.92); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; font-size: 15px; outline: none;">
-      </div>
+@router.get("/contact", response_class=HTMLResponse)
+async def contact_get(request: Request, success: bool = False):
+    return templates.TemplateResponse(
+        request,
+        name="contact.html",
+        context={"request": request, "success": success}
+    )
 
-      <div style="margin-bottom: 20px;">
-        <label style="font-weight: 600; color: #f8fafc; display: block; margin-bottom: 5px; font-family: 'Bebas Neue'; font-size: 18px; letter-spacing: 1px;">Message:</label>
-        <textarea name="message_body" rows="5" placeholder="Type your message here..." required style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.92); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; font-size: 15px; outline: none; resize: vertical;"></textarea>
-      </div>
-
-      <button type="submit" style="background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000; padding: 12px 24px; font-family: 'Teko', sans-serif; font-size: 22px; font-weight: bold; border-radius: 12px; border: none; cursor: pointer; width: 100%;">Send Message 🚀</button>
-    </form>
-  </div>
-</div>
-{% endblock %}
+@router.post("/contact", response_class=HTMLResponse)
+async def contact_post(
+    request: Request,
+    sender_email: str = Form(...),
+    message_body: str = Form(...)
+):
+    try:
+        # Send the email using Resend to AK4MVP@gmail.com
+        params = {
+            "from": "Platform Support <onboarding@resend.dev>",  # Change this if you have a verified domain on Resend
+            "to": ["AK4MVP@gmail.com"],
+            "subject": f"New Contact Form Submission from {sender_email}",
+            "html": f"""
+                <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
+                    <h2 style="color: #d97706;">New Contact Message Received</h2>
+                    <p><strong>From / Contact Info:</strong> {sender_email}</p>
+                    <p><strong>Message:</strong></p>
+                    <blockquote style="background: #f9fafb; border-left: 4px solid #d97706; padding: 12px; margin: 0;">
+                        {message_body}
+                    </blockquote>
+                </div>
+            """,
+        }
+        
+        resend.Emails.send(params)
+        
+        return templates.TemplateResponse(
+            request,
+            name="contact.html",
+            context={"request": request, "success": True}
+        )
+    except Exception as e:
+        print(f"Error sending contact email via Resend: {e}")
+        return templates.TemplateResponse(
+            request,
+            name="contact.html",
+            context={"request": request, "success": False}
+        )
