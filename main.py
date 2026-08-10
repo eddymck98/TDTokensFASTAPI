@@ -135,6 +135,12 @@ async def render_dashboard_or_index(request: Request):
     share_text = "🏈 Weekly Lock-Ins Loaded 🏈\n\nNo picks submitted yet."
     token_history_data = {"labels": [], "values": []}
     
+    # Independent out-of-10 tracking variables
+    prediction_wins = 0
+    prediction_total = 10
+    td_wins = 0
+    td_total = 10
+    
     try:
         weeks_res = supabase.table("weekly_questions").select("week_number").neq("week_number", 999).neq("week_number", 998).neq("week_number", 997).neq("week_number", 96).execute()
         if weeks_res.data:
@@ -241,18 +247,26 @@ async def render_dashboard_or_index(request: Request):
                 consensus_data = sorted(consensus_data, key=lambda x: x.get("total_wager", 0), reverse=True)[:3]
                 consensus_data = sorted(consensus_data, key=lambda x: int(x["q_num"]) if str(x["q_num"]).isdigit() else 99)
 
-        # --- 3. COMPUTE CLOSED WEEKS TOKEN PROGRESSION GRAPH HISTORY ---
+        # --- 3. COMPUTE CLOSED WEEKS TOKEN PROGRESSION GRAPH HISTORY & OUT-OF-10 RATIOS ---
         graph_labels = []
         graph_values = []
         running_tokens = 10  # Starting baseline balance
         
+        all_user_matchup_bets = supabase.table("user_bets").select("question_id, pick, wager_amount, week_number").eq("user_id", user.id).execute().data or []
+        total_matchup_count = len(all_user_matchup_bets)
+        won_matchup_count = 0
+
+        all_user_td_picks = supabase.table("touchdown_picks").select("is_correct, week_number").eq("user_id", user.id).execute().data or []
+        total_td_count = len(all_user_td_picks)
+        won_td_count = sum(1 for t in all_user_td_picks if t.get("is_correct") is True)
+
         for w in available_weeks:
             try:
                 status_res = supabase.table("weekly_questions").select("winning_answer").eq("week_number", w).eq("question_number", 98).execute()
                 is_closed = status_res.data and status_res.data[0].get("winning_answer") == "CLOSED"
                 
                 if is_closed:
-                    week_bets = supabase.table("user_bets").select("question_id, pick, wager_amount").eq("user_id", user.id).eq("week_number", w).execute().data
+                    week_bets = [b for b in all_user_matchup_bets if b.get("week_number") == w]
                     week_qs = {q["id"]: q.get("winning_answer") for q in supabase.table("weekly_questions").select("id, winning_answer").eq("week_number", w).execute().data}
                     
                     week_delta = 0
@@ -265,10 +279,11 @@ async def render_dashboard_or_index(request: Request):
                             if winning_ans in ["Yes", "No"]:
                                 if pick == winning_ans:
                                     week_delta += wager
+                                    won_matchup_count += 1
                                 else:
                                     week_delta -= wager
                     
-                    td_record = supabase.table("touchdown_picks").select("is_correct").eq("user_id", user.id).eq("week_number", w).execute().data
+                    td_record = [t for t in all_user_td_picks if t.get("week_number") == w]
                     if td_record and td_record[0].get("is_correct") is True:
                         week_delta += 5
                         
@@ -279,6 +294,19 @@ async def render_dashboard_or_index(request: Request):
                 print(f"Error computing graph for week {w}: {graph_err}")
                 
         token_history_data = {"labels": graph_labels, "values": graph_values}
+
+        # Calculate out of 10 metrics separately for Matchups and TD Scorers
+        if total_matchup_count > 0:
+            prediction_wins = round((won_matchup_count / total_matchup_count) * min(10, total_matchup_count))
+            prediction_total = min(10, total_matchup_count) if total_matchup_count < 10 else 10
+        else:
+            prediction_wins, prediction_total = 0, 10
+
+        if total_td_count > 0:
+            td_wins = round((won_td_count / total_td_count) * min(10, total_td_count))
+            td_total = min(10, total_td_count) if total_td_count < 10 else 10
+        else:
+            td_wins, td_total = 0, 10
 
     except Exception as e:
         print(f"Bets Fetch Error: {e}")
@@ -296,7 +324,11 @@ async def render_dashboard_or_index(request: Request):
             "personal_stats": personal_stats,
             "consensus_data": consensus_data,
             "share_text": share_text,
-            "token_history_json": json.dumps(token_history_data)
+            "token_history_json": json.dumps(token_history_data),
+            "prediction_wins": prediction_wins,
+            "prediction_total": prediction_total,
+            "td_wins": td_wins,
+            "td_total": td_total
         }
     )
 
