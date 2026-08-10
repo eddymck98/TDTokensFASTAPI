@@ -50,10 +50,14 @@ main.container {
     flex: 1;
 }
 
-/* Token Image Styling Utility */
+/* Token Image Styling Utility with hard constraints */
 .token-icon {
-    width: 20px;
-    height: 20px;
+    width: 20px !important;
+    height: 20px !important;
+    max-width: 20px !important;
+    max-height: 20px !important;
+    min-width: 20px !important;
+    min-height: 20px !important;
     vertical-align: middle;
     display: inline-block;
     object-fit: contain;
@@ -61,8 +65,12 @@ main.container {
 }
 
 .token-icon-lg {
-    width: 26px;
-    height: 26px;
+    width: 26px !important;
+    height: 26px !important;
+    max-width: 26px !important;
+    max-height: 26px !important;
+    min-width: 26px !important;
+    min-height: 26px !important;
     vertical-align: middle;
     display: inline-block;
     object-fit: contain;
