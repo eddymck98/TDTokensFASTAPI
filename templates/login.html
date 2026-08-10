@@ -148,7 +148,8 @@ function switchAuthTab(evt, sectionId) {
 
 document.addEventListener("DOMContentLoaded", function() {
   const urlParams = new URLSearchParams(window.location.search);
-  const hashParams = new URLSearchParams(window.location.hash.substring(1));
+  const hashString = window.location.hash.substring(1);
+  const hashParams = new URLSearchParams(hashString);
   
   const errorType = urlParams.get('error');
   const resetType = urlParams.get('reset');
@@ -157,8 +158,8 @@ document.addEventListener("DOMContentLoaded", function() {
   const banner = document.getElementById('login-alert-banner');
   const alertMessage = document.getElementById('alert-message');
 
-  // If user navigated via password recovery email link
-  if (type === 'recovery') {
+  // Robustly catch recovery type whether passed via query parameters or hash fragments (#type=recovery)
+  if (type === 'recovery' || hashString.includes('type=recovery')) {
     const authTabs = document.querySelector('.auth-tabs');
     if (authTabs) authTabs.style.display = 'none';
     
@@ -202,15 +203,21 @@ async function handlePasswordUpdate(evt) {
     return;
   }
 
+  const hashString = window.location.hash.substring(1);
+  const hashParams = new URLSearchParams(hashString);
   const urlParams = new URLSearchParams(window.location.search);
-  const hashParams = new URLSearchParams(window.location.hash.substring(1));
-  const token = urlParams.get('token') || hashParams.get('access_token') || hashParams.get('token');
+  const token = hashParams.get('access_token') || hashParams.get('token') || urlParams.get('token');
 
   if (window.supabase) {
     try {
-      if (token) {
-        await window.supabase.auth.verifyOtp({ token_hash: token, type: 'recovery' });
+      if (token && hashParams.has('access_token')) {
+        // Set the recovery session using the access token from the hash fragment
+        await window.supabase.auth.setSession({
+          access_token: token,
+          refresh_token: hashParams.get('refresh_token') || ''
+        });
       }
+      
       const { error } = await window.supabase.auth.updateUser({ password: newPass });
       if (error) {
         alert("Error updating password: " + error.message);
