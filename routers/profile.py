@@ -22,26 +22,31 @@ async def get_profile_page(request: Request, supabase: Client = Depends(get_supa
         token_data = json.loads(session_cookie)
         acc_token = token_data.get("access_token")
         ref_token = token_data.get("refresh_token")
+        
         auth_res = supabase.auth.set_session(acc_token, ref_token)
         user = auth_res.user
         if not user:
             return RedirectResponse(url="/", status_code=303)
+            
+        # Ensure PostgREST requests carry the user access token for RLS
+        supabase.postgrest.auth(acc_token)
     except Exception:
         return RedirectResponse(url="/", status_code=303)
 
     try:
-        profile = supabase.table("profiles").select("*").eq("id", user.id).single().execute().data or {}
+        # Use safe list matching rather than strict .single() constraint to avoid lookup errors
+        profile_res = supabase.table("profiles").select("*").eq("id", user.id).execute()
+        profile = profile_res.data[0] if profile_res.data else {}
+
         all_profiles = supabase.table("profiles").select("id, full_name, tokens, favorite_team, is_admin, avatar_emoji, avatar_border, avatar_color, selected_title, featured_badges, unlocked_badges, favorite_player, bio").execute().data or []
         
         # Calculate user progression / milestones to dynamically determine unlocked titles
         user_tokens = profile.get("tokens", 10)
         
-        # Fetch total wins or bets if needed for advanced locks, or derive from token growth/history
         bets_res = supabase.table("user_bets").select("is_won").eq("user_id", user.id).execute().data or []
         total_wins = sum(1 for b in bets_res if b.get("is_won") is True)
 
         # Define title unlock rules mapping
-        # Example criteria: "Gridiron Contender" (Default/Always), "High Roller" (20+ tokens), "Sharp Predictor" (5+ wins)
         unlocked_titles = ["🏈 Gridiron Contender", "Free Agent"] # Default basic titles
         
         if user_tokens >= 15:
@@ -58,7 +63,8 @@ async def get_profile_page(request: Request, supabase: Client = Depends(get_supa
         # Inject unlocked titles into profile context for validation and template rendering
         profile["unlocked_titles"] = unlocked_titles
 
-    except Exception:
+    except Exception as e:
+        print(f"Profile fetch error: {e}")
         profile = {"unlocked_titles": ["🏈 Gridiron Contender"]}
         all_profiles = []
 
@@ -88,7 +94,10 @@ async def update_profile(
     
     try:
         token_data = json.loads(session_cookie)
-        supabase.auth.set_session(token_data.get("access_token"), token_data.get("refresh_token"))
+        acc_token = token_data.get("access_token")
+        supabase.auth.set_session(acc_token, token_data.get("refresh_token"))
+        supabase.postgrest.auth(acc_token)
+        
         user = supabase.auth.get_user().user
         if not user:
             raise HTTPException(status_code=401, detail="Invalid user session.")
@@ -100,7 +109,8 @@ async def update_profile(
 
     # Validate that the selected title is actually unlocked by the user to prevent tampering
     try:
-        profile_data = supabase.table("profiles").select("tokens, is_admin").eq("id", user.id).single().execute().data or {}
+        profile_data_res = supabase.table("profiles").select("tokens, is_admin").eq("id", user.id).execute()
+        profile_data = profile_data_res.data[0] if profile_data_res.data else {}
         user_tokens = profile_data.get("tokens", 10)
         is_admin = profile_data.get("is_admin", False)
         
@@ -154,7 +164,10 @@ async def update_featured_badges(
     
     try:
         token_data = json.loads(session_cookie)
-        supabase.auth.set_session(token_data.get("access_token"), token_data.get("refresh_token"))
+        acc_token = token_data.get("access_token")
+        supabase.auth.set_session(acc_token, token_data.get("refresh_token"))
+        supabase.postgrest.auth(acc_token)
+        
         user = supabase.auth.get_user().user
         if not user:
             raise HTTPException(status_code=401, detail="Invalid user session.")
