@@ -50,6 +50,25 @@ main.container {
     flex: 1;
 }
 
+/* Token Image Styling Utility */
+.token-icon {
+    width: 20px;
+    height: 20px;
+    vertical-align: middle;
+    display: inline-block;
+    object-fit: contain;
+    filter: drop-shadow(0px 2px 5px rgba(251, 191, 36, 0.4));
+}
+
+.token-icon-lg {
+    width: 26px;
+    height: 26px;
+    vertical-align: middle;
+    display: inline-block;
+    object-fit: contain;
+    filter: drop-shadow(0px 3px 8px rgba(251, 191, 36, 0.5));
+}
+
 /* ==========================================
    PREMIUM GLOSSY NAVBAR & HEADER
    ========================================== */
