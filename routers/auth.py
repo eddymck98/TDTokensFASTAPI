@@ -24,7 +24,51 @@ def contains_profanity(text: str) -> bool:
 
 def send_verification_email(to_email: str, verification_link: str) -> bool:
     try:
-        html_content = f"""<div style="background-color: #0b0f19; padding: 30px; font-family: 'Inter', Arial, sans-serif; color: #f8fafc;"><div style="max-width: 600px; margin: 0 auto; background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(255, 255, 255, 0.12); border-top: 4px solid #fbbf24; border-radius: 16px; padding: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);"><div style="text-align: center; margin-bottom: 25px;"><img src="https://github.com/eddymck98/TD-Tokens-Render-/blob/main/TD%20Tokens%207.png?raw=true" alt="Touchdown Tokens Logo" style="max-width: 120px; height: auto; margin-bottom: 15px;"><h1 style="font-family: 'Bebas Neue', Arial, sans-serif; color: #fbbf24; font-size: 32px; letter-spacing: 2px; margin: 0;">TOUCHDOWN TOKENS</h1><p style="color: #93c5fd; font-size: 14px; letter-spacing: 3px; text-transform: uppercase; margin-top: 5px;">Weekly NFL Predictions & Wagers</p></div><h3 style="color: #ffffff; font-size: 20px; margin-bottom: 15px;">Welcome to the League, Fan! 🏈</h3><p style="color: #cbd5e1; font-size: 15px; line-height: 1.6; margin-bottom: 25px;">Thanks for registering an account with Touchdown Tokens. To lock in your weekly picks, compete on leaderboards, and claim your tokens, please authorise your email address below:</p><div style="text-align: center; margin: 35px 0;"><a href="{verification_link}" style="background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000000; padding: 14px 28px; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 16px; letter-spacing: 1px; display: inline-block; box-shadow: 0 6px 20px rgba(251, 191, 36, 0.3);">AUTHORISE EMAIL ADDRESS</a></div><p style="color: #94a3b8; font-size: 13px; line-height: 1.5; margin-top: 30px; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 20px;">If you did not request this account creation or verification, you can safely ignore and delete this email.</p></div><div style="text-align: center; margin-top: 20px; color: #64748b; font-size: 12px;">&copy; 2026 Touchdown Tokens. All rights reserved.</div></div>"""
+        html_content = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="margin: 0; padding: 0; background-color: #0b0f19; font-family: 'Segoe UI', Arial, sans-serif;">
+          <table border="0" cellpadding="0" cellspacing="0" width="100%" style="table-layout: fixed; background-color: #0b0f19; padding: 40px 0;">
+            <tr>
+              <td align="center">
+                <table border="0" cellpadding="0" cellspacing="0" width="600" style="background-color: #0f172a; border: 1px solid rgba(255, 255, 255, 0.12); border-top: 4px solid #fbbf24; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+                  <tr>
+                    <td align="center" style="padding: 40px 30px 20px 30px;">
+                      <img src="https://github.com/eddymck98/TD-Tokens-Render-/blob/main/TD%20Tokens%207.png?raw=true" alt="Touchdown Tokens Logo" width="130" style="display: block; max-width: 130px; height: auto; margin-bottom: 15px;">
+                      <h1 style="font-family: Arial, sans-serif; color: #fbbf24; font-size: 28px; letter-spacing: 2px; margin: 0; text-transform: uppercase;">TOUCHDOWN TOKENS</h1>
+                      <p style="color: #93c5fd; font-size: 13px; letter-spacing: 3px; text-transform: uppercase; margin-top: 5px; margin-bottom: 0;">Weekly NFL Predictions & Wagers</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 20px 40px 40px 40px; color: #cbd5e1; font-size: 15px; line-height: 1.6;">
+                      <h3 style="color: #ffffff; font-size: 20px; margin-top: 0; margin-bottom: 15px;">Welcome to the League, Fan! 🏈</h3>
+                      <p style="margin-bottom: 25px;">Thanks for registering an account with Touchdown Tokens. To lock in your weekly picks, compete on leaderboards, and claim your tokens, please authorise your email address below:</p>
+                      <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                        <tr>
+                          <td align="center" style="padding: 10px 0 25px 0;">
+                            <a href="{verification_link}" target="_blank" style="background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000000; padding: 14px 30px; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 16px; letter-spacing: 1px; display: inline-block; box-shadow: 0 6px 20px rgba(251, 191, 36, 0.3);">AUTHORISE EMAIL ADDRESS</a>
+                          </td>
+                        </tr>
+                      </table>
+                      <p style="color: #94a3b8; font-size: 13px; line-height: 1.5; margin-top: 25px; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 20px; margin-bottom: 0;">If you did not request this account creation or verification, you can safely ignore and delete this email.</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td align="center" style="padding: 20px; background-color: #070a12; color: #64748b; font-size: 12px;">
+                      &copy; 2026 Touchdown Tokens. All rights reserved.
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+        </html>
+        """
         resend.Emails.send({"from": "Touchdown Tokens <noreply@auth.tdtokens.co.uk>", "to": [to_email], "subject": "🏈 Authorise Your Touchdown Tokens Account", "html": html_content})
         return True
     except Exception:
@@ -202,7 +246,51 @@ async def request_password_reset(
             recovery_link = f"https://tdtokens.co.uk/?token={email_otp}&type=recovery" if email_otp else action_link
             
             if recovery_link:
-                html_content = f"""<div style="background-color: #0b0f19; padding: 30px; font-family: 'Inter', Arial, sans-serif; color: #f8fafc;"><div style="max-width: 600px; margin: 0 auto; background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(255, 255, 255, 0.12); border-top: 4px solid #fbbf24; border-radius: 16px; padding: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);"><div style="text-align: center; margin-bottom: 25px;"><img src="https://github.com/eddymck98/TD-Tokens-Render-/blob/main/TD%20Tokens%207.png?raw=true" alt="Touchdown Tokens Logo" style="max-width: 120px; height: auto; margin-bottom: 15px;"><h1 style="font-family: 'Bebas Neue', Arial, sans-serif; color: #fbbf24; font-size: 32px; letter-spacing: 2px; margin: 0;">TOUCHDOWN TOKENS</h1><p style="color: #93c5fd; font-size: 14px; letter-spacing: 3px; text-transform: uppercase; margin-top: 5px;">Password Reset Request</p></div><h3 style="color: #ffffff; font-size: 20px; margin-bottom: 15px;">Reset Your Password 🔑</h3><p style="color: #cbd5e1; font-size: 15px; line-height: 1.6; margin-bottom: 25px;">Click the secure button below to choose a brand new password for your account:</p><div style="text-align: center; margin: 35px 0;"><a href="{recovery_link}" style="background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000000; padding: 14px 28px; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 16px; letter-spacing: 1px; display: inline-block; box-shadow: 0 6px 20px rgba(251, 191, 36, 0.3);">RESET PASSWORD</a></div></div></div>"""
+                html_content = f"""
+                <!DOCTYPE html>
+                <html>
+                <head>
+                  <meta charset="utf-8">
+                  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                </head>
+                <body style="margin: 0; padding: 0; background-color: #0b0f19; font-family: 'Segoe UI', Arial, sans-serif;">
+                  <table border="0" cellpadding="0" cellspacing="0" width="100%" style="table-layout: fixed; background-color: #0b0f19; padding: 40px 0;">
+                    <tr>
+                      <td align="center">
+                        <table border="0" cellpadding="0" cellspacing="0" width="600" style="background-color: #0f172a; border: 1px solid rgba(255, 255, 255, 0.12); border-top: 4px solid #fbbf24; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+                          <tr>
+                            <td align="center" style="padding: 40px 30px 20px 30px;">
+                              <img src="https://github.com/eddymck98/TD-Tokens-Render-/blob/main/TD%20Tokens%207.png?raw=true" alt="Touchdown Tokens Logo" width="130" style="display: block; max-width: 130px; height: auto; margin-bottom: 15px;">
+                              <h1 style="font-family: Arial, sans-serif; color: #fbbf24; font-size: 28px; letter-spacing: 2px; margin: 0; text-transform: uppercase;">TOUCHDOWN TOKENS</h1>
+                              <p style="color: #93c5fd; font-size: 13px; letter-spacing: 3px; text-transform: uppercase; margin-top: 5px; margin-bottom: 0;">Password Reset Request</p>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td style="padding: 20px 40px 40px 40px; color: #cbd5e1; font-size: 15px; line-height: 1.6;">
+                              <h3 style="color: #ffffff; font-size: 20px; margin-top: 0; margin-bottom: 15px;">Reset Your Password 🔑</h3>
+                              <p style="margin-bottom: 25px;">Click the secure button below to choose a brand new password for your account:</p>
+                              <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                                <tr>
+                                  <td align="center" style="padding: 10px 0 25px 0;">
+                                    <a href="{recovery_link}" target="_blank" style="background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000000; padding: 14px 30px; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 16px; letter-spacing: 1px; display: inline-block; box-shadow: 0 6px 20px rgba(251, 191, 36, 0.3);">RESET PASSWORD</a>
+                                  </td>
+                                </tr>
+                              </table>
+                              <p style="color: #94a3b8; font-size: 13px; line-height: 1.5; margin-top: 25px; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 20px; margin-bottom: 0;">If you did not request this password reset, you can safely ignore this email.</p>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td align="center" style="padding: 20px; background-color: #070a12; color: #64748b; font-size: 12px;">
+                              &copy; 2026 Touchdown Tokens. All rights reserved.
+                            </td>
+                          </tr>
+                        </table>
+                      </td>
+                    </tr>
+                  </table>
+                </body>
+                </html>
+                """
                 resend.Emails.send({"from": "Touchdown Tokens <noreply@auth.tdtokens.co.uk>", "to": [email.strip()], "subject": "🔑 Reset Your Touchdown Tokens Password", "html": html_content})
                 return RedirectResponse(url="/auth/login?reset=sent", status_code=303)
         raise HTTPException(status_code=400, detail="Could not generate recovery link.")
