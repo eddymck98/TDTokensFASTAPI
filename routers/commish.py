@@ -151,6 +151,45 @@ async def transfer_commissioner_ownership(
         print(f"Error transferring ownership: {e}")
         raise HTTPException(status_code=400, detail=str(e))
 
+@router.post("/delete-league")
+async def delete_league(
+    request: Request,
+    league_id: str = Form(...),
+    confirmation_name: str = Form(...),
+    supabase: Client = Depends(get_supabase)
+):
+    try:
+        session_cookie = request.cookies.get("td_tokens_session")
+        if not session_cookie:
+            raise HTTPException(status_code=401, detail="Unauthorized session.")
+        
+        token_data = json.loads(session_cookie)
+        supabase.auth.set_session(token_data.get("access_token"), token_data.get("refresh_token"))
+        user = supabase.auth.get_user().user
+        if not user:
+            raise HTTPException(status_code=401, detail="Invalid user session.")
+
+        # Fetch league details to verify ownership and name confirmation
+        league_res = supabase.table("leagues").select("name, league_name, commissioner_id").eq("id", league_id).single().execute()
+        if not league_res.data:
+            raise HTTPException(status_code=404, detail="League not found.")
+        
+        league = league_res.data
+        if league.get("commissioner_id") != user.id:
+            raise HTTPException(status_code=403, detail="Only the league commissioner can delete this league.")
+
+        actual_name = league.get("name") or league.get("league_name") or ""
+        if confirmation_name.strip() != actual_name.strip():
+            return RedirectResponse(url=f"/commish?league_id={league_id}&error=name_mismatch", status_code=303)
+
+        # Execute league deletion
+        supabase.table("leagues").delete().eq("id", league_id).execute()
+
+        return RedirectResponse(url="/leagues?success=league_deleted", status_code=303)
+    except Exception as e:
+        print(f"Error deleting league: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
+
 @router.post("/archive-season")
 async def archive_league_season(
     request: Request,
