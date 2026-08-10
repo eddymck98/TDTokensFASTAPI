@@ -108,7 +108,7 @@
 
 </div>
 
-<!-- Client-side script to switch tabs and display error banners -->
+<!-- Client-side script to switch tabs and display error/success banners -->
 <script>
 function switchAuthTab(evt, sectionId) {
   var i, tabContent, tabBtns;
@@ -127,6 +127,7 @@ function switchAuthTab(evt, sectionId) {
 document.addEventListener("DOMContentLoaded", function() {
   const urlParams = new URLSearchParams(window.location.search);
   const errorType = urlParams.get('error');
+  const resetType = urlParams.get('reset');
   const banner = document.getElementById('login-alert-banner');
   const alertMessage = document.getElementById('alert-message');
 
@@ -138,6 +139,12 @@ document.addEventListener("DOMContentLoaded", function() {
     banner.style.display = 'block';
   } else if (errorType === 'admin_locked') {
     alertMessage.textContent = '⚠️ Sign-in is currently locked by the administrator.';
+    banner.style.display = 'block';
+  } else if (resetType === 'sent') {
+    banner.style.background = 'rgba(16, 185, 129, 0.15)';
+    banner.style.borderColor = 'rgba(16, 185, 129, 0.4)';
+    banner.style.color = '#34d399';
+    alertMessage.textContent = '✅ Success! A password reset link has been sent to your email.';
     banner.style.display = 'block';
   }
 });
