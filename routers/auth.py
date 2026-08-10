@@ -101,13 +101,35 @@ async def signup_user(
     if contains_profanity(combined_full_name):
         raise HTTPException(status_code=400, detail="Name contains restricted language.")
 
+    clean_email = email.strip().lower()
+
     try:
-        response = supabase.auth.sign_up({"email": email.strip(), "password": password})
-        if response.user:
-            new_uid = response.user.id
-            supabase.table("profiles").insert({
+        service_key = os.environ.get("SUPABASE_SERVICE_KEY", "")
+        url = os.environ.get("SUPABASE_URL", "")
+        admin_supabase = create_client(url, service_key) if service_key and url else supabase
+
+        # Check and clear out any lingering ghost auth records to allow a clean sign up
+        try:
+            existing_users = admin_supabase.auth.admin.list_users()
+            matching_user = next((u for u in existing_users if u.email.lower() == clean_email), None)
+            if matching_user:
+                admin_supabase.auth.admin.delete_user(matching_user.id)
+        except Exception:
+            pass
+
+        # Create user via Admin API to guarantee fresh state and token generation
+        create_res = admin_supabase.auth.admin.create_user({
+            "email": clean_email,
+            "password": password,
+            "email_confirm": False
+        })
+
+        if create_res and create_res.user:
+            new_uid = create_res.user.id
+            
+            admin_supabase.table("profiles").upsert({
                 "id": new_uid,
-                "email": email.strip(),
+                "email": clean_email,
                 "full_name": combined_full_name,
                 "tokens": 10,
                 "is_admin": False,
@@ -127,7 +149,7 @@ async def signup_user(
             }).execute()
 
             try:
-                supabase.table("league_members").insert({
+                admin_supabase.table("league_members").insert({
                     "league_id": "00000000-0000-0000-0000-000000000001",
                     "user_id": new_uid
                 }).execute()
@@ -135,11 +157,7 @@ async def signup_user(
                 pass
 
             # Generate proper verification token link via admin api
-            service_key = os.environ.get("SUPABASE_SERVICE_KEY", "")
-            url = os.environ.get("SUPABASE_URL", "")
-            admin_supabase = create_client(url, service_key) if service_key and url else supabase
-            
-            link_response = admin_supabase.auth.admin.generate_link({"type": "signup", "email": email.strip()})
+            link_response = admin_supabase.auth.admin.generate_link({"type": "signup", "email": clean_email})
             verification_link = f"https://tdtokens.co.uk/"
             
             if link_response and hasattr(link_response, "properties") and link_response.properties:
@@ -148,7 +166,7 @@ async def signup_user(
                 email_otp = props.get("email_otp") if isinstance(props, dict) else getattr(props, "email_otp", None)
                 verification_link = f"https://tdtokens.co.uk/?token={email_otp}&type=signup" if email_otp else (action_link or verification_link)
 
-            send_verification_email(email.strip(), verification_link)
+            send_verification_email(clean_email, verification_link)
             return RedirectResponse(url="/auth/login?reset=sent", status_code=303)
         else:
             raise HTTPException(status_code=400, detail="Sign up failed.")
