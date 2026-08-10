@@ -30,10 +30,36 @@ async def get_profile_page(request: Request, supabase: Client = Depends(get_supa
         return RedirectResponse(url="/", status_code=303)
 
     try:
-        profile = supabase.table("profiles").select("*").eq("id", user.id).single().execute().data
+        profile = supabase.table("profiles").select("*").eq("id", user.id).single().execute().data or {}
         all_profiles = supabase.table("profiles").select("id, full_name, tokens, favorite_team, is_admin, avatar_emoji, avatar_border, avatar_color, selected_title, featured_badges, unlocked_badges, favorite_player, bio").execute().data or []
+        
+        # Calculate user progression / milestones to dynamically determine unlocked titles
+        user_tokens = profile.get("tokens", 10)
+        
+        # Fetch total wins or bets if needed for advanced locks, or derive from token growth/history
+        bets_res = supabase.table("user_bets").select("is_won").eq("user_id", user.id).execute().data or []
+        total_wins = sum(1 for b in bets_res if b.get("is_won") is True)
+
+        # Define title unlock rules mapping
+        # Example criteria: "Gridiron Contender" (Default/Always), "High Roller" (20+ tokens), "Sharp Predictor" (5+ wins)
+        unlocked_titles = ["🏈 Gridiron Contender", "Free Agent"] # Default basic titles
+        
+        if user_tokens >= 15:
+            unlocked_titles.append("💰 High Roller")
+        if user_tokens >= 25:
+            unlocked_titles.append("🔥 Token Tycoon")
+        if total_wins >= 3:
+            unlocked_titles.append("🎯 Sharp Predictor")
+        if total_wins >= 10:
+            unlocked_titles.append("🧠 Gridiron Oracle")
+        if profile.get("is_admin"):
+            unlocked_titles.append("👑 Commissioner")
+
+        # Inject unlocked titles into profile context for validation and template rendering
+        profile["unlocked_titles"] = unlocked_titles
+
     except Exception:
-        profile = {}
+        profile = {"unlocked_titles": ["🏈 Gridiron Contender"]}
         all_profiles = []
 
     return templates.TemplateResponse(request=request, name="profile.html", context={
@@ -71,6 +97,35 @@ async def update_profile(
 
     if not full_name.strip():
         raise HTTPException(status_code=400, detail="Display name cannot be blank.")
+
+    # Validate that the selected title is actually unlocked by the user to prevent tampering
+    try:
+        profile_data = supabase.table("profiles").select("tokens, is_admin").eq("id", user.id).single().execute().data or {}
+        user_tokens = profile_data.get("tokens", 10)
+        is_admin = profile_data.get("is_admin", False)
+        
+        bets_res = supabase.table("user_bets").select("is_won").eq("user_id", user.id).execute().data or []
+        total_wins = sum(1 for b in bets_res if b.get("is_won") is True)
+
+        allowed_titles = ["🏈 Gridiron Contender", "Free Agent"]
+        if user_tokens >= 15:
+            allowed_titles.append("💰 High Roller")
+        if user_tokens >= 25:
+            allowed_titles.append("🔥 Token Tycoon")
+        if total_wins >= 3:
+            allowed_titles.append("🎯 Sharp Predictor")
+        if total_wins >= 10:
+            allowed_titles.append("🧠 Gridiron Oracle")
+        if is_admin:
+            allowed_titles.append("👑 Commissioner")
+
+        if selected_title.strip() not in allowed_titles:
+            raise HTTPException(status_code=400, detail="You have not unlocked this title yet!")
+
+    except HTTPException as he:
+        raise he
+    except Exception:
+        pass # Fallback safety if verification fails lookup
 
     try:
         supabase.table("profiles").update({
