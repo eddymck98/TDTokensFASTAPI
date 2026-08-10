@@ -11,6 +11,20 @@
     </div>
   </div>
 
+  <!-- Sticky Real-Time Wager Budget Tracker Bar -->
+  <div id="budget-tracker-bar" style="position: sticky; top: 75px; z-index: 900; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(16px); border: 1px solid rgba(251, 191, 36, 0.3); border-radius: 12px; padding: 12px 18px; margin-bottom: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+    <div style="display: flex; align-items: center; gap: 12px; font-family: 'Bebas Neue'; font-size: 17px; flex-wrap: wrap;">
+      <span style="color: #94a3b8;">BANK: <b id="tracker-bank" style="color: #fff;">{{ profile.tokens | default(10) }}</b> 🪙</span>
+      <span style="color: #64748b;">|</span>
+      <span style="color: #38bdf8;">WAGERED: <b id="tracker-wagered" style="color: #38bdf8;">0</b> 🪙</span>
+      <span style="color: #64748b;">|</span>
+      <span style="color: #10b981;">REMAINING: <b id="tracker-remaining" style="color: #10b981;">{{ profile.tokens | default(10) }}</b> 🪙</span>
+    </div>
+    <div id="budget-warning" style="font-size: 12px; font-weight: bold; color: #ef4444; display: none;">
+      ⚠️ Over Budget!
+    </div>
+  </div>
+
   <!-- Header Section -->
   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px;">
     <div style="flex: 1; min-width: 250px;">
@@ -69,13 +83,13 @@
         </div>
 
         <!-- Dynamic Question Cards Container -->
-        <div id="questions-container">
+        <div id="questions-container" style="display: grid; gap: 14px;">
           {% if questions %}
             {% for q in questions %}
-              <div class="question-card" style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255,255,255,0.12); border-radius: 14px; padding: 15px; margin-bottom: 18px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+              <div class="question-card" style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255,255,255,0.12); border-left: 4px solid #38bdf8; border-radius: 14px; padding: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
                 
                 <!-- Team Matchup Header with Logos -->
-                <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(30, 41, 59, 0.6); padding: 10px 12px; border-radius: 10px; margin-bottom: 14px; border: 1px solid rgba(255,255,255,0.06); gap: 8px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(30, 41, 59, 0.6); padding: 10px 12px; border-radius: 10px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.06); gap: 8px;">
                   <div style="display: flex; align-items: center; gap: 6px; overflow: hidden; flex: 1;">
                     <img src="{{ q.away_logo }}" alt="Away Logo" style="width: 28px; height: 28px; object-fit: contain; flex-shrink: 0;">
                     <span style="color: #ffffff; font-weight: 600; font-size: 13px; word-break: break-word;">{{ q.away_team }}</span>
@@ -92,23 +106,42 @@
                   <span style="color: #38bdf8; font-weight: bold; margin-right: 6px;">Q{{ q.question_number }}.</span>{{ q.prompt }}
                 </p>
                 
-                <!-- Redesigned Toggle & Wager Section -->
-                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                  <div style="display: flex; gap: 8px; flex: 1; min-width: 200px;">
+                <!-- Redesigned Toggle & Stepper Section -->
+                <div style="display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; flex-wrap: wrap;">
+                  
+                  <!-- Yes / No Choice Toggle Buttons -->
+                  <div style="display: flex; gap: 8px;">
                     <label style="flex: 1; cursor: {% if is_week_closed %}default{% else %}pointer{% endif %};">
                       <input type="radio" name="pick_{{ q.id }}" value="Yes" required style="display:none;" onchange="updateRadioStyles(this)" {% if q.user_pick == 'Yes' %}checked{% endif %} {% if is_week_closed %}disabled{% endif %}>
-                      <div class="toggle-btn yes-btn {% if q.user_pick == 'Yes' %}yes-active{% endif %}" style="text-align: center; padding: 10px 4px; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #cbd5e1; font-family: 'Bebas Neue', sans-serif; font-size: 20px; transition: 0.2s;">YES</div>
+                      <div class="toggle-btn yes-btn {% if q.user_pick == 'Yes' %}yes-active{% endif %}" style="text-align: center; padding: 10px 4px; border: 1px solid {% if q.user_pick == 'Yes' %}#10b981{% else %}rgba(255,255,255,0.15){% endif %}; border-radius: 8px; color: #fff; font-family: 'Teko', sans-serif; font-size: 18px; font-weight: bold; transition: 0.2s;">YES 👍</div>
                     </label>
                     <label style="flex: 1; cursor: {% if is_week_closed %}default{% else %}pointer{% endif %};">
                       <input type="radio" name="pick_{{ q.id }}" value="No" required style="display:none;" onchange="updateRadioStyles(this)" {% if q.user_pick == 'No' %}checked{% endif %} {% if is_week_closed %}disabled{% endif %}>
-                      <div class="toggle-btn no-btn {% if q.user_pick == 'No' %}no-active{% endif %}" style="text-align: center; padding: 10px 4px; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #cbd5e1; font-family: 'Bebas Neue', sans-serif; font-size: 20px; transition: 0.2s;">NO</div>
+                      <div class="toggle-btn no-btn {% if q.user_pick == 'No' %}no-active{% endif %}" style="text-align: center; padding: 10px 4px; border: 1px solid {% if q.user_pick == 'No' %}#ef4444{% else %}rgba(255,255,255,0.15){% endif %}; border-radius: 8px; color: #fff; font-family: 'Teko', sans-serif; font-size: 18px; font-weight: bold; transition: 0.2s;">NO 👎</div>
                     </label>
                   </div>
-                  
+
+                  {% if not is_week_closed %}
+                  <!-- Custom Token Stepper & Input Box Controls -->
+                  <div style="display: flex; align-items: center; gap: 6px; background: rgba(30, 41, 59, 0.8); padding: 4px 8px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.15);">
+                    <button type="button" onclick="adjustWager('{{ q.id }}', -1)" style="background: none; border: none; color: #cbd5e1; font-size: 16px; font-weight: bold; cursor: pointer; padding: 4px 8px;">-</button>
+                    
+                    <div style="display: flex; align-items: center; gap: 2px;">
+                      <input class="token-input" type="number" id="wager_{{ q.id }}" name="wager_{{ q.id }}" value="{{ q.user_wager | default(0) }}" min="0" max="{{ profile.tokens | default(10) }}" oninput="updateTokenAllocation()" style="width: 45px; background: transparent; border: none; color: #fbbf24; font-family: 'Bebas Neue'; font-size: 20px; text-align: center; padding: 0;">
+                      <span style="font-size: 13px;">🪙</span>
+                    </div>
+
+                    <button type="button" onclick="adjustWager('{{ q.id }}', 1)" style="background: none; border: none; color: #cbd5e1; font-size: 16px; font-weight: bold; cursor: pointer; padding: 4px 8px;">+</button>
+                    <button type="button" onclick="setMaxWager('{{ q.id }}')" style="background: rgba(251, 191, 36, 0.2); border: 1px solid rgba(251, 191, 36, 0.4); color: #fbbf24; font-size: 11px; font-weight: bold; padding: 4px 6px; border-radius: 6px; cursor: pointer;">MAX</button>
+                  </div>
+                  {% else %}
+                  <!-- Disabled view for closed weeks -->
                   <div style="display: flex; align-items: center; background: rgba(30, 41, 59, 0.9); padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2);">
                     <span style="font-size: 16px; margin-right: 6px;">🪙</span>
-                    <input class="token-input" type="number" name="wager_{{ q.id }}" value="{{ q.user_wager | default(0) }}" min="0" max="{{ profile.tokens | default(10) }}" placeholder="Amt" required style="width: 45px; background: transparent; border: none; color: #fff; font-size: 16px; font-weight: bold; outline: none; text-align: center;" {% if is_week_closed %}disabled{% endif %}>
+                    <span style="color: #fbbf24; font-size: 16px; font-weight: bold;">{{ q.user_wager | default(0) }}</span>
                   </div>
+                  {% endif %}
+
                 </div>
 
                 {% if is_week_closed %}
@@ -186,8 +219,8 @@
 
 <style>
   /* Active states for custom Yes/No toggles */
-  .yes-active { background: #10b981 !important; color: #fff !important; border-color: #10b981 !important; box-shadow: 0 0 15px rgba(16, 185, 129, 0.4); }
-  .no-active { background: #ef4444 !important; color: #fff !important; border-color: #ef4444 !important; box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); }
+  .yes-active { background: rgba(16, 185, 129, 0.25) !important; color: #fff !important; border-color: #10b981 !important; box-shadow: 0 0 15px rgba(16, 185, 129, 0.4); }
+  .no-active { background: rgba(239, 68, 68, 0.25) !important; color: #fff !important; border-color: #ef4444 !important; box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); }
   
   input[type="text"]:focus, input[type="number"]:focus {
     border-color: #38bdf8 !important;
@@ -195,7 +228,7 @@
 </style>
 
 <script>
-  const maxTokens = parseInt("{{ profile.tokens | default(10) }}");
+  const maxBankTokens = parseInt("{{ profile.tokens | default(10) }}");
 
   function updateTokenAllocation() {
     const wagerInputs = document.querySelectorAll('input[name^="wager_"]');
@@ -204,24 +237,72 @@
       totalAllocated += parseInt(input.value) || 0;
     });
 
+    // Update bottom tracker progress bar & count
     const tokenCountDisplay = document.getElementById('allocated-tokens-count');
     if(tokenCountDisplay) {
         tokenCountDisplay.innerText = totalAllocated;
-        const percentage = Math.min(100, (totalAllocated / Math.max(1, maxTokens)) * 100);
+        const percentage = Math.min(100, (totalAllocated / Math.max(1, maxBankTokens)) * 100);
         document.getElementById('token-progress-bar').style.width = percentage + '%';
 
-        if (totalAllocated > maxTokens) {
+        if (totalAllocated > maxBankTokens) {
           tokenCountDisplay.style.color = '#ef4444';
         } else {
           tokenCountDisplay.style.color = '#f8fafc';
         }
     }
+
+    // Update sticky budget tracker header bar values
+    const trackerWagered = document.getElementById("tracker-wagered");
+    const trackerRemaining = document.getElementById("tracker-remaining");
+    const budgetWarning = document.getElementById("budget-warning");
+    const submitBtn = document.getElementById("submit-bets-btn");
+
+    if (trackerWagered) {
+      const remaining = maxBankTokens - totalAllocated;
+      trackerWagered.innerText = totalAllocated;
+      trackerRemaining.innerText = remaining;
+
+      if (remaining < 0) {
+        budgetWarning.style.display = "block";
+        trackerRemaining.style.color = "#ef4444";
+        if (submitBtn) {
+          submitBtn.style.opacity = "0.5";
+          submitBtn.style.pointerEvents = "none";
+        }
+      } else {
+        budgetWarning.style.display = "none";
+        trackerRemaining.style.color = "#10b981";
+        if (submitBtn) {
+          submitBtn.style.opacity = "1";
+          submitBtn.style.pointerEvents = "auto";
+        }
+      }
+    }
+  }
+
+  function adjustWager(questionId, delta) {
+    const input = document.getElementById(`wager_${questionId}`);
+    let currentVal = parseInt(input.value) || 0;
+    let newVal = currentVal + delta;
+    
+    if (newVal < 0) newVal = 0;
+    input.value = newVal;
+    updateTokenAllocation();
+  }
+
+  function setMaxWager(questionId) {
+    const input = document.getElementById(`wager_${questionId}`);
+    input.value = maxBankTokens;
+    updateTokenAllocation();
   }
 
   function resetWagers() {
     setTimeout(() => {
       document.querySelectorAll('.toggle-btn').forEach(btn => {
         btn.classList.remove('yes-active', 'no-active');
+      });
+      document.querySelectorAll('input[name^="wager_"]').forEach(input => {
+        input.value = 0;
       });
       updateTokenAllocation();
     }, 50);
