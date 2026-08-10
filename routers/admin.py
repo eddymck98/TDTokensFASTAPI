@@ -81,6 +81,8 @@ async def admin_portal_landing(request: Request, week: Optional[int] = None):
     available_weeks = []
     target_week = 1
     is_week_closed = False
+    is_published = True
+    lockout_time_formatted = ""
 
     try:
         weeks_res = supabase.table("weekly_questions").select("week_number").neq("week_number", 999).neq("week_number", 998).neq("week_number", 997).neq("week_number", 96).execute()
@@ -93,6 +95,20 @@ async def admin_portal_landing(request: Request, week: Optional[int] = None):
         status_res = supabase.table("weekly_questions").select("winning_answer").eq("week_number", target_week).eq("question_number", 98).execute()
         if status_res.data and status_res.data[0].get("winning_answer") == "CLOSED":
             is_week_closed = True
+
+        # Check publishing status (Default to True/published if row/column doesn't explicitly restrict it, or check via custom metadata)
+        pub_res = supabase.table("weekly_questions").select("winning_answer").eq("week_number", target_week).eq("question_number", 96).execute()
+        if pub_res.data and pub_res.data[0].get("winning_answer") == "UNPUBLISHED":
+            is_published = False
+
+        # Fetch lockout schedule if stored
+        lock_res = supabase.table("weekly_questions").select("winning_answer").eq("week_number", target_week).eq("question_number", 99).ilike("winning_answer", "LOCKTIME:%").execute()
+        if lock_res.data:
+            raw_lock = lock_res.data[0].get("winning_answer", "")
+            if ":" in raw_lock:
+                iso_str = raw_lock.split(":", 1)[1]
+                # Format for datetime-local input (YYYY-MM-DDTHH:MM)
+                lockout_time_formatted = iso_str.replace("Z", "")[:16]
 
     except Exception as e:
         print(f"Error fetching weeks for admin: {e}")
@@ -112,7 +128,6 @@ async def admin_portal_landing(request: Request, week: Optional[int] = None):
             supabase.table("weekly_questions")
             .select("*")
             .eq("week_number", target_week)
-            .order("question_number")
             .execute()
         )
         existing_questions = q_res.data if q_res.data else []
@@ -122,7 +137,7 @@ async def admin_portal_landing(request: Request, week: Optional[int] = None):
     questions_map = {}
     for q in existing_questions:
         qn = q.get("question_number")
-        if qn >= 98: # Skip system utility rows
+        if qn >= 96: # Skip system utility rows (96, 98, 99, etc.)
             continue
         q_text = q.get("question_text", "")
         
@@ -171,6 +186,8 @@ async def admin_portal_landing(request: Request, week: Optional[int] = None):
             "available_weeks": available_weeks,
             "target_week": target_week,
             "is_week_closed": is_week_closed,
+            "is_published": is_published,
+            "lockout_time_formatted": lockout_time_formatted,
             "questions_map": questions_map,
             "user_td_picks": user_td_picks,
             "all_profiles": all_profiles
@@ -182,17 +199,25 @@ async def admin_create_new_week(
     request: Request,
     supabase: Client = Depends(get_supabase)
 ):
-    """Creates the next consecutive week number in the database."""
+    """Creates the next consecutive week number in the database as an unpublished draft."""
     try:
         weeks_res = supabase.table("weekly_questions").select("week_number").neq("week_number", 999).neq("week_number", 998).neq("week_number", 997).neq("week_number", 96).execute()
         existing_weeks = sorted(list(set([r["week_number"] for r in weeks_res.data]))) if weeks_res.data else [1]
         next_week = existing_weeks[-1] + 1 if existing_weeks else 1
 
+        # Insert question 1 as draft and mark week 96 as UNPUBLISHED
         supabase.table("weekly_questions").insert({
             "week_number": next_week,
             "question_number": 1,
             "question_text": f"Week {next_week} Opening Matchup | MATCHUP: 🏈 Free Agent / Neutral @ 🏈 Free Agent / Neutral",
             "winning_answer": "Pending"
+        }).execute()
+
+        supabase.table("weekly_questions").insert({
+            "week_number": next_week,
+            "question_number": 96,
+            "question_text": "PUBLISH STATUS",
+            "winning_answer": "UNPUBLISHED"
         }).execute()
 
         return RedirectResponse(url=f"/admin?week={next_week}", status_code=303)
@@ -227,6 +252,55 @@ async def admin_publish_questions(
             supabase.table("weekly_questions").insert({"week_number": week_number, "question_number": i, "question_text": combined_text, "winning_answer": "Pending"}).execute()
     
     return RedirectResponse(url=f"/admin?week={week_number}&success=questions_published", status_code=303)
+
+@router.post("/week/set-lockout")
+async def set_lockout(
+    request: Request,
+    week_number: int = Form(...),
+    lockout_time: str = Form(...),
+    supabase: Client = Depends(get_supabase)
+):
+    iso_time = f"{lockout_time}:00Z" if lockout_time else ""
+    supabase.table("weekly_questions").delete().eq("week_number", week_number).eq("question_number", 99).execute()
+    supabase.table("weekly_questions").insert({
+        "week_number": week_number,
+        "question_number": 99,
+        "question_text": "LOCKTIME SCHEDULER",
+        "winning_answer": f"LOCKTIME:{iso_time}"
+    }).execute()
+    return RedirectResponse(url=f"/admin?week={week_number}&success=lockout_updated", status_code=303)
+
+@router.post("/week/clear-lockout")
+async def clear_lockout(
+    request: Request,
+    week_number: int = Form(...),
+    supabase: Client = Depends(get_supabase)
+):
+    supabase.table("weekly_questions").delete().eq("week_number", week_number).eq("question_number", 99).execute()
+    return RedirectResponse(url=f"/admin?week={week_number}&success=lockout_cleared", status_code=303)
+
+@router.post("/week/publish")
+async def publish_week(
+    request: Request,
+    week_number: int = Form(...),
+    supabase: Client = Depends(get_supabase)
+):
+    supabase.table("weekly_questions").delete().eq("week_number", week_number).eq("question_number", 96).execute()
+    return RedirectResponse(url=f"/admin?week={week_number}&success=published", status_code=303)
+
+@router.post("/week/unpublish")
+async def unpublish_week(
+    request: Request,
+    week_number: int = Form(...),
+    supabase: Client = Depends(get_supabase)
+):
+    supabase.table("weekly_questions").upsert({
+        "week_number": week_number,
+        "question_number": 96,
+        "question_text": "PUBLISH STATUS",
+        "winning_answer": "UNPUBLISHED"
+    }, on_conflict="week_number,question_number").execute()
+    return RedirectResponse(url=f"/admin?week={week_number}&success=unpublished", status_code=303)
 
 @router.post("/schedule")
 async def admin_save_lockout(
