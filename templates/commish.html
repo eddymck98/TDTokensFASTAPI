@@ -117,7 +117,7 @@
       </div>
 
       <!-- Archive Season & Hall of Fame Panel -->
-      <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-left: 4px solid #10b981; border-radius: 16px; padding: 24px; backdrop-filter: blur(14px);">
+      <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-left: 4px solid #10b981; border-radius: 16px; padding: 24px; margin-bottom: 25px; backdrop-filter: blur(14px);">
         <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: #34d399; letter-spacing: 1px; margin-top: 0; margin-bottom: 8px;">🏆 ARCHIVE SEASON & HALL OF FAME</h3>
         <p style="color: #94a3b8; font-size: 13px; margin-bottom: 16px;">Finalize the current competition, snapshot standings, and record them in the league's Hall of Fame Archives.</p>
         
@@ -127,6 +127,23 @@
             <input type="text" name="season_label" placeholder="Season Label (e.g., 2026 Season)" required style="flex: 1; min-width: 200px; padding: 10px 12px; background: rgba(30, 41, 59, 0.9); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; font-size: 14px;">
             <button type="submit" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; padding: 10px 20px; font-family: 'Teko', sans-serif; font-size: 20px; font-weight: bold; border-radius: 8px; border: none; cursor: pointer;">Archive Season 🌟</button>
           </div>
+        </form>
+      </div>
+
+      <!-- Danger Zone: Delete League Panel -->
+      <div style="background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.3); border-left: 4px solid #ef4444; border-radius: 16px; padding: 24px; backdrop-filter: blur(14px);">
+        <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: #f87171; letter-spacing: 1px; margin-top: 0; margin-bottom: 8px;">⚠️ DANGER ZONE: DELETE LEAGUE</h3>
+        <p style="color: #94a3b8; font-size: 13px; margin-bottom: 16px;">Permanently delete this mini-league, remove all members, and wipe all associated chat feeds and archives. <strong style="color: #ef4444;">This action cannot be undone.</strong></p>
+
+        <form action="/commish/delete-league" method="POST" onsubmit="return confirm('FINAL WARNING: Are you completely sure you want to delete {{ selected_league.name }}?');">
+          <input type="hidden" name="league_id" value="{{ selected_league.id }}">
+          
+          <div style="margin-bottom: 12px; max-width: 450px;">
+            <label style="font-size: 12px; color: #cbd5e1; display: block; margin-bottom: 6px;">To confirm, type the exact league name (<b style="color: #fbbf24;">{{ selected_league.name }}</b>) below:</label>
+            <input type="text" name="confirmation_name" placeholder="Type league name here..." required style="width: 100%; padding: 10px 12px; background: rgba(15, 23, 42, 0.9); color: #fff; border: 1px solid rgba(239, 68, 68, 0.4); border-radius: 8px; font-size: 14px;">
+          </div>
+
+          <button type="submit" style="background: #ef4444; color: #fff; padding: 10px 20px; font-family: 'Teko', sans-serif; font-size: 20px; font-weight: bold; border-radius: 8px; border: none; cursor: pointer;">Delete League Permanently 🚨</button>
         </form>
       </div>
 
