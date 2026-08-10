@@ -66,16 +66,31 @@
         <div>
           <label for="selected_title" style="font-weight: 600; font-size: 13px; color: #f8fafc; display: block; margin-bottom: 6px;">Active Nametag Title:</label>
           <select id="selected_title" name="selected_title" style="width: 100%; padding: 12px; background: rgba(30, 41, 59, 0.9); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; font-size: 15px;">
-            <option value="🏈 Gridiron Contender" {% if profile.selected_title == '🏈 Gridiron Contender' %}selected{% endif %}>🏈 Gridiron Contender</option>
-            <option value="👑 League Champion" {% if profile.selected_title == '👑 League Champion' %}selected{% endif %}>👑 League Champion</option>
-            <option value="⭐ League Commissioner" {% if profile.selected_title == '⭐ League Commissioner' %}selected{% endif %}>⭐ League Commissioner</option>
-            <option value="🔮 The Oracle" {% if profile.selected_title == '🔮 The Oracle' %}selected{% endif %}>🔮 The Oracle</option>
-            <option value="💰 Token Tycoon" {% if profile.selected_title == '💰 Token Tycoon' %}selected{% endif %}>💰 Token Tycoon</option>
-            <option value="⚡ Gridiron Prophet" {% if profile.selected_title == '⚡ Gridiron Prophet' %}selected{% endif %}>⚡ Gridiron Prophet</option>
-            <option value="🎯 Sharp Shooter" {% if profile.selected_title == '🎯 Sharp Shooter' %}selected{% endif %}>🎯 Sharp Shooter</option>
-            <option value="🏈 TD Specialist" {% if profile.selected_title == '🏈 TD Specialist' %}selected{% endif %}>🏈 TD Specialist</option>
-            <option value="🛡️ Mini-League Monarch" {% if profile.selected_title == '🛡️ Mini-League Monarch' %}selected{% endif %}>🛡️ Mini-League Monarch</option>
-            <option value="📉 Bankrupt Gambler" {% if profile.selected_title == '📉 Bankrupt Gambler' %}selected{% endif %}>📉 Bankrupt Gambler</option>
+            {% set available_titles = profile.unlocked_titles | default(['🏈 Gridiron Contender']) %}
+            
+            {% set all_possible_titles = [
+              "🏈 Gridiron Contender",
+              "Free Agent",
+              "👑 League Champion",
+              "👑 Commissioner",
+              "🔮 The Oracle",
+              "💰 High Roller",
+              "🔥 Token Tycoon",
+              "⚡ Gridiron Prophet",
+              "🎯 Sharp Predictor",
+              "🧠 Gridiron Oracle",
+              "🏈 TD Specialist",
+              "🛡️ Mini-League Monarch",
+              "📉 Bankrupt Gambler"
+            ] %}
+
+            {% for t in all_possible_titles %}
+              {% if t in available_titles %}
+                <option value="{{ t }}" {% if profile.selected_title == t %}selected{% endif %}>{{ t }}</option>
+              {% else %}
+                <option value="{{ t }}" disabled style="color: #64748b;">🔒 {{ t }} (Locked)</option>
+              {% endif %}
+            {% endfor %}
           </select>
         </div>
         <div>
