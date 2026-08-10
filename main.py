@@ -8,8 +8,8 @@ from fastapi.templating import Jinja2Templates
 from supabase import create_client
 from starlette.middleware.base import BaseHTTPMiddleware
 
-# Import your modular routers (including commish)
-from routers import auth, bets, leagues, profile, admin, commish
+# Import your modular routers (including commish and the new contact router)
+from routers import auth, bets, leagues, profile, admin, commish, contact
 
 class CommissionerCheckMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
@@ -75,6 +75,7 @@ app.include_router(leagues.router, prefix="/leagues", tags=["Leagues & Standings
 app.include_router.router(profile.router, prefix="/profile", tags=["Profile Management"]) if hasattr(profile.router, "router") else app.include_router(profile.router, prefix="/profile", tags=["Profile Management"])
 app.include_router(admin.router, prefix="/admin", tags=["Admin Portal"])
 app.include_router(commish.router, prefix="/commish", tags=["Commissioner Portal"])
+app.include_router(contact.router, tags=["Contact Us"])
 
 @app.get("/logout")
 async def logout(request: Request):
