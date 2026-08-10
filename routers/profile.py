@@ -28,23 +28,28 @@ async def get_profile_page(request: Request, supabase: Client = Depends(get_supa
         if not user:
             return RedirectResponse(url="/", status_code=303)
             
-        # Ensure PostgREST requests carry the user access token for RLS
         supabase.postgrest.auth(acc_token)
     except Exception:
         return RedirectResponse(url="/", status_code=303)
 
     try:
-        # Use safe list matching rather than strict .single() constraint to avoid lookup errors
+        # Fetch current user profile row
         profile_res = supabase.table("profiles").select("*").eq("id", user.id).execute()
         profile = profile_res.data[0] if profile_res.data else {}
 
         all_profiles = supabase.table("profiles").select("id, full_name, tokens, favorite_team, is_admin, avatar_emoji, avatar_border, avatar_color, selected_title, featured_badges, unlocked_badges, favorite_player, bio").execute().data or []
         
-        # Calculate user progression / milestones to dynamically determine unlocked titles
         user_tokens = profile.get("tokens", 10)
         
-        bets_res = supabase.table("user_bets").select("is_won").eq("user_id", user.id).execute().data or []
-        total_wins = sum(1 for b in bets_res if b.get("is_won") is True)
+        # Calculate total wins using tokens_awarded > 0 from user_bets
+        total_wins = 0
+        try:
+            bets_res = supabase.table("user_bets").select("tokens_awarded").eq("user_id", user.id).execute().data or []
+            for b in bets_res:
+                if (b.get("tokens_awarded") or 0) > 0:
+                    total_wins += 1
+        except Exception:
+            pass 
 
         # Define title unlock rules mapping
         unlocked_titles = ["🏈 Gridiron Contender", "Free Agent"] # Default basic titles
@@ -60,12 +65,11 @@ async def get_profile_page(request: Request, supabase: Client = Depends(get_supa
         if profile.get("is_admin"):
             unlocked_titles.append("👑 Commissioner")
 
-        # Inject unlocked titles into profile context for validation and template rendering
         profile["unlocked_titles"] = unlocked_titles
 
     except Exception as e:
         print(f"Profile fetch error: {e}")
-        profile = {"unlocked_titles": ["🏈 Gridiron Contender"]}
+        profile = {"unlocked_titles": ["🏈 Gridiron Contender", "Free Agent"]}
         all_profiles = []
 
     return templates.TemplateResponse(request=request, name="profile.html", context={
@@ -107,15 +111,20 @@ async def update_profile(
     if not full_name.strip():
         raise HTTPException(status_code=400, detail="Display name cannot be blank.")
 
-    # Validate that the selected title is actually unlocked by the user to prevent tampering
     try:
         profile_data_res = supabase.table("profiles").select("tokens, is_admin").eq("id", user.id).execute()
         profile_data = profile_data_res.data[0] if profile_data_res.data else {}
         user_tokens = profile_data.get("tokens", 10)
         is_admin = profile_data.get("is_admin", False)
         
-        bets_res = supabase.table("user_bets").select("is_won").eq("user_id", user.id).execute().data or []
-        total_wins = sum(1 for b in bets_res if b.get("is_won") is True)
+        total_wins = 0
+        try:
+            bets_res = supabase.table("user_bets").select("tokens_awarded").eq("user_id", user.id).execute().data or []
+            for b in bets_res:
+                if (b.get("tokens_awarded") or 0) > 0:
+                    total_wins += 1
+        except Exception:
+            pass
 
         allowed_titles = ["🏈 Gridiron Contender", "Free Agent"]
         if user_tokens >= 15:
@@ -135,7 +144,7 @@ async def update_profile(
     except HTTPException as he:
         raise he
     except Exception:
-        pass # Fallback safety if verification fails lookup
+        pass 
 
     try:
         supabase.table("profiles").update({
@@ -175,7 +184,6 @@ async def update_featured_badges(
         raise HTTPException(status_code=401, detail="Authentication failed.")
 
     form_data = await request.form()
-    # Extract list of featured badges from multiselect form inputs
     featured_badges = form_data.getlist("featured_badges")
 
     if len(featured_badges) > 3:
