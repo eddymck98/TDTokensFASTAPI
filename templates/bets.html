@@ -106,7 +106,7 @@
                   </div>
                   
                   <div style="display: flex; align-items: center; background: rgba(30, 41, 59, 0.9); padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2);">
-                    <span style="font-size: 16px; margin-right: 6px;">🪙</span>
+                    <img src="https://github.com/eddymck98/TD-Tokens-Render-/blob/main/edited-photo%20(1).png?raw=true" alt="Token" class="token-icon" style="margin-right: 6px;">
                     <input class="token-input" type="number" name="wager_{{ q.id }}" value="{{ q.user_wager | default(0) }}" min="0" max="{{ profile.tokens | default(10) }}" placeholder="Amt" required style="width: 45px; background: transparent; border: none; color: #fff; font-size: 16px; font-weight: bold; outline: none; text-align: center;" {% if is_week_closed %}disabled{% endif %}>
                   </div>
                 </div>
@@ -118,9 +118,9 @@
                       {% if q.winning_answer == 'Pending' %}
                         ⏳ Graded Pending
                       {% elif q.winning_answer == q.user_pick %}
-                        Won (+{{ q.user_wager }} 🪙) ✅
+                        Won (+{{ q.user_wager }} <img src="https://github.com/eddymck98/TD-Tokens-Render-/blob/main/edited-photo%20(1).png?raw=true" alt="Token" class="token-icon" style="width: 14px; height: 14px;">) ✅
                       {% else %}
-                        Lost (-{{ q.user_wager }} 🪙) ❌
+                        Lost (-{{ q.user_wager }} <img src="https://github.com/eddymck98/TD-Tokens-Render-/blob/main/edited-photo%20(1).png?raw=true" alt="Token" class="token-icon" style="width: 14px; height: 14px;">) ❌
                       {% endif %}
                     </span>
                   </div>
@@ -146,7 +146,7 @@
               <span style="font-weight: bold;">
                 {% if td_scorer_graded %}
                   {% if user_td_won %}
-                    <span style="color: #4ade80;">Won (+5 🪙) ✅</span>
+                    <span style="color: #4ade80;">Won (+5 <img src="https://github.com/eddymck98/TD-Tokens-Render-/blob/main/edited-photo%20(1).png?raw=true" alt="Token" class="token-icon" style="width: 14px; height: 14px;">) ✅</span>
                   {% else %}
                     <span style="color: #f87171;">Lost ❌</span>
                   {% endif %}
