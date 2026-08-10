@@ -241,11 +241,10 @@ async def request_password_reset(
         
         if response and hasattr(response, "properties") and response.properties:
             props = response.properties
-            action_link = props.get("action_link") if isinstance(props, dict) else getattr(props, "action_link", None)
             email_otp = props.get("email_otp") if isinstance(props, dict) else getattr(props, "email_otp", None)
             
-            # Formulate link using hash fragment and clear parameters so frontend catches it reliably
-            recovery_link = f"https://tdtokens.co.uk/#access_token={email_otp}&type=recovery" if email_otp else action_link
+            # Direct link to bypass Supabase UI redirect stripping issues, pointing straight to login with flags
+            recovery_link = f"https://tdtokens.co.uk/auth/login?token={email_otp}&type=recovery" if email_otp else f"https://tdtokens.co.uk/auth/login"
             
             if recovery_link:
                 html_content = f"""
@@ -261,20 +260,20 @@ async def request_password_reset(
                       <td align="center">
                         <table border="0" cellpadding="0" cellspacing="0" width="600" style="background-color: #0f172a; border: 1px solid rgba(255, 255, 255, 0.12); border-top: 4px solid #fbbf24; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
                           <tr>
-                            <td align="center" style="padding: 40px 30px 20px 30px; background-color: #0f172a;">
-                              <img src="https://github.com/eddymck98/TD-Tokens-Render-/blob/main/TD%20Tokens%207.png?raw=true" alt="Touchdown Tokens Logo" width="130" style="display: block; width: 130px; height: auto; margin-bottom: 15px;">
+                            <td align="center" style="padding: 40px 30px 20px 30px;">
+                              <img src="https://github.com/eddymck98/TD-Tokens-Render-/blob/main/TD%20Tokens%207.png?raw=true" alt="Touchdown Tokens Logo" width="130" style="display: block; max-width: 130px; height: auto; margin-bottom: 15px;">
                               <h1 style="font-family: Arial, sans-serif; color: #fbbf24; font-size: 28px; letter-spacing: 2px; margin: 0; text-transform: uppercase;">TOUCHDOWN TOKENS</h1>
                               <p style="color: #93c5fd; font-size: 13px; letter-spacing: 3px; text-transform: uppercase; margin-top: 5px; margin-bottom: 0;">Password Reset Request</p>
                             </td>
                           </tr>
                           <tr>
-                            <td style="padding: 30px 40px 40px 40px; color: #cbd5e1; font-size: 15px; line-height: 1.6; background-color: #0f172a;">
-                              <h3 style="color: #ffffff; font-size: 22px; margin-top: 0; margin-bottom: 15px;">Reset Your Password 🔑</h3>
-                              <p style="margin-bottom: 25px; color: #cbd5e1;">Click the secure button below to choose a brand new password for your account:</p>
+                            <td style="padding: 20px 40px 40px 40px; color: #cbd5e1; font-size: 15px; line-height: 1.6;">
+                              <h3 style="color: #ffffff; font-size: 20px; margin-top: 0; margin-bottom: 15px;">Reset Your Password 🔑</h3>
+                              <p style="margin-bottom: 25px;">Click the secure button below to choose a brand new password for your account:</p>
                               <table border="0" cellpadding="0" cellspacing="0" width="100%">
                                 <tr>
                                   <td align="center" style="padding: 10px 0 25px 0;">
-                                    <a href="{recovery_link}" target="_blank" style="background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000000; padding: 14px 30px; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 16px; letter-spacing: 1px; display: inline-block;">RESET PASSWORD</a>
+                                    <a href="{recovery_link}" target="_blank" style="background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000000; padding: 14px 30px; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 16px; letter-spacing: 1px; display: inline-block; box-shadow: 0 6px 20px rgba(251, 191, 36, 0.3);">RESET PASSWORD</a>
                                   </td>
                                 </tr>
                               </table>
