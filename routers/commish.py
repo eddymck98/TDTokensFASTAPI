@@ -169,12 +169,12 @@ async def delete_league(
         if not user:
             raise HTTPException(status_code=401, detail="Invalid user session.")
 
-        # Fetch league details to verify ownership and name confirmation
-        league_res = supabase.table("leagues").select("name, league_name, commissioner_id").eq("id", league_id).single().execute()
+        # Fetch league details safely using select("*") to avoid single-row lookup column mismatches
+        league_res = supabase.table("leagues").select("*").eq("id", league_id).execute()
         if not league_res.data:
             raise HTTPException(status_code=404, detail="League not found.")
         
-        league = league_res.data
+        league = league_res.data[0]
         if league.get("commissioner_id") != user.id:
             raise HTTPException(status_code=403, detail="Only the league commissioner can delete this league.")
 
