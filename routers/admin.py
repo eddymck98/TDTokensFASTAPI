@@ -82,7 +82,8 @@ async def admin_portal_landing(request: Request, week: Optional[int] = None):
     target_week = 1
     is_week_closed = False
     is_published = True
-    lockout_time_formatted = ""
+    lockout_date_val = ""
+    lockout_time_val = ""
 
     try:
         weeks_res = supabase.table("weekly_questions").select("week_number").neq("week_number", 999).neq("week_number", 998).neq("week_number", 997).neq("week_number", 96).execute()
@@ -101,14 +102,16 @@ async def admin_portal_landing(request: Request, week: Optional[int] = None):
         if pub_res.data and pub_res.data[0].get("winning_answer") == "UNPUBLISHED":
             is_published = False
 
-        # Fetch lockout schedule if stored
+        # Fetch lockout schedule if stored and parse into separate date & time parts for UK boxes
         lock_res = supabase.table("weekly_questions").select("winning_answer").eq("week_number", target_week).eq("question_number", 99).ilike("winning_answer", "LOCKTIME:%").execute()
         if lock_res.data:
             raw_lock = lock_res.data[0].get("winning_answer", "")
             if ":" in raw_lock:
-                iso_str = raw_lock.split(":", 1)[1]
-                # Format for datetime-local input (YYYY-MM-DDTHH:MM)
-                lockout_time_formatted = iso_str.replace("Z", "")[:16]
+                iso_str = raw_lock.split(":", 1)[1].replace("Z", "")
+                if "T" in iso_str:
+                    parts = iso_str.split("T")
+                    lockout_date_val = parts[0]
+                    lockout_time_val = parts[1][:5] # HH:MM format
 
     except Exception as e:
         print(f"Error fetching weeks for admin: {e}")
@@ -187,7 +190,8 @@ async def admin_portal_landing(request: Request, week: Optional[int] = None):
             "target_week": target_week,
             "is_week_closed": is_week_closed,
             "is_published": is_published,
-            "lockout_time_formatted": lockout_time_formatted,
+            "lockout_date_val": lockout_date_val,
+            "lockout_time_val": lockout_time_val,
             "questions_map": questions_map,
             "user_td_picks": user_td_picks,
             "all_profiles": all_profiles
@@ -257,10 +261,11 @@ async def admin_publish_questions(
 async def set_lockout(
     request: Request,
     week_number: int = Form(...),
-    lockout_time: str = Form(...),
+    lockout_date: str = Form(...),
+    lockout_time_val: str = Form(...),
     supabase: Client = Depends(get_supabase)
 ):
-    iso_time = f"{lockout_time}:00Z" if lockout_time else ""
+    iso_time = f"{lockout_date}T{lockout_time_val}:00Z" if lockout_date and lockout_time_val else ""
     supabase.table("weekly_questions").delete().eq("week_number", week_number).eq("question_number", 99).execute()
     supabase.table("weekly_questions").insert({
         "week_number": week_number,
