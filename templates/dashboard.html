@@ -1,24 +1,63 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="dashboard-container" style="max-width: 900px; margin: 0 auto; padding-bottom: 40px;">
+<div class="dashboard-container" style="max-width: 900px; margin: 0 auto; padding-bottom: 40px; padding-left: 8px; padding-right: 8px;">
 
-  <!-- Personal Week Summary -->
-  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px;">
-    <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-top: 3px solid #38bdf8; border-radius: 12px; padding: 20px; text-align: center; backdrop-filter: blur(10px);">
-      <div style="font-size: 13px; color: #94a3b8; text-transform: uppercase; font-weight: 700; letter-spacing: 1px;">Picks Submitted</div>
-      <div style="font-family: 'Bebas Neue', sans-serif; font-size: 42px; color: #f8fafc; line-height: 1; margin-top: 5px;">{{ personal_stats.total_bets }}</div>
-    </div>
-    <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-top: 3px solid #10b981; border-radius: 12px; padding: 20px; text-align: center; backdrop-filter: blur(10px);">
-      <div style="font-size: 13px; color: #94a3b8; text-transform: uppercase; font-weight: 700; letter-spacing: 1px;">Win / Loss Ratio</div>
-      <div style="font-family: 'Bebas Neue', sans-serif; font-size: 42px; color: #10b981; line-height: 1; margin-top: 5px;">
-        {{ personal_stats.wins }}<span style="color: #64748b; font-size: 28px;">-</span><span style="color: #ef4444;">{{ personal_stats.losses }}</span>
+  <!-- Mobile-Optimized Compact Hero Header -->
+  <div style="background: linear-gradient(135deg, rgba(30, 58, 138, 0.9) 0%, rgba(15, 23, 42, 0.98) 100%); border: 1px solid rgba(255, 255, 255, 0.12); border-top: 4px solid var(--team-color); border-radius: 14px; padding: 16px; margin-bottom: 16px; box-shadow: 0 8px 25px rgba(0,0,0,0.5);">
+    <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;">
+      <div>
+        <h1 style="font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: var(--team-color); letter-spacing: 1.5px; margin: 0 0 2px 0;">COMMAND CENTER</h1>
+        <p style="color: #94a3b8; font-size: 12px; margin: 0;">Welcome back, <b style="color: #fff;">{{ profile.full_name }}</b>!</p>
+      </div>
+      <div style="background: rgba(30, 41, 59, 0.8); border: 1px solid rgba(255,255,255,0.1); padding: 8px 14px; border-radius: 10px; display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 14px; color: #94a3b8; font-weight: 600; text-transform: uppercase;">Bank:</span>
+        <span style="font-family: 'Bebas Neue'; font-size: 22px; color: var(--team-color); display: inline-flex; align-items: center; gap: 4px;">
+          {{ profile.tokens }} <img src="https://github.com/eddymck98/TD-Tokens-Render-/blob/main/edited-photo%20(1).png?raw=true" alt="Token" class="token-icon">
+        </span>
       </div>
     </div>
-    <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-top: 3px solid #fbbf24; border-radius: 12px; padding: 20px; text-align: center; backdrop-filter: blur(10px);">
-      <div style="font-size: 13px; color: #94a3b8; text-transform: uppercase; font-weight: 700; letter-spacing: 1px;">Tokens Wagered</div>
-      <div style="font-family: 'Bebas Neue', sans-serif; font-size: 42px; color: #fbbf24; line-height: 1; margin-top: 5px;">{{ personal_stats.tokens_wagered }} 🪙</div>
+  </div>
+
+  <!-- Personal Week Summary / Stats Grid (Mobile Clean View) -->
+  <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px;">
+    <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-top: 3px solid #38bdf8; border-radius: 10px; padding: 12px 8px; text-align: center; backdrop-filter: blur(10px);">
+      <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">Picks</div>
+      <div style="font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: #f8fafc; line-height: 1; margin-top: 4px;">{{ personal_stats.total_bets }}</div>
     </div>
+    <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-top: 3px solid #10b981; border-radius: 10px; padding: 12px 8px; text-align: center; backdrop-filter: blur(10px);">
+      <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">Wagered</div>
+      <div style="font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: #fbbf24; line-height: 1; margin-top: 4px; display: inline-flex; align-items: center; gap: 2px;">
+        {{ personal_stats.tokens_wagered }} <img src="https://github.com/eddymck98/TD-Tokens-Render-/blob/main/edited-photo%20(1).png?raw=true" alt="Token" class="token-icon" style="width: 14px !important; height: 14px !important;">
+      </div>
+    </div>
+    <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-top: 3px solid #ef4444; border-radius: 10px; padding: 12px 8px; text-align: center; backdrop-filter: blur(10px);">
+      <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">Win Rate</div>
+      <div style="font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: #10b981; line-height: 1; margin-top: 4px;">
+        {{ personal_stats.wins }}<span style="color: #64748b; font-size: 20px;">-</span><span style="color: #ef4444;">{{ personal_stats.losses }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Separate Win/Loss Ratios Out of 10 Section -->
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;">
+    
+    <!-- Matchup Predictions W/L (Out of 10) -->
+    <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 12px; text-align: center; backdrop-filter: blur(12px);">
+      <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 4px;">Matchup Record (/10)</div>
+      <div style="font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: #38bdf8;">
+        {{ prediction_wins | default(0) }} / {{ prediction_total | default(10) }}
+      </div>
+    </div>
+
+    <!-- Touchdown Scorer W/L (Out of 10) -->
+    <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 12px; text-align: center; backdrop-filter: blur(12px);">
+      <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 4px;">TD Scorer Record (/10)</div>
+      <div style="font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: #fbbf24;">
+        {{ td_wins | default(0) }} / {{ td_total | default(10) }}
+      </div>
+    </div>
+
   </div>
 
   <!-- Nemesis / Rival Widget (Compact Season-Long Grudge Match) -->
@@ -46,9 +85,9 @@
   {% endif %}
 
   <!-- Weekly Pick & Share Hub Section -->
-  <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px; padding: 24px; margin-bottom: 25px; backdrop-filter: blur(14px); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-    <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: #ffffff; letter-spacing: 1px; margin-top: 0; margin-bottom: 5px;">👁️ YOUR CURRENT WEEKLY PICKS & SHARE HUB</h3>
-    <p style="color: #94a3b8; font-size: 14px; margin-bottom: 20px;">Review your active entries and grab a quick share text for your group chat.</p>
+  <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px; padding: 20px; margin-bottom: 25px; backdrop-filter: blur(14px); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+    <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: #ffffff; letter-spacing: 1px; margin-top: 0; margin-bottom: 5px;">👁️ YOUR CURRENT WEEKLY PICKS & SHARE HUB</h3>
+    <p style="color: #94a3b8; font-size: 13px; margin-bottom: 16px;">Review your active entries and grab a quick share text for your group chat.</p>
 
     {% if not current_user_bets %}
       <div style="background: rgba(30, 41, 59, 0.5); padding: 20px; text-align: center; border-radius: 10px;">
@@ -65,13 +104,13 @@
           {% set bg_color = 'rgba(16, 185, 129, 0.08)' if is_won else ('rgba(239, 68, 68, 0.08)' if is_lost else 'rgba(30, 41, 59, 0.4)') %}
           
           <div style="background: {{ bg_color }}; border: 1px solid rgba(255, 255, 255, 0.08); border-left: 3px solid {{ border_color }}; border-radius: 8px; padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
-            <div style="display: flex; align-items: center; gap: 10px; flex: 1; min-width: 260px;">
+            <div style="display: flex; align-items: center; gap: 10px; flex: 1; min-width: 220px;">
               <span style="font-family: 'Bebas Neue'; font-size: 15px; color: {{ border_color }}; letter-spacing: 1px; min-width: 24px;">Q{{ b.question_number }}</span>
               <span style="font-size: 13px; font-weight: 500; color: #ffffff; line-height: 1.3;">{{ b.question_text }}</span>
             </div>
-            <div style="display: flex; align-items: center; gap: 10px; font-size: 12px;">
+            <div style="display: flex; align-items: center; gap: 8px; font-size: 12px; flex-wrap: wrap;">
               <span style="background: rgba(0,0,0,0.3); padding: 3px 8px; border-radius: 6px; color: #cbd5e1;">Pick: <b style="color: #fff;">{{ b.pick }}</b></span>
-              <span style="background: rgba(0,0,0,0.3); padding: 3px 8px; border-radius: 6px; color: #cbd5e1;">Wager: <b style="color: #fbbf24;">{{ b.wager_amount }} 🪙</b></span>
+              <span style="background: rgba(0,0,0,0.3); padding: 3px 8px; border-radius: 6px; color: #cbd5e1; display: inline-flex; align-items: center; gap: 3px;">Wager: <b style="color: #fbbf24;">{{ b.wager_amount }}</b> <img src="https://github.com/eddymck98/TD-Tokens-Render-/blob/main/edited-photo%20(1).png?raw=true" alt="Token" class="token-icon" style="width: 12px !important; height: 12px !important;"></span>
               <span style="font-weight: 700; color: {{ border_color }}; background: rgba(0,0,0,0.2); padding: 3px 8px; border-radius: 6px; letter-spacing: 0.5px;">{{ b.status_label }}</span>
             </div>
           </div>
@@ -104,9 +143,9 @@
   </div>
 
   <!-- Weekly Community Trends Section -->
-  <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px; padding: 24px; margin-bottom: 25px; backdrop-filter: blur(14px); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-    <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: #ffffff; letter-spacing: 1px; margin-top: 0; margin-bottom: 5px;">📊 COMMUNITY TRENDS & HEAVIEST ACTION</h3>
-    <p style="color: #94a3b8; font-size: 14px; margin-bottom: 20px;">A snapshot of the Top 3 most heavily bet matchups across the global league.</p>
+  <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px; padding: 20px; margin-bottom: 25px; backdrop-filter: blur(14px); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+    <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: #ffffff; letter-spacing: 1px; margin-top: 0; margin-bottom: 5px;">📊 COMMUNITY TRENDS & HEAVIEST ACTION</h3>
+    <p style="color: #94a3b8; font-size: 13px; margin-bottom: 16px;">A snapshot of the Top 3 most heavily bet matchups across the global league.</p>
     
     <div id="community-trends-container" style="display: grid; gap: 12px;">
       {% if not consensus_data %}
@@ -116,7 +155,9 @@
       {% else %}
         {% for stat in consensus_data %}
           <div style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255,255,255,0.05); border-radius: 10px; padding: 12px 14px;">
-            <div style="font-size: 12px; color: #38bdf8; font-weight: bold; margin-bottom: 4px; text-transform: uppercase;">Q{{ stat.q_num }} Total Tokens Wagered: {{ stat.total_wager }} 🪙</div>
+            <div style="font-size: 12px; color: #38bdf8; font-weight: bold; margin-bottom: 4px; text-transform: uppercase; display: flex; align-items: center; gap: 4px;">
+              Q{{ stat.q_num }} Total Tokens Wagered: {{ stat.total_wager }} <img src="https://github.com/eddymck98/TD-Tokens-Render-/blob/main/edited-photo%20(1).png?raw=true" alt="Token" class="token-icon" style="width: 12px !important; height: 12px !important;">
+            </div>
             <div style="font-size: 14px; color: #f8fafc; margin-bottom: 10px; font-weight: 500; line-height: 1.3;">{{ stat.text }}</div>
             
             <div style="display: flex; align-items: center; justify-content: space-between; font-size: 12px; font-weight: bold; margin-bottom: 4px;">
@@ -134,12 +175,12 @@
     </div>
   </div>
 
-  <!-- Weekly Token Progression Graph Section -->
-  <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px; padding: 24px; margin-bottom: 25px; backdrop-filter: blur(14px); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-    <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: #ffffff; letter-spacing: 1px; margin-top: 0; margin-bottom: 5px;">📈 TOKEN PROGRESSION HISTORY</h3>
-    <p style="color: #94a3b8; font-size: 14px; margin-bottom: 20px;">Your token balance progression across officially closed and graded weeks.</p>
+  <!-- Weekly Token Progression Graph Section (Starting at Week 0 with 10 tokens) -->
+  <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px; padding: 20px; margin-bottom: 25px; backdrop-filter: blur(14px); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+    <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: #ffffff; letter-spacing: 1px; margin-top: 0; margin-bottom: 5px;">📈 TOKEN PROGRESSION HISTORY</h3>
+    <p style="color: #94a3b8; font-size: 13px; margin-bottom: 16px;">Your token balance progression starting from Week 0 (10 tokens).</p>
     
-    <div style="position: relative; height: 260px; width: 100%;">
+    <div style="position: relative; height: 240px; width: 100%;">
       <canvas id="tokenProgressionChart"></canvas>
     </div>
   </div>
@@ -173,52 +214,65 @@
     alert("Share text copied to clipboard!");
   }
 
-  // Render Token Progression Chart
+  // Render Token Progression Chart starting at Week 0 (10 tokens)
   document.addEventListener("DOMContentLoaded", function() {
-    const chartData = JSON.parse('{{ token_history_json | safe }}');
-    
-    if (chartData && chartData.labels && chartData.labels.length > 0) {
-      const ctx = document.getElementById('tokenProgressionChart').getContext('2d');
-      new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: chartData.labels,
-          datasets: [{
-            label: 'Token Balance',
-            data: chartData.values,
-            borderColor: '#fbbf24',
-            backgroundColor: 'rgba(251, 191, 36, 0.1)',
-            borderWidth: 3,
-            pointBackgroundColor: '#fbbf24',
-            pointBorderColor: '#0f172a',
-            pointBorderWidth: 2,
-            pointRadius: 5,
-            fill: true,
-            tension: 0.2
-          }]
+    let chartLabels = [];
+    let chartValues = [];
+
+    try {
+      const chartData = JSON.parse('{{ token_history_json | safe }}');
+      if (chartData && chartData.labels && chartData.labels.length > 0) {
+        chartLabels = [...chartData.labels];
+        chartValues = [...chartData.values];
+      }
+    } catch (e) {
+      console.error("Could not parse chart history", e);
+    }
+
+    // Force prepend Week 0 with 10 tokens if not already present
+    if (chartLabels.length === 0 || chartLabels[0] !== "Week 0") {
+      chartLabels.unshift("Week 0");
+      chartValues.unshift(10);
+    }
+
+    const ctx = document.getElementById('tokenProgressionChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: chartLabels,
+        datasets: [{
+          label: 'Token Balance',
+          data: chartValues,
+          borderColor: '#fbbf24',
+          backgroundColor: 'rgba(251, 191, 36, 0.1)',
+          borderWidth: 3,
+          pointBackgroundColor: '#fbbf24',
+          pointBorderColor: '#0f172a',
+          pointBorderWidth: 2,
+          pointRadius: 5,
+          fill: true,
+          tension: 0.2
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
         },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false }
+        scales: {
+          x: {
+            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+            ticks: { color: '#94a3b8', font: { family: 'sans-serif' } }
           },
-          scales: {
-            x: {
-              grid: { color: 'rgba(255, 255, 255, 0.05)' },
-              ticks: { color: '#94a3b8', font: { family: 'sans-serif' } }
-            },
-            y: {
-              grid: { color: 'rgba(255, 255, 255, 0.05)' },
-              ticks: { color: '#94a3b8', font: { family: 'sans-serif' } },
-              beginAtZero: false
-            }
+          y: {
+            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+            ticks: { color: '#94a3b8', font: { family: 'sans-serif' } },
+            beginAtZero: false
           }
         }
-      });
-    } else {
-      document.getElementById('tokenProgressionChart').parentElement.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #94a3b8; font-size: 14px;">No closed week data available for progression tracking yet.</div>';
-    }
+      }
+    });
   });
 </script>
 {% endblock %}
