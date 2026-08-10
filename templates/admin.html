@@ -173,11 +173,11 @@
     </form>
   </div>
 
-  <!-- Tab 2: Lockout Scheduler (UK Date & Time Split Boxes) -->
+  <!-- Tab 2: Lockout Scheduler (Text Inputs for Easy Typing) -->
   <div id="lockout" class="admin-tab-content" style="display: none;">
     <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255,255,255,0.12); border-left: 4px solid #38bdf8; padding: 20px; border-radius: 16px; margin-bottom: 20px;">
       <h3 style="color: #38bdf8; font-family: 'Bebas Neue', sans-serif; font-size: 28px; margin: 0 0 5px 0;">KICKOFF LOCKOUT SCHEDULER (UK TIME)</h3>
-      <p style="color: #cbd5e1; font-size: 14px; margin: 0;">Specify the lockout date and UK time (24-hour format e.g., 18:00) using separate interactive boxes below.</p>
+      <p style="color: #cbd5e1; font-size: 14px; margin: 0;">Type the date and UK time directly into the boxes below.</p>
     </div>
 
     <!-- Week Selector Pills & Create New Week Button -->
@@ -196,23 +196,23 @@
       </form>
     </div>
 
-    <!-- Separate Date & Time Inputs for UK logic -->
+    <!-- Fully editable text boxes for UK date and time -->
     <div style="background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 24px;">
       <form action="/admin/week/set-lockout" method="POST">
         <input type="hidden" name="week_number" value="{{ target_week }}">
         
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
           <div>
-            <label for="lockout_date" style="font-weight: 600; color: #f8fafc; font-family: 'Bebas Neue'; font-size: 18px; letter-spacing: 1px; display: block; margin-bottom: 6px;">Lockout Date:</label>
-            <input type="date" id="lockout_date" name="lockout_date" value="{{ lockout_date_val }}" required style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.95); color: #fff; border: 1px solid rgba(56, 189, 248, 0.4); border-radius: 10px; font-size: 15px; outline: none;">
+            <label for="lockout_date" style="font-weight: 600; color: #f8fafc; font-family: 'Bebas Neue'; font-size: 18px; letter-spacing: 1px; display: block; margin-bottom: 6px;">Lockout Date (YYYY-MM-DD):</label>
+            <input type="text" id="lockout_date" name="lockout_date" value="{{ lockout_date_val }}" placeholder="2026-09-13" required style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.95); color: #fff; border: 1px solid rgba(56, 189, 248, 0.4); border-radius: 10px; font-size: 15px; outline: none;">
           </div>
           <div>
-            <label for="lockout_time_val" style="font-weight: 600; color: #f8fafc; font-family: 'Bebas Neue'; font-size: 18px; letter-spacing: 1px; display: block; margin-bottom: 6px;">UK Time (24hr e.g. 18:00):</label>
-            <input type="time" id="lockout_time_val" name="lockout_time_val" value="{{ lockout_time_val }}" required style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.95); color: #fff; border: 1px solid rgba(56, 189, 248, 0.4); border-radius: 10px; font-size: 15px; outline: none;">
+            <label for="lockout_time_val" style="font-weight: 600; color: #f8fafc; font-family: 'Bebas Neue'; font-size: 18px; letter-spacing: 1px; display: block; margin-bottom: 6px;">UK Time (HH:MM 24hr):</label>
+            <input type="text" id="lockout_time_val" name="lockout_time_val" value="{{ lockout_time_val }}" placeholder="18:00" required style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.95); color: #fff; border: 1px solid rgba(56, 189, 248, 0.4); border-radius: 10px; font-size: 15px; outline: none;">
           </div>
         </div>
 
-        <p style="color: #94a3b8; font-size: 12px; margin-bottom: 20px;">🇬🇧 Times are handled cleanly using UK local conventions (automatically adjusting for British Summer Time / UTC).</p>
+        <p style="color: #94a3b8; font-size: 12px; margin-bottom: 20px;">🇬🇧 You can now freely click and type into both fields (e.g., Date: <code>2026-09-13</code>, Time: <code>18:00</code>).</p>
 
         <div style="display: flex; gap: 12px; flex-wrap: wrap;">
           <button type="submit" style="background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%); color: #000; padding: 12px 24px; font-family: 'Teko', sans-serif; font-size: 20px; font-weight: bold; border-radius: 12px; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);">Update / Override Schedule 🕒</button>
