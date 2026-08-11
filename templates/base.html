@@ -15,31 +15,18 @@
     <!-- Global CSS Stylesheet linked via FastAPI StaticFiles -->
     <link rel="stylesheet" href="{{ url_for('static', path='styles.css') }}">
 
-    <!-- Safe Team Data Extraction with Fallbacks -->
-    {% set raw_team = profile.favorite_team if profile and profile.favorite_team else "Free Agent / Neutral" %}
-    
-    {% set matched_team = namespace(key="🏈 Free Agent / Neutral") %}
-    {% if team_data is defined and team_data %}
-        {% for key in team_data.keys() %}
-            {% if raw_team.lower() in key.lower() or key.lower() in raw_team.lower() %}
-                {% set matched_team.key = key %}
-            {% endif %}
-        {% endfor %}
-    {% endif %}
-
-    {% set current_team = matched_team.key %}
-    {% set t_color = team_data[current_team].color if team_data is defined and team_data and current_team in team_data else "#fbbf24" %}
-    {% set t_logo = "https://github.com/eddymck98/TD-Tokens-Render-/blob/main/TD%20Tokens%207.png?raw=true" %}
-    {% set t_team_logo = team_data[current_team].logo if team_data is defined and team_data and current_team in team_data and team_data[current_team].logo else t_logo %}
-    {% set t_stadium = team_data[current_team].stadium if team_data is defined and team_data and current_team in team_data and team_data[current_team].stadium else "https://images.unsplash.com/photo-1566577739112-5180d4bf9390?auto=format&fit=crop&w=1920&q=80" %}
+    <!-- Extract Team Info safely with robust fallbacks for logged-out users -->
+    {% set current_team = profile.favorite_team if profile and profile.favorite_team else "🏈 Free Agent / Neutral" %}
+    {% set t_color = team_data[current_team].color if team_data and current_team in team_data else "#fbbf24" %}
+    {% set t_logo = team_data[current_team].logo if team_data and current_team in team_data and team_data[current_team].logo else "https://github.com/eddymck98/TD-Tokens-Render-/blob/main/TD%20Tokens%207.png?raw=true" %}
+    {% set t_stadium = team_data[current_team].stadium if team_data and current_team in team_data and team_data[current_team].stadium else "https://images.unsplash.com/photo-1566577739112-5180d4bf9390?auto=format&fit=crop&w=1920&q=80" %}
 
     <style>
         :root {
             --team-color: {{ t_color }};
-            --team-color-glow: {{ t_color }}33;
-            --team-logo-url: url('{{ t_team_logo }}');
+            --team-color-glow: {{ t_color }}55;
+            --team-logo-url: url('{{ t_logo }}');
         }
-
         .app-background {
             position: fixed;
             top: 0;
@@ -55,34 +42,34 @@
 <body>
     <div class="app-background"></div>
 
-    <!-- Premium Glossy Navbar -->
-    <nav class="navbar" style="background: linear-gradient(135deg, {{ t_color }}dd 0%, rgba(15, 23, 42, 0.95) 100%);">
+    <!-- Premium Glossy Navbar (Always visible structure & logo) -->
+    <nav class="navbar" style="--team-color: {{ t_color }};">
         <a href="/" class="brand-container">
-            <div class="brand-logo-wrapper" style="border: 2px solid {{ t_color }}; box-shadow: 0 0 12px {{ t_color }};">
+            <div class="brand-logo-wrapper">
                 <img src="{{ t_logo }}" alt="Logo" class="brand-logo">
             </div>
             <h1 class="brand-text">TOUCHDOWN <span>TOKENS</span></h1>
         </a>
         
-        <!-- Navigation Links & Toggle -->
+        <!-- Navigation Links & Toggle (Visible ONLY when logged in with a valid profile) -->
         {% if profile and profile.full_name and profile.full_name != "Error Loading Profile" %}
         <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle navigation">
             ☰
         </button>
 
         <div class="nav-links" id="navLinks">
-            <a href="/dashboard/" class="{% if request.url.path in ['/dashboard', '/dashboard/'] %}active{% endif %}">🏠 Home</a>
-            <a href="/rules/" class="{% if request.url.path in ['/rules', '/rules/'] %}active{% endif %}">📖 Rules</a>
-            <a href="/profile/" class="{% if request.url.path in ['/profile', '/profile/'] %}active{% endif %}">👤 Profile</a>
-            <a href="/bets/" class="{% if request.url.path in ['/bets', '/bets/'] %}active{% endif %}">🎯 Bets</a>
-            <a href="/leagues/" class="{% if request.url.path in ['/leagues', '/leagues/'] %}active{% endif %}">🛡️ Leagues</a>         
+            <a href="/dashboard" class="{% if request.url.path == '/dashboard' %}active{% endif %}">🏠 Home</a>
+            <a href="/rules" class="{% if request.url.path == '/rules' %}active{% endif %}">📖 Rules</a>
+            <a href="/profile" class="{% if request.url.path == '/profile' %}active{% endif %}">👤 Profile</a>
+            <a href="/bets" class="{% if request.url.path == '/bets' %}active{% endif %}">🎯 Bets</a>
+            <a href="/leagues" class="{% if request.url.path == '/leagues' %}active{% endif %}">🛡️ Leagues</a>         
                     
             {% if request.state.is_commissioner or profile.is_admin %}
-                <a href="/commish/" style="color: #fbbf24;" class="{% if request.url.path in ['/commish', '/commish/'] %}active{% endif %}">⭐ Commish</a>
+                <a href="/commish" style="color: #fbbf24;" class="{% if request.url.path == '/commish' %}active{% endif %}">⭐ Commish</a>
             {% endif %}
 
             {% if profile.is_admin %}
-                <a href="/admin/" class="nav-admin-btn {% if request.url.path in ['/admin', '/admin/'] %}active{% endif %}">🛠️ Admin</a>
+                <a href="/admin" class="nav-admin-btn {% if request.url.path == '/admin' %}active{% endif %}">🛠️ Admin</a>
             {% endif %}
             
             <a href="/logout" class="nav-logout-btn">🚪 Logout</a>
@@ -124,7 +111,7 @@
             <span style="color: #475569;">•</span>
             <a href="https://www.espn.com/nfl" target="_blank" style="color: #94a3b8; font-size: 13px; text-decoration: none;">ESPN NFL Scoreboard</a>
             <span style="color: #475569;">•</span>
-            <a href="/contact/" style="color: #94a3b8; font-size: 13px; text-decoration: none;">Contact Us</a>
+            <a href="/contact" style="color: #94a3b8; font-size: 13px; text-decoration: none;">Contact Us</a>
             <span style="color: #475569;">•</span>
             <a href="https://buymeacoffee.com/ed.mckenna" target="_blank" style="color: #fbbf24; font-size: 13px; font-weight: bold; text-decoration: none;">☕ Support the App</a>
         </div>
