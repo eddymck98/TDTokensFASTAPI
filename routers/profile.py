@@ -208,6 +208,31 @@ async def update_email(
     except Exception as e:
         return RedirectResponse(url=f"/profile?error={str(e)}", status_code=303)
 
+@router.post("/update-password")
+async def update_password(
+    request: Request,
+    new_password: str = Form(...),
+    supabase: Client = Depends(get_supabase)
+):
+    session_cookie = request.cookies.get("td_tokens_session")
+    if not session_cookie:
+        raise HTTPException(status_code=401, detail="Unauthorized session.")
+    
+    try:
+        token_data = json.loads(session_cookie)
+        acc_token = token_data.get("access_token")
+        
+        # Set session context so Supabase knows precisely which user account to modify
+        supabase.auth.set_session(acc_token, token_data.get("refresh_token"))
+        supabase.postgrest.auth(acc_token)
+        
+        # Execute password update
+        supabase.auth.update_user({"password": new_password.strip()})
+        
+        return RedirectResponse(url="/profile/?success=password_updated", status_code=303)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
 @router.post("/featured-badges")
 async def update_featured_badges(
     request: Request,
