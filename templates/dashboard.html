@@ -9,7 +9,7 @@
     <div style="display: flex; align-items: center; gap: 10px;">
       <span style="font-size: 13px; white-space: nowrap; font-weight: bold; color: #fbbf24; letter-spacing: 1px;">⚡ RIVAL FEED:</span>
       
-      <!-- Sliding Marquee Track (Optimized to 50s for immediate smooth flow) -->
+      <!-- Sliding Marquee Track -->
       <div style="overflow: hidden; white-space: nowrap; width: 100%; position: relative;">
         <div class="marquee-track" style="display: inline-block; animation: slideMarquee 50s linear infinite; color: #cbd5e1; font-size: 13px;">
           {% for act in recent_league_activity %}
@@ -206,7 +206,7 @@
     {% endif %}
   </div>
 
-  <!-- Weekly Community Trends & Hot Topics Section (Modern Mini-Cards Grid with Fixed Layout & Borders) -->
+  <!-- Weekly Community Trends & Hot Topics Section (Modern Mini-Cards Grid) -->
   <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border: 1px solid rgba(251, 191, 36, 0.25); border-radius: 14px; padding: 22px; margin-bottom: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
     
     <!-- Section Header -->
@@ -227,26 +227,32 @@
         {% for stat in consensus_data[:3] %}
           {% set is_heavyweight = loop.first %}
           
-          <!-- Strict Volume-Tier Categorization -->
+          <!-- Dynamic styling and titles based on sorted volume rank -->
           {% if is_heavyweight %}
             {% set action_badge = '🔥 HEAVYWEIGHT' %}
             {% set action_desc = 'The single most heavily token-backed matchup of the week.' %}
             {% set badge_color = '#fbbf24' %}
+            {% set card_border = 'rgba(251, 191, 36, 0.5)' %}
+            {% set card_bg = 'rgba(30, 41, 59, 0.85)' %}
           {% elif loop.index == 2 %}
             {% set action_badge = '⚡ HIGH-VOLUME' %}
             {% set action_desc = 'The second most active betting pool on the weekly slate.' %}
             {% set badge_color = '#38bdf8' %}
+            {% set card_border = 'rgba(56, 189, 248, 0.4)' %}
+            {% set card_bg = 'rgba(30, 41, 59, 0.7)' %}
           {% else %}
             {% set action_badge = '🎯 TRENDING' %}
             {% set action_desc = 'Capturing steady community token volume and attention.' %}
             {% set badge_color = '#a78bfa' %}
+            {% set card_border = 'rgba(167, 139, 250, 0.4)' %}
+            {% set card_bg = 'rgba(30, 41, 59, 0.7)' %}
           {% endif %}
           
-          <!-- Mini-Card Bubble Container with uniform gold-accented styling -->
-          <div style="background: rgba(30, 41, 59, 0.75); border: 1px solid rgba(251, 191, 36, 0.35); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 4px 15px rgba(0,0,0,0.3); position: relative; overflow: hidden;">
+          <!-- Mini-Card Bubble Container -->
+          <div style="background: {{ card_bg }}; border: 1px solid {{ card_border }}; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 4px 15px rgba(0,0,0,0.3); position: relative; overflow: hidden;">
             
             <div>
-              <!-- Top Header Row: Clean Stacked Badges & Pill Counts to prevent overflow -->
+              <!-- Top Header Row -->
               <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; gap: 6px;">
                 <span style="background: rgba(15, 23, 42, 0.8); color: {{ badge_color }}; font-size: 10px; font-weight: bold; padding: 3px 7px; border-radius: 4px; border: 1px solid {{ badge_color }}; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.2;">{{ action_badge }}</span>
                 
