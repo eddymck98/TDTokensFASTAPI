@@ -15,7 +15,13 @@ def get_supabase(request: Request) -> Client:
     return request.app.state.supabase
 
 @router.get("/", response_class=HTMLResponse)
-async def get_leagues_page(request: Request, league_id: Optional[str] = None, supabase: Client = Depends(get_supabase)):
+async def get_leagues_page(
+    request: Request, 
+    league_id: Optional[str] = None, 
+    error: Optional[str] = None,
+    success: Optional[str] = None,
+    supabase: Client = Depends(get_supabase)
+):
     session_cookie = request.cookies.get("td_tokens_session")
     if not session_cookie:
         return RedirectResponse(url="/", status_code=303)
@@ -151,6 +157,17 @@ async def get_leagues_page(request: Request, league_id: Optional[str] = None, su
     except Exception as e:
         print(f"Leagues page error: {e}")
 
+    # Translate code error keys into user-friendly UI prompt strings
+    error_message = None
+    if error == "blank_code":
+        error_message = "Invite code cannot be blank."
+    elif error == "invalid_code":
+        error_message = "Invalid invite code. Please check and try again."
+    elif error == "incorrect_password":
+        error_message = "Incorrect league password. Access denied."
+    elif error == "server_error":
+        error_message = "A server error occurred while processing your request. Please try again."
+
     return templates.TemplateResponse(request=request, name="leagues.html", context={
         "request": request,
         "user": user,
@@ -162,7 +179,9 @@ async def get_leagues_page(request: Request, league_id: Optional[str] = None, su
         "trash_talk_messages": trash_talk_messages,
         "archived_seasons": archived_seasons,
         "active_league_id": league_id or "global",
-        "team_data": NFL_TEAM_DATA
+        "team_data": NFL_TEAM_DATA,
+        "join_error": error_message,
+        "success_msg": success
     })
 
 @router.post("/set-default")
