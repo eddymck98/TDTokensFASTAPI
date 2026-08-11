@@ -28,6 +28,16 @@
             --team-color-glow: {{ t_color }}55;
             --team-logo-url: url('{{ t_team_logo }}');
         }
+
+        /* SITE-WIDE OVERRIDE: Forces standard container cards across all templates to adopt team styling */
+        .dashboard-container > div, 
+        .profile-container > div, 
+        .rules-container > div, 
+        .leagues-container > div,
+        .bets-container > div {
+            border-left-color: var(--team-color) !important;
+        }
+
         .app-background {
             position: fixed;
             top: 0;
