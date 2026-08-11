@@ -36,17 +36,8 @@
     <style>
         :root {
             --team-color: {{ t_color }};
-            --team-color-glow: {{ t_color }}55;
+            --team-color-glow: {{ t_color }}33;
             --team-logo-url: url('{{ t_team_logo }}');
-        }
-
-        /* SITE-WIDE OVERRIDE: Forces standard container cards across all templates to adopt team styling */
-        .dashboard-container > div, 
-        .profile-container > div, 
-        .rules-container > div, 
-        .leagues-container > div,
-        .bets-container > div {
-            border-left-color: var(--team-color) !important;
         }
 
         .app-background {
@@ -64,8 +55,8 @@
 <body>
     <div class="app-background"></div>
 
-    <!-- Premium Glossy Navbar (Always visible structure & logo) -->
-    <nav class="navbar" style="--team-color: {{ t_color }};">
+    <!-- Premium Glossy Navbar -->
+    <nav class="navbar">
         <a href="/" class="brand-container">
             <div class="brand-logo-wrapper">
                 <img src="{{ t_logo }}" alt="Logo" class="brand-logo">
@@ -73,7 +64,7 @@
             <h1 class="brand-text">TOUCHDOWN <span>TOKENS</span></h1>
         </a>
         
-        <!-- Navigation Links & Toggle (Visible ONLY when logged in with a valid profile) -->
+        <!-- Navigation Links & Toggle -->
         {% if profile and profile.full_name and profile.full_name != "Error Loading Profile" %}
         <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle navigation">
             ☰
