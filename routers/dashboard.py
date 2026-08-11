@@ -228,22 +228,19 @@ async def render_dashboard_or_index(request: Request):
     except Exception as e:
         print(f"Bets Fetch Error: {e}")
 
-    # --- 3. RECENT MINI-LEAGUE ACTIVITY FEED FETCH (SAFE PAYOUTS ONLY) ---
+    # --- 3. RECENT MINI-LEAGUE ACTIVITY FEED FETCH (SAFE TWO-STEP FETCH) ---
     recent_league_activity = []
     try:
-        # A. Find all mini-leagues the current user belongs to
         my_leagues_res = supabase.table("league_members").select("league_id, leagues(name)").eq("user_id", user.id).execute()
         my_league_ids = [m["league_id"] for m in my_leagues_res.data] if my_leagues_res.data else []
         
         if my_league_ids:
-            # B. Find other user IDs who share these same mini-leagues
             shared_members_res = supabase.table("league_members").select("user_id").in_("league_id", my_league_ids).execute()
             shared_user_ids = list(set([m["user_id"] for m in shared_members_res.data])) if shared_members_res.data else []
             
-            # C. Fetch ONLY token payouts/wins from shared users (NO specific pick/question details leaked)
             if shared_user_ids:
                 payouts_res = supabase.table("user_bets") \
-                    .select("user_id, tokens_awarded, week_number, profiles(full_name)") \
+                    .select("user_id, tokens_awarded, week_number") \
                     .in_("user_id", shared_user_ids) \
                     .gt("tokens_awarded", 0) \
                     .order("created_at", desc=True) \
@@ -251,10 +248,15 @@ async def render_dashboard_or_index(request: Request):
                     .execute()
                     
                 if payouts_res.data:
+                    payout_user_ids = list(set([p["user_id"] for p in payouts_res.data]))
+                    profiles_res = supabase.table("profiles").select("id, full_name").in_("id", payout_user_ids).execute()
+                    profile_map = {row["id"]: row["full_name"] for row in profiles_res.data} if profiles_res.data else {}
+                    
                     for p in payouts_res.data:
-                        p_info = p.get("profiles") or {}
+                        uid = p.get("user_id")
+                        user_name = profile_map.get(uid, "A rival player")
                         recent_league_activity.append({
-                            "user_name": p_info.get("full_name", "A rival player"),
+                            "user_name": user_name,
                             "tokens_won": p.get("tokens_awarded", 0),
                             "week_number": p.get("week_number", 1)
                         })
