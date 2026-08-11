@@ -1,6 +1,6 @@
 import os
 import json
-from fastapi import APIRouter, Depends, Form, Request, HTTPException
+from fastapi import APIRouter, Depends, Form, Request, HTTPException, Query
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, EmailStr
@@ -87,6 +87,30 @@ async def signup_page(request: Request):
 async def login_page(request: Request):
     """Renders the user login page."""
     return templates.TemplateResponse(request=request, name="login.html", context={"request": request})
+
+@router.get("/verify", response_class=HTMLResponse)
+async def verify_user_email(
+    request: Request,
+    token: str = Query(...),
+    type: str = Query("signup"),
+    supabase: Client = Depends(get_supabase)
+):
+    """Handles verification when a user clicks the authorization link in their email."""
+    try:
+        # Verify OTP token generated during sign-up/recovery
+        res = supabase.auth.verify_otp({"token_hash": token, "type": type})
+        if res and res.session:
+            response = RedirectResponse(url="/auth/login?verified=true", status_code=303)
+            session_data = json.dumps({
+                "access_token": res.session.access_token,
+                "refresh_token": res.session.refresh_token
+            })
+            response.set_cookie(key="td_tokens_session", value=session_data, max_age=2592000, httponly=True, secure=True)
+            return response
+        else:
+            return RedirectResponse(url="/auth/login?error=invalid_token", status_code=303)
+    except Exception:
+        return RedirectResponse(url="/auth/login?error=verification_failed", status_code=303)
 
 # ==========================================
 # POST ROUTES FOR FORM ACTIONS
@@ -200,15 +224,16 @@ async def signup_user(
             except Exception:
                 pass
 
-            # Generate proper verification token link via admin api
+            # Generate proper verification token link via admin api pointing straight to our app callback route
             link_response = admin_supabase.auth.admin.generate_link({"type": "signup", "email": clean_email})
-            verification_link = f"https://tdtokens.co.uk/"
+            verification_link = "https://tdtokens.co.uk/"
             
             if link_response and hasattr(link_response, "properties") and link_response.properties:
                 props = link_response.properties
-                action_link = props.get("action_link") if isinstance(props, dict) else getattr(props, "action_link", None)
+                hashed_token = props.get("hashed_token") if isinstance(props, dict) else getattr(props, "hashed_token", None)
                 email_otp = props.get("email_otp") if isinstance(props, dict) else getattr(props, "email_otp", None)
-                verification_link = f"https://tdtokens.co.uk/?token={email_otp}&type=signup" if email_otp else (action_link or verification_link)
+                token_to_use = hashed_token or email_otp
+                verification_link = f"https://tdtokens.co.uk/auth/verify?token={token_to_use}&type=signup" if token_to_use else verification_link
 
             send_verification_email(clean_email, verification_link)
             return RedirectResponse(url="/auth/login?reset=sent", status_code=303)
@@ -241,10 +266,12 @@ async def request_password_reset(
         
         if response and hasattr(response, "properties") and response.properties:
             props = response.properties
+            hashed_token = props.get("hashed_token") if isinstance(props, dict) else getattr(props, "hashed_token", None)
             email_otp = props.get("email_otp") if isinstance(props, dict) else getattr(props, "email_otp", None)
+            token_to_use = hashed_token or email_otp
             
             # Direct link to bypass Supabase UI redirect stripping issues, pointing straight to login with flags
-            recovery_link = f"https://tdtokens.co.uk/auth/login?token={email_otp}&type=recovery" if email_otp else f"https://tdtokens.co.uk/auth/login"
+            recovery_link = f"https://tdtokens.co.uk/auth/login?token={token_to_use}&type=recovery" if token_to_use else f"https://tdtokens.co.uk/auth/login"
             
             if recovery_link:
                 html_content = f"""
