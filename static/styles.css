@@ -230,6 +230,15 @@ main.container {
     border-left: 4px solid var(--team-color, #fbbf24) !important;
 }
 
+/* GLOBAL FORCING OVERRIDE: Forces all primary view cards/containers site-wide to adopt team accent colors */
+.dashboard-container > div, 
+.profile-container > div, 
+.rules-container > div, 
+.leagues-container > div,
+.bets-container > div {
+    border-left-color: var(--team-color) !important;
+}
+
 /* Leaderboard & Podium Ranks */
 .leaderboard-row {
     background: rgba(15, 23, 42, 0.85);
