@@ -69,18 +69,18 @@
         </button>
 
         <div class="nav-links" id="navLinks">
-            <a href="/dashboard" class="{% if request.url.path == '/dashboard' %}active{% endif %}">🏠 Home</a>
-            <a href="/rules" class="{% if request.url.path == '/rules' %}active{% endif %}">📖 Rules</a>
-            <a href="/profile" class="{% if request.url.path == '/profile' %}active{% endif %}">👤 Profile</a>
-            <a href="/bets" class="{% if request.url.path == '/bets' %}active{% endif %}">🎯 Bets</a>
-            <a href="/leagues" class="{% if request.url.path == '/leagues' %}active{% endif %}">🛡️ Leagues</a>         
+            <a href="/dashboard/" class="{% if request.url.path in ['/dashboard', '/dashboard/'] %}active{% endif %}">🏠 Home</a>
+            <a href="/rules/" class="{% if request.url.path in ['/rules', '/rules/'] %}active{% endif %}">📖 Rules</a>
+            <a href="/profile/" class="{% if request.url.path in ['/profile', '/profile/'] %}active{% endif %}">👤 Profile</a>
+            <a href="/bets/" class="{% if request.url.path in ['/bets', '/bets/'] %}active{% endif %}">🎯 Bets</a>
+            <a href="/leagues/" class="{% if request.url.path in ['/leagues', '/leagues/'] %}active{% endif %}">🛡️ Leagues</a>         
                     
             {% if request.state.is_commissioner or profile.is_admin %}
-                <a href="/commish" style="color: #fbbf24;" class="{% if request.url.path == '/commish' %}active{% endif %}">⭐ Commish</a>
+                <a href="/commish/" style="color: #fbbf24;" class="{% if request.url.path in ['/commish', '/commish/'] %}active{% endif %}">⭐ Commish</a>
             {% endif %}
 
             {% if profile.is_admin %}
-                <a href="/admin" class="nav-admin-btn {% if request.url.path == '/admin' %}active{% endif %}">🛠️ Admin</a>
+                <a href="/admin/" class="nav-admin-btn {% if request.url.path in ['/admin', '/admin/'] %}active{% endif %}">🛠️ Admin</a>
             {% endif %}
             
             <a href="/logout" class="nav-logout-btn">🚪 Logout</a>
@@ -122,7 +122,7 @@
             <span style="color: #475569;">•</span>
             <a href="https://www.espn.com/nfl" target="_blank" style="color: #94a3b8; font-size: 13px; text-decoration: none;">ESPN NFL Scoreboard</a>
             <span style="color: #475569;">•</span>
-            <a href="/contact" style="color: #94a3b8; font-size: 13px; text-decoration: none;">Contact Us</a>
+            <a href="/contact/" style="color: #94a3b8; font-size: 13px; text-decoration: none;">Contact Us</a>
             <span style="color: #475569;">•</span>
             <a href="https://buymeacoffee.com/ed.mckenna" target="_blank" style="color: #fbbf24; font-size: 13px; font-weight: bold; text-decoration: none;">☕ Support the App</a>
         </div>
