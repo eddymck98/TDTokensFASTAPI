@@ -111,7 +111,8 @@
     <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: #fbbf24; letter-spacing: 1px; margin-top: 0; margin-bottom: 5px;">🔑 RESET YOUR PASSWORD</h3>
     <p style="color: #cbd5e1; font-size: 14px; margin-bottom: 20px;">Enter your new secure password below to complete the reset process.</p>
 
-    <form id="recovery-form" onsubmit="handlePasswordUpdate(event)">
+    <!-- Pointed directly to backend POST route /auth/update-password -->
+    <form action="/auth/update-password" method="POST" onsubmit="return validatePasswordMatch(event)">
       <div style="margin-bottom: 15px;">
         <label for="new-password" style="font-weight: 600; font-size: 14px; color: #f8fafc; display: block; margin-bottom: 6px;">New Password (min 6 characters):</label>
         <input type="password" id="new-password" name="new_password" required minlength="6" placeholder="Type new password..." style="width: 100%; padding: 12px; background: rgba(30, 41, 59, 0.9); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; font-size: 15px; box-sizing: border-box;">
@@ -183,7 +184,6 @@ document.addEventListener("DOMContentLoaded", function() {
     alertMessage.textContent = '✅ Email verified successfully! Please log in with your credentials below.';
     banner.style.display = 'block';
   } else if (errorType === 'email_exists') {
-    // Automatically shift to the signup tab so the user sees the error context clearly
     const signupBtn = document.querySelectorAll('.auth-tab-btn')[1];
     if (signupBtn) signupBtn.click();
 
@@ -219,45 +219,16 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 });
 
-async function handlePasswordUpdate(evt) {
-  evt.preventDefault();
+function validatePasswordMatch(evt) {
   const newPass = document.getElementById('new-password').value;
   const confirmPass = document.getElementById('confirm-password').value;
 
   if (newPass !== confirmPass) {
     alert("Passwords do not match. Please re-enter them.");
-    return;
+    evt.preventDefault();
+    return false;
   }
-
-  const hashString = window.location.hash.substring(1);
-  const hashParams = new URLSearchParams(hashString);
-  const urlParams = new URLSearchParams(window.location.search);
-  const token = hashParams.get('access_token') || hashParams.get('token') || urlParams.get('token');
-
-  if (window.supabase) {
-    try {
-      if (token && hashParams.has('access_token')) {
-        // Set the recovery session using the access token from the hash fragment
-        await window.supabase.auth.setSession({
-          access_token: token,
-          refresh_token: hashParams.get('refresh_token') || ''
-        });
-      }
-      
-      const { error } = await window.supabase.auth.updateUser({ password: newPass });
-      if (error) {
-        alert("Error updating password: " + error.message);
-      } else {
-        alert("✅ Password updated successfully! Redirecting to login...");
-        window.location.href = "/auth/login";
-      }
-    } catch (err) {
-      alert("Error: " + err.message);
-    }
-  } else {
-    alert("✅ Password reset submitted successfully! Please log in with your new password.");
-    window.location.href = "/auth/login";
-  }
+  return true;
 }
 </script>
 
