@@ -206,7 +206,7 @@
     {% endif %}
   </div>
 
-  <!-- Weekly Community Trends & Hot Topics Section (Overhauled Design with Categorization) -->
+  <!-- Weekly Community Trends & Hot Topics Section (Modern Mini-Cards Grid) -->
   <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border: 1px solid rgba(251, 191, 36, 0.25); border-radius: 14px; padding: 22px; margin-bottom: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
     
     <!-- Section Header -->
@@ -216,74 +216,64 @@
       </h3>
       <span style="font-size: 11px; background: rgba(251, 191, 36, 0.15); color: #fbbf24; padding: 4px 10px; border-radius: 6px; font-weight: bold; border: 1px solid rgba(251, 191, 36, 0.3); font-family: 'Bebas Neue'; letter-spacing: 0.5px;">TOP 3 ACTION</span>
     </div>
-    <p style="color: #94a3b8; font-size: 13px; margin-bottom: 20px;">The most heavily bet matchups and prop insights capturing the global league's focus this week.</p>
+    <p style="color: #94a3b8; font-size: 13px; margin-bottom: 20px;">Key insights and behavioral breakdowns capturing the global league's focus this week.</p>
     
-    <div id="community-trends-container" style="display: grid; gap: 16px;">
+    <div id="community-trends-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px;">
       {% if not consensus_data %}
-        <div style="background: rgba(30, 41, 59, 0.5); padding: 24px; text-align: center; border-radius: 12px; border: 1px dashed rgba(255,255,255,0.1);">
+        <div style="background: rgba(30, 41, 59, 0.5); padding: 24px; text-align: center; border-radius: 12px; border: 1px dashed rgba(255,255,255,0.1); grid-column: 1 / -1;">
           <p style="color: #cbd5e1; font-size: 14px; margin: 0;">Not enough global action yet to calculate community trends.</p>
         </div>
       {% else %}
         {% for stat in consensus_data[:3] %}
           {% set is_heavyweight = loop.first %}
           {% set card_border = 'rgba(251, 191, 36, 0.45)' if is_heavyweight else 'rgba(255, 255, 255, 0.08)' %}
-          {% set card_bg = 'rgba(30, 41, 59, 0.75)' if is_heavyweight else 'rgba(30, 41, 59, 0.45)' %}
+          {% set card_bg = 'rgba(30, 41, 59, 0.8)' if is_heavyweight else 'rgba(30, 41, 59, 0.5)' %}
           
-          <!-- Dynamic category detection based on question text -->
-          {% set q_lower = stat.text | lower %}
-          {% if 'touchdown' in q_lower or 'td' in q_lower %}
-            {% set prop_badge = '🎯 SCORING PROP' %}
-            {% set prop_desc = 'Community prediction on scoring performance' %}
-          {% elif 'passing' in q_lower or 'yards' in q_lower and ('qb' in q_lower or 'throw' in q_lower) %}
-            {% set prop_badge = '🏈 PASSING PROP' %}
-            {% set prop_desc = 'Quarterback yardage threshold action' %}
-          {% elif 'rushing' in q_lower or 'receptions' in q_lower or 'receiving' in q_lower %}
-            {% set prop_badge = '⚡ YARDAGE / CATCH PROP' %}
-            {% set prop_desc = 'Skill player stat-line projection' %}
+          <!-- Determine Action Category & Description -->
+          {% if is_heavyweight %}
+            {% set action_badge = '🔥 HEAVYWEIGHT ACTION' %}
+            {% set action_desc = 'The single most heavily token-backed matchup of the week.' %}
+            {% set badge_color = '#fbbf24' %}
+          {% elif stat.yes_pct >= 75 or stat.no_pct >= 75 %}
+            {% set action_badge = '🛡️ COMMUNITY CONSENSUS' %}
+            {% set action_desc = 'Overwhelming public agreement; global league leaning heavily one way.' %}
+            {% set badge_color = '#38bdf8' %}
           {% else %}
-            {% set prop_badge = '🏆 GAME PREDICTION' %}
-            {% set prop_desc = 'General outcome confidence breakdown' %}
+            {% set action_badge = '⚡ HIGH-STAKES TOSS-UP' %}
+            {% set action_desc = 'A deeply divided matchup with tokens split right down the middle.' %}
+            {% set badge_color = '#a78bfa' %}
           {% endif %}
           
-          <div style="background: {{ card_bg }}; border: 1px solid {{ card_border }}; border-radius: 12px; padding: 16px 18px; position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+          <!-- Mini-Card Bubble Container -->
+          <div style="background: {{ card_bg }}; border: 1px solid {{ card_border }}; border-radius: 12px; padding: 18px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 4px 15px rgba(0,0,0,0.3); position: relative; overflow: hidden;">
             
-            <!-- Top Metadata Badges -->
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 6px;">
-              <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-                {% if is_heavyweight %}
-                  <span style="background: rgba(251, 191, 36, 0.2); color: #fbbf24; font-size: 10px; font-weight: bold; padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(251, 191, 36, 0.4); text-transform: uppercase; letter-spacing: 0.5px;">🔥 Heavyweight</span>
-                {% endif %}
-                <span style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; font-size: 10px; font-weight: bold; padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(56, 189, 248, 0.3); text-transform: uppercase; letter-spacing: 0.5px;">{{ prop_badge }}</span>
-                <span style="background: rgba(15, 23, 42, 0.6); color: #94a3b8; font-size: 11px; font-weight: bold; padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.05); font-family: 'Bebas Neue'; letter-spacing: 0.5px;">Q{{ stat.q_num }}</span>
+            <div>
+              <!-- Top Header (Badge & Wager Amount) -->
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 6px;">
+                <span style="background: rgba(15, 23, 42, 0.6); color: {{ badge_color }}; font-size: 10px; font-weight: bold; padding: 3px 8px; border-radius: 4px; border: 1px solid {{ badge_color }}; text-transform: uppercase; letter-spacing: 0.5px;">{{ action_badge }}</span>
+                <span style="color: #fbbf24; font-family: 'Bebas Neue'; font-size: 14px; letter-spacing: 0.5px;">Q{{ stat.q_num }} • {{ stat.total_wager }} 🪙</span>
               </div>
+
+              <!-- Question Text -->
+              <div style="font-size: 15px; color: #ffffff; margin-bottom: 6px; font-weight: 600; line-height: 1.35;">{{ stat.text }}</div>
               
-              <span style="background: rgba(0, 0, 0, 0.4); padding: 3px 10px; border-radius: 6px; color: #fbbf24; font-family: 'Bebas Neue'; font-size: 15px; letter-spacing: 0.5px; border: 1px solid rgba(251, 191, 36, 0.2);">
-                🪙 {{ stat.total_wager }} WAGERED
-              </span>
+              <!-- Description Text Bubble Subtitle -->
+              <div style="font-size: 11px; color: #94a3b8; margin-bottom: 16px; font-style: italic; line-height: 1.3;">{{ action_desc }}</div>
             </div>
 
-            <!-- Question Text & Description -->
-            <div style="font-size: 16px; color: #ffffff; margin-bottom: 4px; font-weight: 600; line-height: 1.4;">{{ stat.text }}</div>
-            <div style="font-size: 11px; color: #94a3b8; margin-bottom: 12px; font-style: italic;">{{ prop_desc }}</div>
-            
-            <!-- Metrics Row (Yes vs No side-by-side breakdown) -->
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 13px;">
+            <!-- Bottom Percentage Split Bubbles -->
+            <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center;">
               <div style="display: flex; align-items: center; gap: 6px;">
-                <span style="width: 8px; height: 8px; border-radius: 50%; background: #34d399; display: inline-block; box-shadow: 0 0 6px #34d399;"></span>
-                <span style="color: #cbd5e1; font-weight: 500;">YES:</span> 
-                <b style="color: #34d399; font-family: 'Bebas Neue'; font-size: 16px; letter-spacing: 0.5px;">{{ stat.yes_pct }}%</b>
+                <span style="width: 7px; height: 7px; border-radius: 50%; background: #34d399; box-shadow: 0 0 5px #34d399;"></span>
+                <span style="font-size: 11px; color: #cbd5e1; font-weight: 600;">YES</span>
+                <span style="font-family: 'Bebas Neue'; font-size: 16px; color: #34d399;">{{ stat.yes_pct }}%</span>
               </div>
+              <div style="width: 1px; height: 16px; background: rgba(255,255,255,0.1);"></div>
               <div style="display: flex; align-items: center; gap: 6px;">
-                <span style="color: #f87171; font-weight: 500;">NO:</span> 
-                <b style="color: #f87171; font-family: 'Bebas Neue'; font-size: 16px; letter-spacing: 0.5px;">{{ stat.no_pct }}%</b>
-                <span style="width: 8px; height: 8px; border-radius: 50%; background: #f87171; display: inline-block; box-shadow: 0 0 6px #f87171;"></span>
+                <span style="font-family: 'Bebas Neue'; font-size: 16px; color: #f87171;">{{ stat.no_pct }}%</span>
+                <span style="font-size: 11px; color: #cbd5e1; font-weight: 600;">NO</span>
+                <span style="width: 7px; height: 7px; border-radius: 50%; background: #f87171; box-shadow: 0 0 5px #f87171;"></span>
               </div>
-            </div>
-            
-            <!-- Clean Unified Multi-Segment Progress Bar -->
-            <div style="display: flex; width: 100%; height: 10px; border-radius: 5px; overflow: hidden; background: rgba(15, 23, 42, 0.9); padding: 1px; border: 1px solid rgba(255,255,255,0.06);">
-              <div style="width: {{ stat.yes_pct }}%; background: #34d399; border-radius: 4px 0 0 4px; transition: width 0.6s ease;"></div>
-              <div style="width: {{ stat.no_pct }}%; background: #f87171; border-radius: 0 4px 4px 0; transition: width 0.6s ease; margin-left: {% if stat.yes_pct > 0 and stat.no_pct > 0 %}2px{% else %}0{% endif %};"></div>
             </div>
 
           </div>
