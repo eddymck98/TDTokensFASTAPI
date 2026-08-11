@@ -168,31 +168,6 @@
     </form>
   </div>
 
-  <!-- Mini-League Trophy Cabinet Section -->
-  <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-left: 4px solid var(--team-color); border-radius: 16px; padding: 24px; margin-bottom: 25px; backdrop-filter: blur(14px);">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
-      <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: #fbbf24; letter-spacing: 1px; margin: 0;">🏆 MINI-LEAGUE TROPHY CABINET</h3>
-      <span style="font-size: 11px; background: rgba(56, 189, 248, 0.15); color: #38bdf8; padding: 3px 8px; border-radius: 6px; font-weight: bold;">RIVALS & LEAGUES ONLY</span>
-    </div>
-    <p style="color: #94a3b8; font-size: 14px; margin-bottom: 20px;">Trophies and achievements earned exclusively across your active mini-leagues.</p>
-
-    {% if not trophies %}
-      <div style="background: rgba(30, 41, 59, 0.5); padding: 24px; text-align: center; border-radius: 10px; border: 1px dashed rgba(255,255,255,0.1);">
-        <p style="color: #cbd5e1; font-size: 14px; margin: 0;">No mini-league trophies in your cabinet yet. Climb your group leaderboards to secure hardware!</p>
-      </div>
-    {% else %}
-      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px;">
-        {% for trophy in trophies %}
-          <div style="background: rgba(30, 41, 59, 0.8); border: 1px solid rgba(251, 191, 36, 0.3); border-radius: 10px; padding: 14px; text-align: center;">
-            <div style="font-size: 32px; margin-bottom: 6px;">{{ trophy.emoji | default('🏆') }}</div>
-            <div style="font-family: 'Bebas Neue'; font-size: 16px; color: #fbbf24; letter-spacing: 0.5px;">{{ trophy.title }}</div>
-            <div style="font-size: 11px; color: #94a3b8; margin-top: 2px;">{{ trophy.league_name }}</div>
-          </div>
-        {% endfor %}
-      </div>
-    {% endif %}
-  </div>
-
   <!-- Virtual Trophy Cabinet Inspector -->
   <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-left: 4px solid var(--team-color); border-radius: 16px; padding: 24px; backdrop-filter: blur(14px);">
     <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: #ffffff; letter-spacing: 1px; margin-top: 0; margin-bottom: 5px;">🏆 Virtual Trophy Cabinet Reference</h3>
