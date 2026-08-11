@@ -109,10 +109,15 @@
   <!-- Tab 3: Password Recovery Screen (Triggered automatically when clicked from Email Reset Link) -->
   <div id="recovery-section" class="auth-tab-content" style="display: none; background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(251, 191, 36, 0.4); border-top: 4px solid #fbbf24; border-radius: 16px; padding: 24px; backdrop-filter: blur(14px); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
     <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: #fbbf24; letter-spacing: 1px; margin-top: 0; margin-bottom: 5px;">🔑 RESET YOUR PASSWORD</h3>
-    <p style="color: #cbd5e1; font-size: 14px; margin-bottom: 20px;">Enter your new secure password below to complete the reset process.</p>
+    <p style="color: #cbd5e1; font-size: 14px; margin-bottom: 20px;">Enter your account email and your new secure password below.</p>
 
-    <!-- Pointed directly to backend POST route /auth/update-password -->
+    <!-- Pointed directly to backend POST route /auth/update-password with email field added -->
     <form action="/auth/update-password" method="POST" onsubmit="return validatePasswordMatch(event)">
+      <div style="margin-bottom: 15px;">
+        <label for="reset-email" style="font-weight: 600; font-size: 14px; color: #f8fafc; display: block; margin-bottom: 6px;">Account Email Address:</label>
+        <input type="email" id="reset-email" name="email" required placeholder="Enter your email..." style="width: 100%; padding: 12px; background: rgba(30, 41, 59, 0.9); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; font-size: 15px; box-sizing: border-box;">
+      </div>
+
       <div style="margin-bottom: 15px;">
         <label for="new-password" style="font-weight: 600; font-size: 14px; color: #f8fafc; display: block; margin-bottom: 6px;">New Password (min 6 characters):</label>
         <input type="password" id="new-password" name="new_password" required minlength="6" placeholder="Type new password..." style="width: 100%; padding: 12px; background: rgba(30, 41, 59, 0.9); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; font-size: 15px; box-sizing: border-box;">
@@ -172,7 +177,7 @@ document.addEventListener("DOMContentLoaded", function() {
     banner.style.background = 'rgba(251, 191, 36, 0.15)';
     banner.style.borderColor = 'rgba(251, 191, 36, 0.4)';
     banner.style.color = '#fbbf24';
-    alertMessage.textContent = '🔑 Account Recovery Verified. Please enter your new password below.';
+    alertMessage.textContent = '🔑 Account Recovery Verified. Please enter your email and new password below.';
     banner.style.display = 'block';
     return;
   }
