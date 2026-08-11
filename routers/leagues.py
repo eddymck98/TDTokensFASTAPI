@@ -244,34 +244,39 @@ async def create_league(
             new_league_id = res_l.data[0]["id"]
             supabase.table("league_members").insert({
                 "league_id": new_league_id,
-                "user_id": user.id
+                "user_id": user.id,
+                "role": "commissioner"
             }).execute()
 
         return RedirectResponse(url=f"/leagues/?league_id={new_league_id}&success=league_created", status_code=303)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@router.post("/join")
+@router.api_route("/join", methods=["GET", "POST"])
 async def join_league(
     request: Request,
-    invite_code: str = Form(...),
+    code: Optional[str] = None,
+    invite_code: Optional[str] = Form(None),
     league_password: str = Form(""),
     supabase: Client = Depends(get_supabase)
 ):
     session_cookie = request.cookies.get("td_tokens_session")
     if not session_cookie:
-        raise HTTPException(status_code=401, detail="Unauthorized session.")
+        return RedirectResponse(url="/", status_code=303)
     try:
         token_data = json.loads(session_cookie)
         supabase.auth.set_session(token_data.get("access_token"), token_data.get("refresh_token"))
         user = supabase.auth.get_user().user
         if not user:
-            raise HTTPException(status_code=401, detail="Invalid user session.")
+            return RedirectResponse(url="/", status_code=303)
     except Exception:
-        raise HTTPException(status_code=401, detail="Authentication failed.")
+        return RedirectResponse(url="/", status_code=303)
 
-    clean_code = invite_code.strip().upper()
+    # Determine code from query parameter (GET) or form post (POST)
+    clean_code = (code or invite_code or "").strip().upper()
     if not clean_code:
+        if request.method == "POST":
+            return RedirectResponse(url="/leagues/?error=blank_code", status_code=303)
         return RedirectResponse(url="/leagues/?error=blank_code", status_code=303)
 
     try:
@@ -280,6 +285,25 @@ async def join_league(
             return RedirectResponse(url="/leagues/?error=invalid_code", status_code=303)
 
         target_league = found_league[0]
+
+        # If it's a GET request (clicking the direct challenge link), check if a password is required. 
+        # If a password exists, redirect back to the leagues page or show a password prompt. Otherwise, auto-join.
+        if request.method == "GET":
+            if target_league.get("league_password", "").strip():
+                # Password protected: redirect to leagues page with info to prompt password
+                return RedirectResponse(url=f"/leagues/?error=incorrect_password", status_code=303)
+            
+            # Not password protected: auto join directly
+            already_member = supabase.table("league_members").select("id").eq("league_id", target_league["id"]).eq("user_id", user.id).execute().data
+            if not already_member:
+                supabase.table("league_members").insert({
+                    "league_id": target_league["id"],
+                    "user_id": user.id,
+                    "role": "member"
+                }).execute()
+            return RedirectResponse(url=f"/leagues/?league_id={target_league['id']}&success=joined_league", status_code=303)
+
+        # POST request handling (form submit with code and optional password)
         if target_league.get("league_password", "") and target_league.get("league_password", "") != league_password.strip():
             return RedirectResponse(url=f"/leagues/?league_id={target_league['id']}&error=incorrect_password", status_code=303)
 
@@ -289,7 +313,8 @@ async def join_league(
 
         supabase.table("league_members").insert({
             "league_id": target_league["id"],
-            "user_id": user.id
+            "user_id": user.id,
+            "role": "member"
         }).execute()
 
         return RedirectResponse(url=f"/leagues/?league_id={target_league['id']}&success=joined_league", status_code=303)
@@ -363,9 +388,14 @@ async def archive_season(
         if not user:
             raise HTTPException(status_code=401, detail="Invalid user session.")
 
-        # Verify commissioner authorization
+        # Verify commissioner authorization (supports both primary column or co-commish role)
         league_check = supabase.table("leagues").select("commissioner_id").eq("id", league_id).execute()
-        if not league_check.data or league_check.data[0].get("commissioner_id") != user.id:
+        is_primary = league_check.data and league_check.data[0].get("commissioner_id") == user.id
+        
+        mem_check = supabase.table("league_members").select("role").eq("league_id", league_id).eq("user_id", user.id).execute()
+        is_co_commish = mem_check.data and mem_check.data[0].get("role") == "commissioner"
+
+        if not is_primary and not is_co_commish:
             raise HTTPException(status_code=403, detail="Only the league commissioner can archive seasons.")
 
         # Fetch current standings for this mini league to build the snapshot JSON
