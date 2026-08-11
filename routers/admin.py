@@ -8,6 +8,7 @@ from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from typing import Optional
 from supabase import Client
+from utils.email_notifications import send_weekly_reminders_to_all
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
@@ -434,3 +435,32 @@ async def admin_app_access_control(
     supabase.table("weekly_questions").insert({"week_number": 997, "question_number": 99, "question_text": "SIGNUP LOCK SETTING", "winning_answer": "LOCKED" if signup_locked else "UNLOCKED"}).execute()
     
     return RedirectResponse(url="/admin?success=access_controls_updated", status_code=303)
+
+@router.post("/send-reminders")
+async def trigger_weekly_reminders(
+    request: Request,
+    week_number: int = Form(...),
+    supabase: Client = Depends(get_supabase)
+):
+    # Verify admin session security
+    session_cookie = request.cookies.get("td_tokens_session")
+    if not session_cookie:
+        return RedirectResponse(url="/auth/login", status_code=303)
+    
+    try:
+        token_data = json.loads(session_cookie)
+        supabase.auth.set_session(token_data.get("access_token"), token_data.get("refresh_token"))
+        user = supabase.auth.get_user().user
+        
+        # Verify user is actually an admin in the database
+        profile_res = supabase.table("profiles").select("is_admin").eq("id", user.id).execute()
+        if not profile_res.data or not profile_res.data[0].get("is_admin"):
+            return RedirectResponse(url="/", status_code=303)
+    except Exception:
+        return RedirectResponse(url="/auth/login", status_code=303)
+
+    # Trigger the bulk email sender helper
+    sent_count = send_weekly_reminders_to_all(supabase, week_number)
+
+    # Redirect back to admin panel with success count parameter
+    return RedirectResponse(url=f"/admin?week={week_number}&success=reminders_sent_count_{sent_count}", status_code=303)
