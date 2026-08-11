@@ -27,7 +27,12 @@
             --team-color-glow: {{ t_color }}55;
         }
         
-        /* Explicitly force correct background image, preventing external/default car photo leaks */
+        /* Explicitly force correct background image and prevent horizontal mobile overflow */
+        html, body {
+            overflow-x: hidden;
+            width: 100%;
+        }
+
         body {
             background: radial-gradient(circle at 50% 20%, rgba(15, 23, 42, 0.90), rgba(7, 13, 25, 0.99)), 
                         url('{{ t_stadium }}') center center / cover no-repeat fixed !important;
@@ -85,14 +90,14 @@
 
     <!-- Compact Sticky Balance Bar -->
     {% if profile and profile.full_name and profile.full_name != "Error Loading Profile" and request.url.path != '/auth/login' and not request.url.path.startswith('/admin') %}
-    <div class="sticky-balance-bar container" style="position: sticky; top: 75px; z-index: 90; margin-top: 12px; margin-bottom: 20px; background: rgba(15, 23, 42, 0.92); border: 1px solid rgba(255, 255, 255, 0.12); border-left: 4px solid var(--team-color); border-radius: 12px; padding: 10px 15px; backdrop-filter: blur(14px); box-shadow: 0 8px 20px rgba(0,0,0,0.4); display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+    <div class="sticky-balance-bar container" style="position: sticky; top: 75px; z-index: 90; margin-top: 12px; margin-bottom: 20px; background: rgba(15, 23, 42, 0.92); border: 1px solid rgba(255, 255, 255, 0.12); border-left: 4px solid var(--team-color); border-radius: 12px; padding: 10px 15px; backdrop-filter: blur(14px); box-shadow: 0 8px 20px rgba(0,0,0,0.4); display: flex; justify-content: space-between; align-items: center; gap: 10px; box-sizing: border-box;">
         <div style="display: flex; align-items: center; gap: 10px; overflow: hidden; flex: 1; min-width: 0;">
             <div style="border: 2px {{ profile.avatar_border | default('solid') }} var(--team-color); border-radius: 8px; padding: 4px 8px; background: {{ profile.avatar_color | default('#1e3a8a') }}; flex-shrink: 0;">
                 <span style="font-size: 20px;">{{ profile.avatar_emoji | default('🏈') }}</span>
             </div>
             <div style="overflow: hidden; flex: 1; min-width: 0;">
                 <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; line-height: 1.2;">
-                    <b style="font-size: 14px; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px;">{{ profile.full_name }}</b>
+                    <b style="font-size: 14px; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px;">{{ profile.full_name }}</b>
                     <span style="font-size: 10px; color: #38bdf8; background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.2); padding: 0px 4px; border-radius: 4px; white-space: nowrap;">{{ profile.selected_title | default('Gridiron Contender') }}</span>
                 </div>
                 <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase; font-weight: 600; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ profile.favorite_team | default('🏈 Free Agent / Neutral') }}</div>
@@ -106,13 +111,13 @@
     {% endif %}
 
     <!-- Main Content Container -->
-    <main class="container">
+    <main class="container" style="box-sizing: border-box; width: 100%;">
         {% block content %}{% endblock %}
     </main>
 
     <!-- Global Footer -->
-    <footer class="footer container">
-        <div class="footer-links">
+    <footer class="footer container" style="box-sizing: border-box; width: 100%;">
+        <div class="footer-links" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; align-items: center;">
             <a href="https://www.nfl.com" target="_blank" style="color: #94a3b8; font-size: 13px; text-decoration: none;">NFL Official Site</a>
             <span style="color: #475569;">•</span>
             <a href="https://www.espn.com/nfl" target="_blank" style="color: #94a3b8; font-size: 13px; text-decoration: none;">ESPN NFL Scoreboard</a>
@@ -121,7 +126,7 @@
             <span style="color: #475569;">•</span>
             <a href="https://buymeacoffee.com/ed.mckenna" target="_blank" style="color: #fbbf24; font-size: 13px; font-weight: bold; text-decoration: none;">☕ Support the App</a>
         </div>
-        <div style="color: #94a3b8; font-size: 12px; font-weight: 600; margin-bottom: 20px; text-align: center;">&copy; 2026 Touchdown Tokens. All rights reserved. Designed & Engineered by Ed McKenna.</div>
+        <div style="color: #94a3b8; font-size: 12px; font-weight: 600; margin: 15px 0; text-align: center;">&copy; 2026 Touchdown Tokens. All rights reserved. Designed & Engineered by Ed McKenna.</div>
         <div style="text-align: center;">
             <a href="https://buymeacoffee.com/ed.mckenna" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000000; padding: 10px 22px; border-radius: 12px; font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 1px; font-weight: bold; text-decoration: none; box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3);">☕ Buy Me A Coffee</a>
         </div>
