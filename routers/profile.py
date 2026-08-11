@@ -5,6 +5,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from supabase import Client
+from database import NFL_TEAM_DATA
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
@@ -76,7 +77,8 @@ async def get_profile_page(request: Request, supabase: Client = Depends(get_supa
         "request": request,
         "user": user,
         "profile": profile,
-        "all_profiles": all_profiles
+        "all_profiles": all_profiles,
+        "team_data": NFL_TEAM_DATA
     })
 
 @router.post("/update")
@@ -158,7 +160,7 @@ async def update_profile(
             "bio": bio.strip()
         }).eq("id", user.id).execute()
 
-        return RedirectResponse(url="/profile?success=profile_updated", status_code=303)
+        return RedirectResponse(url="/profile/?success=profile_updated", status_code=303)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -194,6 +196,6 @@ async def update_featured_badges(
             "featured_badges": featured_badges
         }).eq("id", user.id).execute()
 
-        return RedirectResponse(url="/profile?success=badges_updated", status_code=303)
+        return RedirectResponse(url="/profile/?success=badges_updated", status_code=303)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
