@@ -10,6 +10,20 @@
     </div>
   {% endif %}
 
+  <!-- Closed & Graded Status Banner -->
+  {% if is_week_graded %}
+    <div style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); border-left: 4px solid #10b981; padding: 14px 18px; border-radius: 12px; margin-bottom: 25px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="font-size: 20px;">📊</span>
+        <div>
+          <h4 style="margin: 0; color: #34d399; font-family: 'Bebas Neue'; font-size: 20px; letter-spacing: 1px;">WEEK {{ target_week }} IS CLOSED & GRADED</h4>
+          <p style="margin: 2px 0 0 0; color: #cbd5e1; font-size: 13px;">All match outcomes and token payouts have been finalized for this slate.</p>
+        </div>
+      </div>
+      <a href="/dashboard" style="background: #10b981; color: #fff; padding: 6px 14px; border-radius: 8px; font-family: 'Teko', sans-serif; font-size: 18px; font-weight: bold; text-decoration: none;">View Standings 🏆</a>
+    </div>
+  {% endif %}
+
   <!-- Lockout Timer Header -->
   <div class="team-themed-card team-watermark-bg" style="background: rgba(15, 23, 42, 0.95); border-top: 4px solid #ef4444; padding: 20px; text-align: center; margin-bottom: 25px;">
     <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: #ef4444; letter-spacing: 1.5px; margin: 0 0 5px 0;">⏳ TIME UNTIL WEEKLY LOCKOUT</h3>
@@ -235,6 +249,23 @@
       </form>
     {% endif %}
   {% endif %}
+
+  <!-- Compare Picks Against Rival Section -->
+  <div style="background: rgba(30, 41, 59, 0.8); border: 1px solid rgba(255, 255, 255, 0.08); border-top: 4px solid #38bdf8; border-radius: 12px; padding: 20px; margin-top: 30px; box-shadow: 0 8px 25px rgba(0,0,0,0.3);">
+    <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: #38bdf8; letter-spacing: 1px; margin-top: 0; margin-bottom: 5px;">⚔️ COMPARE WEEK {{ target_week }} PICKS</h3>
+    <p style="color: #94a3b8; font-size: 13px; margin-bottom: 15px;">Select a member from your mini-leagues to match head-to-head on their Week {{ target_week }} wagers.</p>
+
+    <form method="GET" action="/bets" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+      <input type="hidden" name="week" value="{{ target_week }}">
+      <select name="compare_user" required style="flex: 1; min-width: 220px; padding: 10px; background: rgba(15, 23, 42, 0.95); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; font-size: 14px;">
+        <option value="" disabled selected>-- Choose a mini-league rival --</option>
+        {% for member in league_members %}
+          <option value="{{ member.id }}">{{ member.full_name | default(member.email) }}</option>
+        {% endfor %}
+      </select>
+      <button type="submit" style="background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%); color: #000; padding: 10px 20px; font-family: 'Teko', sans-serif; font-size: 19px; font-weight: bold; border-radius: 8px; border: none; cursor: pointer;">Compare Head-to-Head 🔍</button>
+    </form>
+  </div>
 
 </div>
 
