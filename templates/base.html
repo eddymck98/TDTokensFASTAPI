@@ -15,22 +15,23 @@
     <!-- Global CSS Stylesheet linked via FastAPI StaticFiles -->
     <link rel="stylesheet" href="{{ url_for('static', path='styles.css') }}">
 
-    <!-- Extract Team Info safely with flexible fallback matching -->
+    <!-- Safe Team Data Extraction with Fallbacks -->
     {% set raw_team = profile.favorite_team if profile and profile.favorite_team else "Free Agent / Neutral" %}
     
-    {# Find matching key in team_data whether it has emojis or not #}
     {% set matched_team = namespace(key="🏈 Free Agent / Neutral") %}
-    {% for key in team_data.keys() %}
-        {% if raw_team.lower() in key.lower() or key.lower() in raw_team.lower() %}
-            {% set matched_team.key = key %}
-        {% endif %}
-    {% endfor %}
+    {% if team_data is defined and team_data %}
+        {% for key in team_data.keys() %}
+            {% if raw_team.lower() in key.lower() or key.lower() in raw_team.lower() %}
+                {% set matched_team.key = key %}
+            {% endif %}
+        {% endfor %}
+    {% endif %}
 
     {% set current_team = matched_team.key %}
-    {% set t_color = team_data[current_team].color if team_data and current_team in team_data else "#fbbf24" %}
+    {% set t_color = team_data[current_team].color if team_data is defined and team_data and current_team in team_data else "#fbbf24" %}
     {% set t_logo = "https://github.com/eddymck98/TD-Tokens-Render-/blob/main/TD%20Tokens%207.png?raw=true" %}
-    {% set t_team_logo = team_data[current_team].logo if team_data and current_team in team_data and team_data[current_team].logo else t_logo %}
-    {% set t_stadium = team_data[current_team].stadium if team_data and current_team in team_data and team_data[current_team].stadium else "https://images.unsplash.com/photo-1566577739112-5180d4bf9390?auto=format&fit=crop&w=1920&q=80" %}
+    {% set t_team_logo = team_data[current_team].logo if team_data is defined and team_data and current_team in team_data and team_data[current_team].logo else t_logo %}
+    {% set t_stadium = team_data[current_team].stadium if team_data is defined and team_data and current_team in team_data and team_data[current_team].stadium else "https://images.unsplash.com/photo-1566577739112-5180d4bf9390?auto=format&fit=crop&w=1920&q=80" %}
 
     <style>
         :root {
