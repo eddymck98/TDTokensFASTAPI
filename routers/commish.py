@@ -32,11 +32,23 @@ async def commish_portal(request: Request, league_id: Optional[str] = None):
     except Exception:
         return RedirectResponse(url="/auth/login", status_code=303)
 
-    # Fetch all leagues where the current user is the commissioner
+    # Fetch all leagues where the current user is an authorized commissioner (role = 'commissioner') or primary commissioner_id
     managed_leagues = []
     try:
-        leagues_res = supabase.table("leagues").select("*").eq("commissioner_id", current_profile["id"]).execute()
-        managed_leagues = leagues_res.data if leagues_res.data else []
+        # Check membership table where role is commissioner
+        member_res = supabase.table("league_members").select("league_id, role, leagues(*)").eq("user_id", current_profile["id"]).eq("role", "commissioner").execute()
+        if member_res.data:
+            for m in member_res.data:
+                if m.get("leagues"):
+                    managed_leagues.append(m["leagues"])
+        
+        # Fallback/merge legacy leagues where commissioner_id matches directly
+        legacy_res = supabase.table("leagues").select("*").eq("commissioner_id", current_profile["id"]).execute()
+        if legacy_res.data:
+            existing_ids = {l["id"] for l in managed_leagues}
+            for l in legacy_res.data:
+                if l["id"] not in existing_ids:
+                    managed_leagues.append(l)
     except Exception as e:
         print(f"Error fetching managed leagues: {e}")
 
@@ -47,21 +59,28 @@ async def commish_portal(request: Request, league_id: Optional[str] = None):
             "managed_leagues": [], 
             "selected_league": None, 
             "league_members": [],
+            "direct_challenge_link": "",
             "team_data": NFL_TEAM_DATA
         })
 
     # Select active league based on query param or default to the first one
     selected_league = next((l for l in managed_leagues if l["id"] == league_id), managed_leagues[0])
 
-    # Fetch members of the selected league
+    # Build Direct Challenge Referral Link
+    base_url = str(request.base_url).rstrip("/")
+    invite_code = selected_league.get("invite_code", "SLATE")
+    direct_challenge_link = f"{base_url}/leagues/join?code={invite_code}"
+
+    # Fetch members of the selected league including roles
     league_members = []
     try:
-        members_res = supabase.table("league_members").select("user_id, profiles(full_name, email, tokens)").eq("league_id", selected_league["id"]).execute()
+        members_res = supabase.table("league_members").select("user_id, role, profiles(full_name, email, tokens)").eq("league_id", selected_league["id"]).execute()
         if members_res.data:
             for m in members_res.data:
                 p_info = m.get("profiles") or {}
                 league_members.append({
                     "user_id": m["user_id"],
+                    "role": m.get("role", "member"),
                     "full_name": p_info.get("full_name", "Unknown"),
                     "email": p_info.get("email", ""),
                     "tokens": p_info.get("tokens", 10)
@@ -77,10 +96,42 @@ async def commish_portal(request: Request, league_id: Optional[str] = None):
             "profile": current_profile,
             "managed_leagues": managed_leagues,
             "selected_league": selected_league,
+            "direct_challenge_link": direct_challenge_link,
             "league_members": league_members,
             "team_data": NFL_TEAM_DATA
         }
     )
+
+@router.post("/add-commissioner")
+async def add_co_commissioner(
+    request: Request,
+    league_id: str = Form(...),
+    member_user_id: str = Form(...),
+    supabase: Client = Depends(get_supabase)
+):
+    """Promotes an existing league member to co-commissioner."""
+    try:
+        session_cookie = request.cookies.get("td_tokens_session")
+        if session_cookie:
+            token_data = json.loads(session_cookie)
+            supabase.auth.set_session(token_data.get("access_token"), token_data.get("refresh_token"))
+            user = supabase.auth.get_user().user
+            if user:
+                # Verify request sender is commissioner
+                league_check = supabase.table("leagues").select("commissioner_id").eq("id", league_id).execute()
+                is_primary = league_check.data and league_check.data[0].get("commissioner_id") == user.id
+                
+                mem_check = supabase.table("league_members").select("role").eq("league_id", league_id).eq("user_id", user.id).execute()
+                is_co_commish = mem_check.data and mem_check.data[0].get("role") == "commissioner"
+
+                if not is_primary and not is_co_commish:
+                    raise HTTPException(status_code=403, detail="Unauthorized action.")
+
+        supabase.table("league_members").update({"role": "commissioner"}).eq("league_id", league_id).eq("user_id", member_user_id).execute()
+        return RedirectResponse(url=f"/commish?league_id={league_id}&success=co_commish_added", status_code=303)
+    except Exception as e:
+        print(f"Error adding co-commissioner: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
 
 @router.post("/announcement")
 async def post_league_announcement(
@@ -151,8 +202,9 @@ async def transfer_commissioner_ownership(
     supabase: Client = Depends(get_supabase)
 ):
     try:
-        # Update the league's commissioner_id to the new user
+        # Update the league's commissioner_id to the new user and grant them commissioner role
         supabase.table("leagues").update({"commissioner_id": new_commissioner_id}).eq("id", league_id).execute()
+        supabase.table("league_members").update({"role": "commissioner"}).eq("league_id", league_id).eq("user_id", new_commissioner_id).execute()
         return RedirectResponse(url="/commish?success=ownership_transferred", status_code=303)
     except Exception as e:
         print(f"Error transferring ownership: {e}")
@@ -182,8 +234,14 @@ async def delete_league(
             raise HTTPException(status_code=404, detail="League not found.")
         
         league = league_res.data[0]
-        if league.get("commissioner_id") != user.id:
-            raise HTTPException(status_code=403, detail="Only the league commissioner can delete this league.")
+        
+        # Check if user is primary commissioner or co-commissioner
+        is_primary = league.get("commissioner_id") == user.id
+        mem_check = supabase.table("league_members").select("role").eq("league_id", league_id).eq("user_id", user.id).execute()
+        is_co_commish = mem_check.data and mem_check.data[0].get("role") == "commissioner"
+
+        if not is_primary and not is_co_commish:
+            raise HTTPException(status_code=403, detail="Only league commissioners can delete this league.")
 
         actual_name = league.get("name") or league.get("league_name") or ""
         if confirmation_name.strip() != actual_name.strip():
@@ -212,8 +270,13 @@ async def archive_league_season(
             user = supabase.auth.get_user().user
             if user:
                 league_check = supabase.table("leagues").select("commissioner_id").eq("id", league_id).execute()
-                if not league_check.data or league_check.data[0].get("commissioner_id") != user.id:
-                    raise HTTPException(status_code=403, detail="Only the league commissioner can archive seasons.")
+                is_primary = league_check.data and league_check.data[0].get("commissioner_id") == user.id
+                
+                mem_check = supabase.table("league_members").select("role").eq("league_id", league_id).eq("user_id", user.id).execute()
+                is_co_commish = mem_check.data and mem_check.data[0].get("role") == "commissioner"
+
+                if not is_primary and not is_co_commish:
+                    raise HTTPException(status_code=403, detail="Only league commissioners can archive seasons.")
 
         members_res = supabase.table("league_members").select("user_id, profiles(id, full_name, tokens)").eq("league_id", league_id).execute()
         
