@@ -63,7 +63,7 @@
                   </div>
 
                   <!-- Avatar Box -->
-                  <div style="width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; background-color: {{ row.avatar_color | default('#1e3a8a') }}; border: 2px solid {% if row.avatar_border == 'gold' %}#fbbf24{% elif row.avatar_border == 'neon' %}#38bdf8{% elif row.avatar_border == 'fire' %}#ef4444{% else %}rgba(255,255,255,0.3)%}{% endif %}; flex-shrink: 0; box-shadow: 0 0 6px rgba(0,0,0,0.3);">
+                  <div style="width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; background-color: {{ row.avatar_color | default('#1e3a8a') }}; border: 2px solid {% if row.avatar_border == 'gold' %}#fbbf24{% elif row.avatar_border == 'neon' %}#38bdf8{% elif row.avatar_border == 'fire' %}#ef4444{% else %}rgba(255,255,255,0.3){% endif %}; flex-shrink: 0; box-shadow: 0 0 6px rgba(0,0,0,0.3);">
                     {{ row.avatar_emoji | default('👤') }}
                   </div>
 
