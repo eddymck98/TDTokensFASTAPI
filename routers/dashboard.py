@@ -228,38 +228,104 @@ async def render_dashboard_or_index(request: Request):
     except Exception as e:
         print(f"Bets Fetch Error: {e}")
 
-    # --- 3. RECENT MINI-LEAGUE ACTIVITY FEED FETCH (SAFE TWO-STEP FETCH) ---
+    # --- 3. RECENT MINI-LEAGUE ACTIVITY FEED FETCH (FULL SUITE WITH ROLLING 2-WEEK WINDOW) ---
     recent_league_activity = []
     try:
         my_leagues_res = supabase.table("league_members").select("league_id, leagues(name)").eq("user_id", user.id).execute()
-        my_league_ids = [m["league_id"] for m in my_leagues_res.data] if my_leagues_res.data else []
+        my_leagues = my_leagues_res.data if my_leagues_res.data else []
+        my_league_ids = [m["league_id"] for m in my_leagues]
+        league_name_map = {m["league_id"]: m["leagues"]["name"] for m in my_leagues if m.get("leagues")}
+        
+        target_week = available_weeks[-1] if available_weeks else 1
+        min_allowed_week = max(1, target_week - 1)  # Rolling 2-week window (drops anything older than the immediate previous week)
         
         if my_league_ids:
             shared_members_res = supabase.table("league_members").select("user_id").in_("league_id", my_league_ids).execute()
             shared_user_ids = list(set([m["user_id"] for m in shared_members_res.data])) if shared_members_res.data else []
             
             if shared_user_ids:
+                profiles_res = supabase.table("profiles").select("id, full_name").in_("id", shared_user_ids).execute()
+                profile_map = {row["id"]: row["full_name"] for row in profiles_res.data} if profiles_res.data else {}
+                
+                # A. Big Token Payouts & Wins (Rolling 2-Week Window)
                 payouts_res = supabase.table("user_bets") \
                     .select("user_id, tokens_awarded, week_number") \
                     .in_("user_id", shared_user_ids) \
+                    .gte("week_number", min_allowed_week) \
                     .gt("tokens_awarded", 0) \
                     .order("created_at", desc=True) \
-                    .limit(8) \
+                    .limit(4) \
                     .execute()
                     
                 if payouts_res.data:
-                    payout_user_ids = list(set([p["user_id"] for p in payouts_res.data]))
-                    profiles_res = supabase.table("profiles").select("id, full_name").in_("id", payout_user_ids).execute()
-                    profile_map = {row["id"]: row["full_name"] for row in profiles_res.data} if profiles_res.data else {}
-                    
                     for p in payouts_res.data:
                         uid = p.get("user_id")
                         user_name = profile_map.get(uid, "A rival player")
                         recent_league_activity.append({
                             "user_name": user_name,
                             "tokens_won": p.get("tokens_awarded", 0),
-                            "week_number": p.get("week_number", 1)
+                            "week_number": p.get("week_number", target_week),
+                            "type": "payout"
                         })
+
+                # B. Touchdown Scorer Bonus Hits (Rolling 2-Week Window)
+                td_res = supabase.table("touchdown_picks") \
+                    .select("user_id, player_name, week_number, is_correct") \
+                    .in_("user_id", shared_user_ids) \
+                    .gte("week_number", min_allowed_week) \
+                    .eq("is_correct", True) \
+                    .order("created_at", desc=True) \
+                    .limit(4) \
+                    .execute()
+
+                if td_res.data:
+                    for td in td_res.data:
+                        uid = td.get("user_id")
+                        user_name = profile_map.get(uid, "A rival player")
+                        recent_league_activity.append({
+                            "user_name": user_name,
+                            "player_name": td.get("player_name"),
+                            "week_number": td.get("week_number", target_week),
+                            "type": "td_bonus"
+                        })
+
+                # C. New Mini-League Joins (Evergreen)
+                joins_res = supabase.table("league_members") \
+                    .select("user_id, league_id, joined_at") \
+                    .in_("league_id", my_league_ids) \
+                    .order("joined_at", desc=True) \
+                    .limit(3) \
+                    .execute()
+                
+                if joins_res.data:
+                    for j in joins_res.data:
+                        uid = j.get("user_id")
+                        user_name = profile_map.get(uid, "A player")
+                        l_name = league_name_map.get(j.get("league_id"), "a mini-league")
+                        recent_league_activity.append({
+                            "user_name": user_name,
+                            "league_name": l_name,
+                            "type": "new_join"
+                        })
+
+                # D. Leaderboard Rank Jumps (#1 Takeovers)
+                standings_res = supabase.table("league_standings") \
+                    .select("user_id, league_id, rank, previous_rank") \
+                    .in_("league_id", my_league_ids) \
+                    .eq("rank", 1) \
+                    .execute()
+                
+                if standings_res.data:
+                    for s in standings_res.data:
+                        uid = s.get("user_id")
+                        if s.get("previous_rank", 2) > 1:
+                            user_name = profile_map.get(uid, "A player")
+                            l_name = league_name_map.get(s.get("league_id"), "a mini-league")
+                            recent_league_activity.append({
+                                "user_name": user_name,
+                                "league_name": l_name,
+                                "type": "rank_jump"
+                            })
     except Exception as e:
         print(f"Activity Feed Error: {e}")
 
