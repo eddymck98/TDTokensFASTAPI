@@ -91,7 +91,7 @@
 
     {% if not current_user_bets %}
       <div style="background: rgba(30, 41, 59, 0.5); padding: 20px; text-align: center; border-radius: 10px;">
-        <p style="color: #cbd5e1; font-size: 15px; margin: 0;">You haven't submitted any picks for this week yet! Head over to the <a href="/bets" style="color: var(--team-color) !important; font-weight: bold;">Place Bets</a> page.</p>
+        <p style="color: #cbd5e1; font-size: 15px; margin: 0;">You haven't submitted any picks for this week yet! Head over to the <a href="/bets/" style="color: var(--team-color) !important; font-weight: bold;">Place Bets</a> page.</p>
       </div>
     {% else %}
       
@@ -185,15 +185,15 @@
 
   <!-- Quick Navigation Grid -->
   <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-top: 30px;">
-    <a href="/bets" class="team-themed-card" style="border-left: 4px solid var(--team-color); padding: 20px; display: block; transition: transform 0.2s ease; text-decoration: none;">
+    <a href="/bets/" class="team-themed-card" style="border-left: 4px solid var(--team-color); padding: 20px; display: block; transition: transform 0.2s ease; text-decoration: none;">
       <h4 style="font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: var(--team-color); margin: 0 0 5px 0;">🎯 Place Weekly Bets</h4>
       <p style="color: #94a3b8; font-size: 13px; margin: 0;">Submit your Yes/No picks and configure token wagers.</p>
     </a>
-    <a href="/leagues" class="team-themed-card" style="border-left: 4px solid var(--team-color); padding: 20px; display: block; transition: transform 0.2s ease; text-decoration: none;">
+    <a href="/leagues/" class="team-themed-card" style="border-left: 4px solid var(--team-color); padding: 20px; display: block; transition: transform 0.2s ease; text-decoration: none;">
       <h4 style="font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: var(--team-color); margin: 0 0 5px 0;">🏆 Leagues & Standings</h4>
       <p style="color: #94a3b8; font-size: 13px; margin: 0;">View global leaderboards, mini-leagues, and trash talk.</p>
     </a>
-    <a href="/profile" class="team-themed-card" style="border-left: 4px solid var(--team-color); padding: 20px; display: block; transition: transform 0.2s ease; text-decoration: none;">
+    <a href="/profile/" class="team-themed-card" style="border-left: 4px solid var(--team-color); padding: 20px; display: block; transition: transform 0.2s ease; text-decoration: none;">
       <h4 style="font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: var(--team-color); margin: 0 0 5px 0;">👤 Profile & Trophies</h4>
       <p style="color: #94a3b8; font-size: 13px; margin: 0;">Customize your avatar, title, and inspect unlocked badges.</p>
     </a>
