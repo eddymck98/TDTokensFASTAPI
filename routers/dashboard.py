@@ -228,7 +228,7 @@ async def render_dashboard_or_index(request: Request):
     except Exception as e:
         print(f"Bets Fetch Error: {e}")
 
-    # --- 3. RECENT MINI-LEAGUE ACTIVITY FEED FETCH (FULL SUITE WITH ROLLING 2-WEEK WINDOW) ---
+    # --- 3. RECENT MINI-LEAGUE ACTIVITY FEED FETCH (FULL SUITE WITH DYNAMIC LEADERBOARD RANKS) ---
     recent_league_activity = []
     try:
         my_leagues_res = supabase.table("league_members").select("league_id, leagues(name)").eq("user_id", user.id).execute()
@@ -254,7 +254,7 @@ async def render_dashboard_or_index(request: Request):
                     .gte("week_number", min_allowed_week) \
                     .gt("tokens_awarded", 0) \
                     .order("created_at", desc=True) \
-                    .limit(4) \
+                    .limit(3) \
                     .execute()
                     
                 if payouts_res.data:
@@ -275,7 +275,7 @@ async def render_dashboard_or_index(request: Request):
                     .gte("week_number", min_allowed_week) \
                     .eq("is_correct", True) \
                     .order("created_at", desc=True) \
-                    .limit(4) \
+                    .limit(3) \
                     .execute()
 
                 if td_res.data:
@@ -294,7 +294,7 @@ async def render_dashboard_or_index(request: Request):
                     .select("user_id, league_id, joined_at") \
                     .in_("league_id", my_league_ids) \
                     .order("joined_at", desc=True) \
-                    .limit(3) \
+                    .limit(2) \
                     .execute()
                 
                 if joins_res.data:
@@ -308,24 +308,19 @@ async def render_dashboard_or_index(request: Request):
                             "type": "new_join"
                         })
 
-                # D. Leaderboard Rank Jumps (#1 Takeovers)
-                standings_res = supabase.table("league_standings") \
-                    .select("user_id, league_id, rank, previous_rank") \
-                    .in_("league_id", my_league_ids) \
-                    .eq("rank", 1) \
-                    .execute()
-                
-                if standings_res.data:
-                    for s in standings_res.data:
-                        uid = s.get("user_id")
-                        if s.get("previous_rank", 2) > 1:
-                            user_name = profile_map.get(uid, "A player")
-                            l_name = league_name_map.get(s.get("league_id"), "a mini-league")
-                            recent_league_activity.append({
-                                "user_name": user_name,
-                                "league_name": l_name,
-                                "type": "rank_jump"
-                            })
+                # D. Leaderboard #1 Spot Dynamic Takeovers
+                leaders_res = supabase.rpc("get_mini_league_leaders").execute()
+                if leaders_res.data:
+                    for leader in leaders_res.data:
+                        if leader.get("league_id") in my_league_ids:
+                            uid = leader.get("user_id")
+                            user_name = profile_map.get(uid)
+                            if user_name:
+                                recent_league_activity.append({
+                                    "user_name": user_name,
+                                    "league_name": leader.get("league_name"),
+                                    "type": "rank_jump"
+                                })
     except Exception as e:
         print(f"Activity Feed Error: {e}")
 
