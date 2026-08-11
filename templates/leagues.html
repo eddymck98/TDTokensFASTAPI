@@ -222,6 +222,14 @@
     <!-- Join League Box -->
     <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-left: 4px solid #fbbf24; border-radius: 14px; padding: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.3);">
       <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: #fbbf24; margin-top: 0; margin-bottom: 10px;">Join a League</h3>
+      
+      <!-- Inline Error Prompt Banner -->
+      {% if join_error %}
+        <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #fca5a5; padding: 10px 12px; border-radius: 8px; font-size: 13px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+          <span>⚠️</span> <span>{{ join_error }}</span>
+        </div>
+      {% endif %}
+
       <form action="/leagues/join" method="POST">
         <div style="margin-bottom: 10px;">
           <label style="font-size: 11px; color: #94a3b8; display: block; margin-bottom: 3px;">Invite Code:</label>
