@@ -39,12 +39,12 @@
     </div>
   </div>
 
-  <!-- Separate Win/Loss Ratios Section -->
+  <!-- Separate Win/Loss Ratios Section (Season Totals) -->
   <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;">
     
     <!-- Matchup Predictions W/L -->
     <div style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 10px; padding: 12px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
-      <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 4px;">Matchup Record</div>
+      <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 4px;">Matchup Record (Season)</div>
       <div style="font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: #fbbf24;">
         {{ prediction_wins | default(0) }} / {{ prediction_total | default(0) }}
       </div>
@@ -52,7 +52,7 @@
 
     <!-- Touchdown Scorer W/L -->
     <div style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 10px; padding: 12px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
-      <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 4px;">TD Scorer Record</div>
+      <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 4px;">TD Scorer Record (Season)</div>
       <div style="font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: #fbbf24;">
         {{ td_wins | default(0) }} / {{ td_total | default(0) }}
       </div>
