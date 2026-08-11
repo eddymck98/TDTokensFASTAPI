@@ -25,7 +25,8 @@
 body {
     margin: 0;
     padding: 0;
-    background: var(--bg-gradient), url('https://images.unsplash.com/photo-1566577739112-5180d4bf9390?auto=format&fit=crop&w=1920&q=80') center center / cover no-repeat fixed !important;
+    background: radial-gradient(circle at 50% 20%, rgba(15, 23, 42, 0.90), rgba(7, 13, 25, 0.99)), 
+                url('https://images.unsplash.com/photo-1566577739112-5180d4bf9390?auto=format&fit=crop&w=1920&q=80') center center / cover no-repeat fixed !important;
     color: var(--text-main) !important;
     font-family: 'Inter', sans-serif !important;
     min-height: 100vh;
@@ -59,7 +60,7 @@ main.container {
 .team-themed-card {
     background: var(--card-bg);
     border: 1px solid var(--border-color);
-    border-left: 4px solid var(--team-color, #fbbf24);
+    border-left: 4px solid #fbbf24;
     border-radius: 16px;
     position: relative;
     overflow: hidden;
@@ -87,9 +88,9 @@ main.container {
 }
 
 .team-btn-gradient {
-    background: linear-gradient(135deg, var(--team-color, #fbbf24) 0%, #0f172a 100%);
+    background: linear-gradient(135deg, #fbbf24 0%, #0f172a 100%);
     color: #fff;
-    border: 1px solid var(--team-color, #fbbf24);
+    border: 1px solid #fbbf24;
     font-weight: bold;
 }
 
@@ -225,18 +226,8 @@ main.container {
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
 
-/* Site-wide automated team styling inheritance for cards/boxes */
 .summary-box, .rule-card, .profile-card, .league-card {
-    border-left: 4px solid var(--team-color, #fbbf24) !important;
-}
-
-/* GLOBAL FORCING OVERRIDE: Forces all primary view cards/containers site-wide to adopt team accent colors */
-.dashboard-container > div, 
-.profile-container > div, 
-.rules-container > div, 
-.leagues-container > div,
-.bets-container > div {
-    border-left-color: var(--team-color) !important;
+    border-left: 4px solid #fbbf24 !important;
 }
 
 /* Leaderboard & Podium Ranks */
@@ -256,7 +247,7 @@ main.container {
 .leaderboard-row:hover {
     transform: translateY(-1px);
     border-color: rgba(255, 255, 255, 0.25);
-    box-shadow: 0 4px 15px var(--team-color-glow);
+    box-shadow: 0 4px 15px rgba(251, 191, 36, 0.35);
 }
 
 .podium-rank-1 {
@@ -304,7 +295,7 @@ input:focus, select:focus, textarea:focus {
 }
 
 button[type="submit"], .btn-primary {
-    background: linear-gradient(135deg, var(--team-color, #fbbf24) 0%, #d97706 100%);
+    background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
     color: #000000;
     padding: 12px 24px;
     font-family: 'Teko', sans-serif;
@@ -314,13 +305,13 @@ button[type="submit"], .btn-primary {
     border: none;
     cursor: pointer;
     letter-spacing: 1px;
-    box-shadow: 0 4px 15px var(--team-color-glow);
+    box-shadow: 0 4px 15px rgba(251, 191, 36, 0.35);
     transition: all 0.2s ease;
 }
 
 button[type="submit"]:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px var(--team-color-glow);
+    box-shadow: 0 6px 20px rgba(251, 191, 36, 0.35);
 }
 
 /* ==========================================
