@@ -64,9 +64,9 @@ async def render_dashboard_or_index(request: Request):
     token_history_data = {"labels": [], "values": []}
     
     prediction_wins = 0
-    prediction_total = 10
+    prediction_total = 0
     td_wins = 0
-    td_total = 10
+    td_total = 0
     
     try:
         weeks_res = supabase.table("weekly_questions").select("week_number").neq("week_number", 999).neq("week_number", 998).neq("week_number", 997).neq("week_number", 96).execute()
@@ -211,17 +211,18 @@ async def render_dashboard_or_index(request: Request):
                 
         token_history_data = {"labels": graph_labels, "values": graph_values}
 
+        # Updated to track cumulative total across all played weeks cleanly
         if total_matchup_count > 0:
-            prediction_wins = round((won_matchup_count / total_matchup_count) * min(10, total_matchup_count))
-            prediction_total = min(10, total_matchup_count) if total_matchup_count < 10 else 10
+            prediction_wins = won_matchup_count
+            prediction_total = total_matchup_count
         else:
-            prediction_wins, prediction_total = 0, 10
+            prediction_wins, prediction_total = 0, 0
 
         if total_td_count > 0:
-            td_wins = round((won_td_count / total_td_count) * min(10, total_td_count))
-            td_total = min(10, total_td_count) if total_td_count < 10 else 10
+            td_wins = won_td_count
+            td_total = total_td_count
         else:
-            td_wins, td_total = 0, 10
+            td_wins, td_total = 0, 0
 
     except Exception as e:
         print(f"Bets Fetch Error: {e}")
