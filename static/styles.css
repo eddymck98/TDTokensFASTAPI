@@ -6,6 +6,8 @@
 
 :root {
     --team-color: #fbbf24;
+    --team-color-glow: rgba(251, 191, 36, 0.35);
+    --team-logo-url: url('https://github.com/eddymck98/TD-Tokens-Render-/blob/main/TD%20Tokens%207.png?raw=true');
     --bg-gradient: radial-gradient(circle at 50% 20%, rgba(15, 23, 42, 0.90), rgba(7, 13, 25, 0.99));
     --card-bg: rgba(15, 23, 42, 0.85);
     --border-color: rgba(255, 255, 255, 0.12);
@@ -51,6 +53,47 @@ main.container {
 }
 
 /* ==========================================
+   TEAM-THEMED ENHANCEMENTS & UTILITIES
+   ========================================== */
+
+.team-themed-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-left: 4px solid var(--team-color, #fbbf24);
+    border-radius: 16px;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(14px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.team-watermark-bg {
+    position: relative;
+}
+
+.team-watermark-bg::after {
+    content: '';
+    position: absolute;
+    bottom: -20px;
+    right: -20px;
+    width: 140px;
+    height: 140px;
+    background-image: var(--team-logo-url);
+    background-size: contain;
+    background-repeat: no-repeat;
+    opacity: 0.04;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.team-btn-gradient {
+    background: linear-gradient(135deg, var(--team-color, #fbbf24) 0%, #0f172a 100%);
+    color: #fff;
+    border: 1px solid var(--team-color, #fbbf24);
+    font-weight: bold;
+}
+
+/* ==========================================
    PREMIUM GLOSSY NAVBAR & HEADER
    ========================================== */
 
@@ -87,7 +130,7 @@ main.container {
 
 .brand-logo {
     max-height: 40px;
-    filter: drop-shadow(0px 4px 10px rgba(251, 191, 36, 0.4));
+    filter: drop-shadow(0px 4px 10px var(--team-color-glow));
 }
 
 .brand-text {
@@ -157,6 +200,7 @@ main.container {
 .sticky-balance-bar {
     background: rgba(15, 23, 42, 0.90);
     border: 1px solid rgba(255, 255, 255, 0.12);
+    border-left: 4px solid var(--team-color, #fbbf24);
     border-radius: 14px;
     padding: 14px 22px;
     margin: 20px auto;
@@ -198,7 +242,7 @@ main.container {
 .leaderboard-row:hover {
     transform: translateY(-1px);
     border-color: rgba(255, 255, 255, 0.25);
-    box-shadow: 0 4px 15px rgba(251, 191, 36, 0.2);
+    box-shadow: 0 4px 15px var(--team-color-glow);
 }
 
 .podium-rank-1 {
@@ -256,13 +300,13 @@ button[type="submit"], .btn-primary {
     border: none;
     cursor: pointer;
     letter-spacing: 1px;
-    box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3);
+    box-shadow: 0 4px 15px var(--team-color-glow);
     transition: all 0.2s ease;
 }
 
 button[type="submit"]:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(251, 191, 36, 0.5);
+    box-shadow: 0 6px 20px var(--team-color-glow);
 }
 
 /* ==========================================
