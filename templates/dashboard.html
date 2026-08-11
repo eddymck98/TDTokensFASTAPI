@@ -4,7 +4,7 @@
 <div class="dashboard-container" style="max-width: 900px; margin: 0 auto; padding-bottom: 40px; padding-left: 8px; padding-right: 8px;">
 
   <!-- Mobile-Optimized Compact Hero Header -->
-  <div style="background: linear-gradient(135deg, rgba(30, 58, 138, 0.9) 0%, rgba(15, 23, 42, 0.98) 100%); border: 1px solid rgba(255, 255, 255, 0.12); border-top: 4px solid var(--team-color); border-radius: 14px; padding: 16px; margin-bottom: 16px; box-shadow: 0 8px 25px rgba(0,0,0,0.5);">
+  <div class="team-themed-card team-watermark-bg" style="background: linear-gradient(135deg, rgba(30, 58, 138, 0.9) 0%, rgba(15, 23, 42, 0.98) 100%); border-top: 4px solid var(--team-color); padding: 16px; margin-bottom: 16px;">
     <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;">
       <div>
         <h1 style="font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: var(--team-color); letter-spacing: 1.5px; margin: 0 0 2px 0;">COMMAND CENTER</h1>
@@ -21,17 +21,17 @@
 
   <!-- Personal Week Summary / Stats Grid (Mobile Clean View) -->
   <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px;">
-    <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-top: 3px solid #38bdf8; border-radius: 10px; padding: 12px 8px; text-align: center; backdrop-filter: blur(10px);">
+    <div class="team-themed-card" style="border-top: 3px solid #38bdf8; padding: 12px 8px; text-align: center;">
       <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">Picks</div>
       <div style="font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: #f8fafc; line-height: 1; margin-top: 4px;">{{ personal_stats.total_bets }}</div>
     </div>
-    <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-top: 3px solid #10b981; border-radius: 10px; padding: 12px 8px; text-align: center; backdrop-filter: blur(10px);">
+    <div class="team-themed-card" style="border-top: 3px solid #10b981; padding: 12px 8px; text-align: center;">
       <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">Wagered</div>
       <div style="font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: #fbbf24; line-height: 1; margin-top: 4px; display: inline-flex; align-items: center; gap: 2px;">
         {{ personal_stats.tokens_wagered }} 🪙
       </div>
     </div>
-    <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-top: 3px solid #ef4444; border-radius: 10px; padding: 12px 8px; text-align: center; backdrop-filter: blur(10px);">
+    <div class="team-themed-card" style="border-top: 3px solid #ef4444; padding: 12px 8px; text-align: center;">
       <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">Win Rate</div>
       <div style="font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: #10b981; line-height: 1; margin-top: 4px;">
         {{ personal_stats.wins }}<span style="color: #64748b; font-size: 20px;">-</span><span style="color: #ef4444;">{{ personal_stats.losses }}</span>
@@ -43,7 +43,7 @@
   <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;">
     
     <!-- Matchup Predictions W/L (Out of 10) -->
-    <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 12px; text-align: center; backdrop-filter: blur(12px);">
+    <div class="team-themed-card" style="padding: 12px; text-align: center;">
       <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 4px;">Matchup Record (/10)</div>
       <div style="font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: #38bdf8;">
         {{ prediction_wins | default(0) }} / {{ prediction_total | default(10) }}
@@ -51,7 +51,7 @@
     </div>
 
     <!-- Touchdown Scorer W/L (Out of 10) -->
-    <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 12px; text-align: center; backdrop-filter: blur(12px);">
+    <div class="team-themed-card" style="padding: 12px; text-align: center;">
       <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 4px;">TD Scorer Record (/10)</div>
       <div style="font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: #fbbf24;">
         {{ td_wins | default(0) }} / {{ td_total | default(10) }}
@@ -62,14 +62,14 @@
 
   <!-- Nemesis / Rival Widget (Compact Season-Long Grudge Match) -->
   {% if nemesis %}
-  <div style="background: rgba(15, 23, 42, 0.92); border: 1px solid rgba(251, 191, 36, 0.3); border-left: 4px solid #fbbf24; border-radius: 12px; padding: 12px 16px; margin-bottom: 25px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+  <div class="team-themed-card team-watermark-bg" style="border: 1px solid rgba(251, 191, 36, 0.3); border-left: 4px solid var(--team-color); padding: 12px 16px; margin-bottom: 25px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
     <div style="display: flex; align-items: center; gap: 12px; overflow: hidden; flex: 1; min-width: 240px;">
-      <div style="width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; background-color: {{ nemesis.avatar_color | default('#1e3a8a') }}; border: 2px solid #fbbf24; flex-shrink: 0; box-shadow: 0 0 8px rgba(251, 191, 36, 0.4);">
+      <div style="width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; background-color: {{ nemesis.avatar_color | default('#1e3a8a') }}; border: 2px solid var(--team-color); flex-shrink: 0; box-shadow: 0 0 8px var(--team-color-glow);">
         {{ nemesis.avatar_emoji | default('🦹‍♂️') }}
       </div>
       <div style="overflow: hidden; flex: 1; min-width: 0;">
         <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-          <span style="font-family: 'Bebas Neue'; font-size: 16px; color: #fbbf24; letter-spacing: 0.5px;">⚡ Active Nemesis:</span>
+          <span style="font-family: 'Bebas Neue'; font-size: 16px; color: var(--team-color); letter-spacing: 0.5px;">⚡ Active Nemesis:</span>
           <b style="font-size: 14px; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px;">{{ nemesis.full_name }}</b>
         </div>
         <div style="font-size: 11px; color: #94a3b8; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
@@ -78,14 +78,14 @@
       </div>
     </div>
     <div style="background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.25); padding: 4px 10px; border-radius: 8px; text-align: right; flex-shrink: 0;">
-      <span style="font-size: 11px; color: #fbbf24; font-weight: bold; display: block; text-transform: uppercase; letter-spacing: 0.5px;">Grudge Score</span>
+      <span style="font-size: 11px; color: var(--team-color); font-weight: bold; display: block; text-transform: uppercase; letter-spacing: 0.5px;">Grudge Score</span>
       <span style="font-family: 'Bebas Neue'; font-size: 18px; color: #ffffff; line-height: 1;">{{ nemesis.score }} Inverse Wins</span>
     </div>
   </div>
   {% endif %}
 
   <!-- Weekly Pick & Share Hub Section -->
-  <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px; padding: 20px; margin-bottom: 25px; backdrop-filter: blur(14px); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+  <div class="team-themed-card team-watermark-bg" style="padding: 20px; margin-bottom: 25px;">
     <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: #ffffff; letter-spacing: 1px; margin-top: 0; margin-bottom: 5px;">👁️ YOUR CURRENT WEEKLY PICKS & SHARE HUB</h3>
     <p style="color: #94a3b8; font-size: 13px; margin-bottom: 16px;">Review your active entries and grab a quick share text for your group chat.</p>
 
@@ -95,7 +95,7 @@
       </div>
     {% else %}
       
-      <!-- Compressed Pick Cards for Reduced Scrolling -->
+      <!-- Compressed Pick Cards for Reduced Scrolling (Protected via state-based status borders) -->
       <div style="display: grid; gap: 6px; margin-bottom: 20px;">
         {% for b in current_user_bets %}
           {% set is_won = 'Won' in b.status_label %}
@@ -120,7 +120,7 @@
         {% if td_pick %}
           {% set td_won = 'Won' in td_pick.status_label %}
           {% set td_lost = 'Lost' in td_pick.status_label %}
-          {% set td_border = '#10b981' if td_won else ('#ef4444' if td_lost else '#fbbf24') %}
+          {% set td_border = '#10b981' if td_won else ('#ef4444' if td_lost else '#38bdf8') %}
           {% set td_bg = 'rgba(16, 185, 129, 0.08)' if td_won else ('rgba(239, 68, 68, 0.08)' if td_lost else 'rgba(30, 41, 59, 0.4)') %}
           
           <div style="background: {{ td_bg }}; border: 1px solid rgba(255, 255, 255, 0.08); border-left: 3px solid {{ td_border }}; border-radius: 8px; padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; margin-top: 2px;">
@@ -143,7 +143,7 @@
   </div>
 
   <!-- Weekly Community Trends Section -->
-  <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px; padding: 20px; margin-bottom: 25px; backdrop-filter: blur(14px); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+  <div class="team-themed-card team-watermark-bg" style="padding: 20px; margin-bottom: 25px;">
     <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: #ffffff; letter-spacing: 1px; margin-top: 0; margin-bottom: 5px;">📊 COMMUNITY TRENDS & HEAVIEST ACTION</h3>
     <p style="color: #94a3b8; font-size: 13px; margin-bottom: 16px;">A snapshot of the Top 3 most heavily bet matchups across the global league.</p>
     
@@ -176,7 +176,7 @@
   </div>
 
   <!-- Weekly Token Progression Graph Section (Starting at Week 0 with 10 tokens) -->
-  <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px; padding: 20px; margin-bottom: 25px; backdrop-filter: blur(14px); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+  <div class="team-themed-card team-watermark-bg" style="padding: 20px; margin-bottom: 25px;">
     <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: #ffffff; letter-spacing: 1px; margin-top: 0; margin-bottom: 5px;">📈 TOKEN PROGRESSION HISTORY</h3>
     <p style="color: #94a3b8; font-size: 13px; margin-bottom: 16px;">Your token balance progression starting from Week 0 (10 tokens).</p>
     
@@ -187,15 +187,15 @@
 
   <!-- Quick Navigation Grid -->
   <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-top: 30px;">
-    <a href="/bets" style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-left: 4px solid #38bdf8; padding: 20px; border-radius: 14px; display: block; transition: transform 0.2s ease; text-decoration: none;">
+    <a href="/bets" class="team-themed-card" style="border-left: 4px solid #38bdf8; padding: 20px; display: block; transition: transform 0.2s ease; text-decoration: none;">
       <h4 style="font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: #38bdf8; margin: 0 0 5px 0;">🎯 Place Weekly Bets</h4>
       <p style="color: #94a3b8; font-size: 13px; margin: 0;">Submit your Yes/No picks and configure token wagers.</p>
     </a>
-    <a href="/leagues" style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-left: 4px solid #fbbf24; padding: 20px; border-radius: 14px; display: block; transition: transform 0.2s ease; text-decoration: none;">
+    <a href="/leagues" class="team-themed-card" style="border-left: 4px solid #fbbf24; padding: 20px; display: block; transition: transform 0.2s ease; text-decoration: none;">
       <h4 style="font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: #fbbf24; margin: 0 0 5px 0;">🏆 Leagues & Standings</h4>
       <p style="color: #94a3b8; font-size: 13px; margin: 0;">View global leaderboards, mini-leagues, and trash talk.</p>
     </a>
-    <a href="/profile" style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-left: 4px solid #10b981; padding: 20px; border-radius: 14px; display: block; transition: transform 0.2s ease; text-decoration: none;">
+    <a href="/profile" class="team-themed-card" style="border-left: 4px solid #10b981; padding: 20px; display: block; transition: transform 0.2s ease; text-decoration: none;">
       <h4 style="font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: #34d399; margin: 0 0 5px 0;">👤 Profile & Trophies</h4>
       <p style="color: #94a3b8; font-size: 13px; margin: 0;">Customize your avatar, title, and inspect unlocked badges.</p>
     </a>
