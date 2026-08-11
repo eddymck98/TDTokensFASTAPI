@@ -225,3 +225,40 @@ async def update_featured_badges(
         return RedirectResponse(url="/profile/?success=badges_updated", status_code=303)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+@router.post("/notifications")
+async def update_notification_preferences(
+    request: Request,
+    email_notifications: Optional[str] = Form(None),
+    grading_emails: Optional[str] = Form(None),
+    supabase: Client = Depends(get_supabase)
+):
+    session_cookie = request.cookies.get("td_tokens_session")
+    if not session_cookie:
+        return RedirectResponse(url="/auth/login", status_code=303)
+    
+    try:
+        token_data = json.loads(session_cookie)
+        acc_token = token_data.get("access_token")
+        supabase.auth.set_session(acc_token, token_data.get("refresh_token"))
+        supabase.postgrest.auth(acc_token)
+        
+        user = supabase.auth.get_user().user
+        if not user:
+            return RedirectResponse(url="/auth/login", status_code=303)
+    except Exception:
+        return RedirectResponse(url="/auth/login", status_code=303)
+
+    is_email_notif = True if email_notifications == "true" else False
+    is_grading_notif = True if grading_emails == "true" else False
+
+    try:
+        supabase.table("profiles").update({
+            "email_notifications": is_email_notif,
+            "grading_emails": is_grading_notif
+        }).eq("id", user.id).execute()
+
+        return RedirectResponse(url="/profile/?success=preferences_saved", status_code=303)
+    except Exception as e:
+        print(f"Error saving preferences: {e}")
+        return RedirectResponse(url="/profile/?error=save_failed", status_code=303)
