@@ -316,25 +316,30 @@ async def request_password_reset(
 @router.post("/update-password")
 async def update_password(
     request: Request,
+    email: str = Form(...),
     new_password: str = Form(...),
     supabase: Client = Depends(get_supabase)
 ):
-    """Handles updating the user's password once they are authenticated or come back via recovery session token."""
-    session_cookie = request.cookies.get("td_tokens_session")
-    if not session_cookie:
-        raise HTTPException(status_code=401, detail="Unauthorized session.")
-    
+    """Handles updating the user's password using the submitted email address from the recovery form."""
     try:
-        token_data = json.loads(session_cookie)
-        acc_token = token_data.get("access_token")
+        service_key = os.environ.get("SUPABASE_SERVICE_KEY", "")
+        url = os.environ.get("SUPABASE_URL", "")
+        admin_supabase = create_client(url, service_key) if service_key and url else supabase
+
+        clean_email = email.strip().lower()
+        profile_res = admin_supabase.table("profiles").select("id").eq("email", clean_email).execute()
         
-        # Set session context so Supabase knows precisely which user account to modify
-        supabase.auth.set_session(acc_token, token_data.get("refresh_token"))
-        supabase.postgrest.auth(acc_token)
+        if not profile_res.data:
+            return RedirectResponse(url="/auth/login?error=invalid_credentials", status_code=303)
+            
+        user_id = profile_res.data[0]["id"]
         
-        # Execute password update
-        supabase.auth.update_user({"password": new_password.strip()})
+        admin_supabase.auth.admin.update_user_by_id(
+            user_id,
+            {"password": new_password.strip()}
+        )
         
-        return RedirectResponse(url="/profile/?success=password_updated", status_code=303)
+        return RedirectResponse(url="/auth/login?reset=updated", status_code=303)
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        print(f"Password update error: {e}")
+        return RedirectResponse(url="/auth/login?error=signup_failed", status_code=303)
