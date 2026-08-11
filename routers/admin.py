@@ -22,6 +22,26 @@ def contains_profanity(text: str) -> bool:
     text_lower = text.lower(); words = text_lower.split()
     return any(p_word in text_lower or any(p_word == w for w in words) for p_word in PROFANITY_FILTER)
 
+def log_email_broadcast(supabase_client: Client, admin_email: str, broadcast_type: str, recipient_count: int):
+    try:
+        supabase_client.table("email_broadcast_logs").insert({
+            "admin_email": admin_email,
+            "broadcast_type": broadcast_type,
+            "recipient_count": recipient_count
+        }).execute()
+    except Exception as e:
+        print(f"Error logging email broadcast: {e}")
+
+def log_admin_action(supabase_client: Client, admin_email: str, action_type: str, details: str):
+    try:
+        supabase_client.table("admin_audit_logs").insert({
+            "admin_email": admin_email,
+            "action_type": action_type,
+            "details": details
+        }).execute()
+    except Exception as e:
+        print(f"Error logging admin action: {e}")
+
 def recalculate_all_user_balances(supabase_client: Client):
     try:
         all_profiles = supabase_client.table("profiles").select("id").execute().data
@@ -77,6 +97,30 @@ async def admin_portal_landing(request: Request, week: Optional[int] = None):
     except Exception as e:
         print(f"Admin Auth Error: {e}")
         return RedirectResponse(url="/auth/login", status_code=303)
+
+    # Check global sign-in lockdown state
+    global_signins_locked = False
+    try:
+        lock_check = supabase.table("weekly_questions").select("winning_answer").eq("week_number", 998).eq("question_number", 99).execute()
+        if lock_check.data and lock_check.data[0].get("winning_answer") == "LOCKED":
+            global_signins_locked = True
+    except Exception:
+        pass
+
+    # Fetch Email Broadcast History and Safety Audit Logs
+    email_logs = []
+    safety_audit_logs = []
+    try:
+        email_res = supabase.table("email_broadcast_logs").select("*").order("created_at", desc=True).limit(10).execute()
+        email_logs = email_res.data or []
+    except Exception as e:
+        print(f"Error fetching email logs: {e}")
+
+    try:
+        audit_res = supabase.table("admin_audit_logs").select("*").order("created_at", desc=True).limit(15).execute()
+        safety_audit_logs = audit_res.data or []
+    except Exception as e:
+        print(f"Error fetching safety audit logs: {e}")
 
     # Fetch all active weeks to populate pill navigation & default to newest
     available_weeks = []
@@ -195,7 +239,10 @@ async def admin_portal_landing(request: Request, week: Optional[int] = None):
             "lockout_time_val": lockout_time_val,
             "questions_map": questions_map,
             "user_td_picks": user_td_picks,
-            "all_profiles": all_profiles
+            "all_profiles": all_profiles,
+            "global_signins_locked": global_signins_locked,
+            "email_logs": email_logs,
+            "safety_audit_logs": safety_audit_logs
         }
     )
 
@@ -206,6 +253,15 @@ async def admin_create_new_week(
 ):
     """Creates the next consecutive week number in the database as an unpublished draft."""
     try:
+        session_cookie = request.cookies.get("td_tokens_session")
+        admin_email = "Admin"
+        if session_cookie:
+            try:
+                td_data = json.loads(session_cookie)
+                u = supabase.auth.get_user(td_data.get("access_token")).user
+                if u: admin_email = u.email
+            except: pass
+
         weeks_res = supabase.table("weekly_questions").select("week_number").neq("week_number", 999).neq("week_number", 998).neq("week_number", 997).neq("week_number", 96).execute()
         existing_weeks = sorted(list(set([r["week_number"] for r in weeks_res.data]))) if weeks_res.data else [1]
         next_week = existing_weeks[-1] + 1 if existing_weeks else 1
@@ -225,6 +281,7 @@ async def admin_create_new_week(
             "winning_answer": "UNPUBLISHED"
         }).execute()
 
+        log_admin_action(supabase, admin_email, "CREATE_WEEK", f"Created new draft for Week {next_week}")
         return RedirectResponse(url=f"/admin?week={next_week}", status_code=303)
     except Exception as e:
         print(f"Error creating new week: {e}")
@@ -241,6 +298,15 @@ async def admin_publish_questions(
     if status_res.data and status_res.data[0].get("winning_answer") == "CLOSED":
         raise HTTPException(status_code=403, detail="Cannot modify questions for a closed/locked week.")
 
+    session_cookie = request.cookies.get("td_tokens_session")
+    admin_email = "Admin"
+    if session_cookie:
+        try:
+            td_data = json.loads(session_cookie)
+            u = supabase.auth.get_user(td_data.get("access_token")).user
+            if u: admin_email = u.email
+        except: pass
+
     form_data = await request.form()
     for i in range(1, 11):
         prompt = form_data.get(f"prompt_{i}", "")
@@ -256,6 +322,7 @@ async def admin_publish_questions(
         else:
             supabase.table("weekly_questions").insert({"week_number": week_number, "question_number": i, "question_text": combined_text, "winning_answer": "Pending"}).execute()
     
+    log_admin_action(supabase, admin_email, "PUBLISH_QUESTIONS", f"Updated questions for Week {week_number}")
     return RedirectResponse(url=f"/admin?week={week_number}&success=questions_published", status_code=303)
 
 @router.post("/week/set-lockout")
@@ -266,6 +333,15 @@ async def set_lockout(
     lockout_time_val: str = Form(...),
     supabase: Client = Depends(get_supabase)
 ):
+    session_cookie = request.cookies.get("td_tokens_session")
+    admin_email = "Admin"
+    if session_cookie:
+        try:
+            td_data = json.loads(session_cookie)
+            u = supabase.auth.get_user(td_data.get("access_token")).user
+            if u: admin_email = u.email
+        except: pass
+
     iso_time = f"{lockout_date}T{lockout_time_val}:00Z" if lockout_date and lockout_time_val else ""
     supabase.table("weekly_questions").delete().eq("week_number", week_number).eq("question_number", 99).execute()
     supabase.table("weekly_questions").insert({
@@ -274,6 +350,8 @@ async def set_lockout(
         "question_text": "LOCKTIME SCHEDULER",
         "winning_answer": f"LOCKTIME:{iso_time}"
     }).execute()
+    
+    log_admin_action(supabase, admin_email, "SET_LOCKOUT", f"Set lockout schedule for Week {week_number} to {iso_time}")
     return RedirectResponse(url=f"/admin?week={week_number}&success=lockout_updated", status_code=303)
 
 @router.post("/week/clear-lockout")
@@ -282,7 +360,17 @@ async def clear_lockout(
     week_number: int = Form(...),
     supabase: Client = Depends(get_supabase)
 ):
+    session_cookie = request.cookies.get("td_tokens_session")
+    admin_email = "Admin"
+    if session_cookie:
+        try:
+            td_data = json.loads(session_cookie)
+            u = supabase.auth.get_user(td_data.get("access_token")).user
+            if u: admin_email = u.email
+        except: pass
+
     supabase.table("weekly_questions").delete().eq("week_number", week_number).eq("question_number", 99).execute()
+    log_admin_action(supabase, admin_email, "CLEAR_LOCKOUT", f"Cleared lockout schedule for Week {week_number}")
     return RedirectResponse(url=f"/admin?week={week_number}&success=lockout_cleared", status_code=303)
 
 @router.post("/week/publish")
@@ -291,7 +379,17 @@ async def publish_week(
     week_number: int = Form(...),
     supabase: Client = Depends(get_supabase)
 ):
+    session_cookie = request.cookies.get("td_tokens_session")
+    admin_email = "Admin"
+    if session_cookie:
+        try:
+            td_data = json.loads(session_cookie)
+            u = supabase.auth.get_user(td_data.get("access_token")).user
+            if u: admin_email = u.email
+        except: pass
+
     supabase.table("weekly_questions").delete().eq("week_number", week_number).eq("question_number", 96).execute()
+    log_admin_action(supabase, admin_email, "PUBLISH_WEEK", f"Published Week {week_number} slate")
     return RedirectResponse(url=f"/admin?week={week_number}&success=published", status_code=303)
 
 @router.post("/week/unpublish")
@@ -300,12 +398,23 @@ async def unpublish_week(
     week_number: int = Form(...),
     supabase: Client = Depends(get_supabase)
 ):
+    session_cookie = request.cookies.get("td_tokens_session")
+    admin_email = "Admin"
+    if session_cookie:
+        try:
+            td_data = json.loads(session_cookie)
+            u = supabase.auth.get_user(td_data.get("access_token")).user
+            if u: admin_email = u.email
+        except: pass
+
     supabase.table("weekly_questions").upsert({
         "week_number": week_number,
         "question_number": 96,
         "question_text": "PUBLISH STATUS",
         "winning_answer": "UNPUBLISHED"
     }, on_conflict="week_number,question_number").execute()
+    
+    log_admin_action(supabase, admin_email, "UNPUBLISH_WEEK", f"Unpublished Week {week_number} slate")
     return RedirectResponse(url=f"/admin?week={week_number}&success=unpublished", status_code=303)
 
 @router.post("/schedule")
@@ -315,6 +424,15 @@ async def admin_save_lockout(
     lockout_iso: str = Form(...),
     supabase: Client = Depends(get_supabase)
 ):
+    session_cookie = request.cookies.get("td_tokens_session")
+    admin_email = "Admin"
+    if session_cookie:
+        try:
+            td_data = json.loads(session_cookie)
+            u = supabase.auth.get_user(td_data.get("access_token")).user
+            if u: admin_email = u.email
+        except: pass
+
     supabase.table("weekly_questions").delete().eq("week_number", week_number).ilike("winning_answer", "LOCKTIME:%").execute()
     supabase.table("weekly_questions").insert({
         "week_number": week_number,
@@ -322,6 +440,8 @@ async def admin_save_lockout(
         "question_text": "LOCKTIME SCHEDULER",
         "winning_answer": f"LOCKTIME:{lockout_iso}"
     }).execute()
+    
+    log_admin_action(supabase, admin_email, "SAVE_LOCKOUT", f"Saved ISO lockout for Week {week_number}")
     return RedirectResponse(url=f"/admin?week={week_number}&success=lockout_saved", status_code=303)
 
 @router.post("/toggle-week-status")
@@ -333,6 +453,15 @@ async def toggle_week_status(
 ):
     """Closes or Reopens a week by updating Question 98 status."""
     try:
+        session_cookie = request.cookies.get("td_tokens_session")
+        admin_email = "Admin"
+        if session_cookie:
+            try:
+                td_data = json.loads(session_cookie)
+                u = supabase.auth.get_user(td_data.get("access_token")).user
+                if u: admin_email = u.email
+            except: pass
+
         status_val = "CLOSED" if action == "close" else "OPEN"
         
         existing = supabase.table("weekly_questions").select("id").eq("week_number", week_number).eq("question_number", 98).execute()
@@ -347,6 +476,7 @@ async def toggle_week_status(
                 "winning_answer": status_val
             }).execute()
 
+        log_admin_action(supabase, admin_email, "TOGGLE_WEEK_STATUS", f"Toggled Week {week_number} status to {status_val}")
         return RedirectResponse(url=f"/admin?week={week_number}", status_code=303)
     except Exception as e:
         print(f"Error toggling week status: {e}")
@@ -359,6 +489,15 @@ async def close_weekly_slate(
     supabase: Client = Depends(get_supabase)
 ):
     try:
+        session_cookie = request.cookies.get("td_tokens_session")
+        admin_email = "Admin"
+        if session_cookie:
+            try:
+                td_data = json.loads(session_cookie)
+                u = supabase.auth.get_user(td_data.get("access_token")).user
+                if u: admin_email = u.email
+            except: pass
+
         supabase.table("weekly_questions").upsert({
             "week_number": week_number,
             "question_number": 98,
@@ -366,6 +505,7 @@ async def close_weekly_slate(
             "winning_answer": "CLOSED"
         }, on_conflict="week_number,question_number").execute()
         
+        log_admin_action(supabase, admin_email, "CLOSE_WEEK", f"Closed weekly slate for Week {week_number}")
         return RedirectResponse(url=f"/admin?week={week_number}&success=week_closed", status_code=303)
     except Exception as e:
         print(f"Error closing week: {e}")
@@ -377,6 +517,15 @@ async def admin_grade_live(
     week_number: int = Form(...),
     supabase: Client = Depends(get_supabase)
 ):
+    session_cookie = request.cookies.get("td_tokens_session")
+    admin_email = "Admin"
+    if session_cookie:
+        try:
+            td_data = json.loads(session_cookie)
+            u = supabase.auth.get_user(td_data.get("access_token")).user
+            if u: admin_email = u.email
+        except: pass
+
     form_data = await request.form()
     
     questions = supabase.table("weekly_questions").select("id, question_number").eq("week_number", week_number).lt("question_number", 11).execute().data
@@ -401,15 +550,26 @@ async def admin_grade_live(
                 print(f"Error updating TD pick grade: {e}")
 
     recalculate_all_user_balances(supabase)
+    log_admin_action(supabase, admin_email, "GRADE_WEEK", f"Graded Week {week_number} results and recalculated tokens")
     return RedirectResponse(url=f"/admin?week={week_number}&success=week_graded", status_code=303)
 
 @router.post("/adjust")
 async def admin_bulk_adjust_tokens(
+    request: Request,
     user_id: str = Form(...),
     adjustment_type: str = Form(...),
     amount: int = Form(...),
     supabase: Client = Depends(get_supabase)
 ):
+    session_cookie = request.cookies.get("td_tokens_session")
+    admin_email = "Admin"
+    if session_cookie:
+        try:
+            td_data = json.loads(session_cookie)
+            u = supabase.auth.get_user(td_data.get("access_token")).user
+            if u: admin_email = u.email
+        except: pass
+
     prof = supabase.table("profiles").select("tokens").eq("id", user_id).single().execute().data
     if prof:
         current_tokens = prof.get("tokens", 10)
@@ -420,20 +580,32 @@ async def admin_bulk_adjust_tokens(
         else:
             new_tokens = amount
         supabase.table("profiles").update({"tokens": new_tokens}).eq("id", user_id).execute()
+        log_admin_action(supabase, admin_email, "ADJUST_TOKENS", f"Adjusted tokens for user {user_id}: {adjustment_type} {amount} (New total: {new_tokens})")
     return RedirectResponse(url="/admin?success=tokens_adjusted", status_code=303)
 
 @router.post("/control")
 async def admin_app_access_control(
+    request: Request,
     signin_locked: bool = Form(False),
     signup_locked: bool = Form(False),
     supabase: Client = Depends(get_supabase)
 ):
+    session_cookie = request.cookies.get("td_tokens_session")
+    admin_email = "Admin"
+    if session_cookie:
+        try:
+            td_data = json.loads(session_cookie)
+            u = supabase.auth.get_user(td_data.get("access_token")).user
+            if u: admin_email = u.email
+        except: pass
+
     supabase.table("weekly_questions").delete().eq("week_number", 998).execute()
     supabase.table("weekly_questions").insert({"week_number": 998, "question_number": 99, "question_text": "SIGNIN LOCK SETTING", "winning_answer": "LOCKED" if signin_locked else "UNLOCKED"}).execute()
     
     supabase.table("weekly_questions").delete().eq("week_number", 997).execute()
     supabase.table("weekly_questions").insert({"week_number": 997, "question_number": 99, "question_text": "SIGNUP LOCK SETTING", "winning_answer": "LOCKED" if signup_locked else "UNLOCKED"}).execute()
     
+    log_admin_action(supabase, admin_email, "ACCESS_CONTROL", f"Updated access control: Signin Locked={signin_locked}, Signup Locked={signup_locked}")
     return RedirectResponse(url="/admin?success=access_controls_updated", status_code=303)
 
 @router.post("/send-reminders")
@@ -451,6 +623,7 @@ async def trigger_weekly_reminders(
         token_data = json.loads(session_cookie)
         supabase.auth.set_session(token_data.get("access_token"), token_data.get("refresh_token"))
         user = supabase.auth.get_user().user
+        admin_email = user.email if user else "Admin"
         
         # Verify user is actually an admin in the database
         profile_res = supabase.table("profiles").select("is_admin").eq("id", user.id).execute()
@@ -461,6 +634,8 @@ async def trigger_weekly_reminders(
 
     # Trigger the pick submission email helper
     sent_count = send_weekly_reminders(supabase, week_number)
+    log_email_broadcast(supabase, admin_email, "WEEKLY_REMINDERS", sent_count)
+    log_admin_action(supabase, admin_email, "SEND_REMINDERS", f"Sent weekly reminder emails for Week {week_number} to {sent_count} users")
 
     # Redirect back to admin panel with success count parameter
     return RedirectResponse(url=f"/admin?week={week_number}&success=reminders_sent_count_{sent_count}", status_code=303)
@@ -480,6 +655,7 @@ async def trigger_grading_emails(
         token_data = json.loads(session_cookie)
         supabase.auth.set_session(token_data.get("access_token"), token_data.get("refresh_token"))
         user = supabase.auth.get_user().user
+        admin_email = user.email if user else "Admin"
         
         # Verify user is actually an admin in the database
         profile_res = supabase.table("profiles").select("is_admin").eq("id", user.id).execute()
@@ -490,6 +666,8 @@ async def trigger_grading_emails(
 
     # Trigger the grading announcement email helper
     sent_count = send_grading_notifications(supabase, week_number)
+    log_email_broadcast(supabase, admin_email, "GRADING_ANNOUNCEMENT", sent_count)
+    log_admin_action(supabase, admin_email, "SEND_GRADING_EMAILS", f"Sent grading announcement emails for Week {week_number} to {sent_count} users")
 
     # Redirect back to admin panel with success count parameter
     return RedirectResponse(url=f"/admin?week={week_number}&success=grading_sent_count_{sent_count}", status_code=303)
