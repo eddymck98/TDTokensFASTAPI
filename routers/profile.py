@@ -69,16 +69,33 @@ async def get_profile_page(request: Request, supabase: Client = Depends(get_supa
 
         profile["unlocked_titles"] = unlocked_titles
 
+        # Fetch trophies ONLY earned within the user's mini-leagues context
+        user_leagues = supabase.table("league_members").select("league_id").eq("user_id", user.id).execute().data
+        league_ids = [l["league_id"] for l in user_leagues] if user_leagues else []
+
+        trophies = []
+        if league_ids:
+            trophies_res = supabase.table("trophies") \
+                .select("*") \
+                .in_("league_id", league_ids) \
+                .eq("user_id", user.id) \
+                .execute()
+            trophies = trophies_res.data or []
+        else:
+            trophies = []
+
     except Exception as e:
         print(f"Profile fetch error: {e}")
         profile = {"unlocked_titles": ["🏈 Gridiron Contender", "Free Agent"]}
         all_profiles = []
+        trophies = []
 
     return templates.TemplateResponse(request=request, name="profile.html", context={
         "request": request,
         "user": user,
         "profile": profile,
         "all_profiles": all_profiles,
+        "trophies": trophies,
         "team_data": NFL_TEAM_DATA
     })
 
