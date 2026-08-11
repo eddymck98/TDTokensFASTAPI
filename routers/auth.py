@@ -312,3 +312,29 @@ async def request_password_reset(
         return RedirectResponse(url="/auth/login?error=signup_failed", status_code=303)
     except Exception:
         return RedirectResponse(url="/auth/login?error=signup_failed", status_code=303)
+
+@router.post("/update-password")
+async def update_password(
+    request: Request,
+    new_password: str = Form(...),
+    supabase: Client = Depends(get_supabase)
+):
+    """Handles updating the user's password once they are authenticated or come back via recovery session token."""
+    session_cookie = request.cookies.get("td_tokens_session")
+    if not session_cookie:
+        raise HTTPException(status_code=401, detail="Unauthorized session.")
+    
+    try:
+        token_data = json.loads(session_cookie)
+        acc_token = token_data.get("access_token")
+        
+        # Set session context so Supabase knows precisely which user account to modify
+        supabase.auth.set_session(acc_token, token_data.get("refresh_token"))
+        supabase.postgrest.auth(acc_token)
+        
+        # Execute password update
+        supabase.auth.update_user({"password": new_password.strip()})
+        
+        return RedirectResponse(url="/profile/?success=password_updated", status_code=303)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
