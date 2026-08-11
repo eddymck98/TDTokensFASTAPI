@@ -3,6 +3,13 @@
 {% block content %}
 <div class="bets-container" style="max-width: 900px; margin: 0 auto; padding-bottom: 40px; padding-left: 12px; padding-right: 12px;">
 
+  <!-- Success Notification Banner -->
+  {% if request.query_params.get('success') == 'submitted' %}
+    <div style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); color: #34d399; padding: 14px 20px; border-radius: 12px; font-size: 15px; margin-bottom: 25px; text-align: center; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);">
+      <span style="font-size: 20px;">✅</span> <span><strong>Thank you for submitting your weekly bets!</strong> Your predictions and wagers have been locked in successfully. Good luck! 🏈</span>
+    </div>
+  {% endif %}
+
   <!-- Lockout Timer Header -->
   <div class="team-themed-card team-watermark-bg" style="background: rgba(15, 23, 42, 0.95); border-top: 4px solid #ef4444; padding: 20px; text-align: center; margin-bottom: 25px;">
     <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: #ef4444; letter-spacing: 1.5px; margin: 0 0 5px 0;">⏳ TIME UNTIL WEEKLY LOCKOUT</h3>
