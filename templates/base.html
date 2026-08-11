@@ -36,7 +36,6 @@
     <style>
         :root {
             --team-color: {{ t_color }};
-            --team-color-glow: {{ t_color }}33;
             --team-logo-url: url('{{ t_team_logo }}');
         }
 
@@ -90,9 +89,9 @@
         {% endif %}
     </nav>
 
-    <!-- Compact Sticky Balance Bar -->
+    <!-- Compact Sticky Balance Bar (Restored to clean dark theme with a subtle team avatar frame accent) -->
     {% if profile and profile.full_name and profile.full_name != "Error Loading Profile" and request.url.path != '/auth/login' and not request.url.path.startswith('/admin') %}
-    <div class="sticky-balance-bar container" style="position: sticky; top: 75px; z-index: 90; margin-top: 12px; margin-bottom: 20px; background: rgba(15, 23, 42, 0.92); border: 1px solid rgba(255, 255, 255, 0.12); border-left: 4px solid var(--team-color); border-radius: 12px; padding: 10px 15px; backdrop-filter: blur(14px); box-shadow: 0 8px 20px rgba(0,0,0,0.4); display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+    <div class="sticky-balance-bar container" style="position: sticky; top: 75px; z-index: 90; margin-top: 12px; margin-bottom: 20px; background: rgba(15, 23, 42, 0.92); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 12px; padding: 10px 15px; backdrop-filter: blur(14px); box-shadow: 0 8px 20px rgba(0,0,0,0.4); display: flex; justify-content: space-between; align-items: center; gap: 10px;">
         <div style="display: flex; align-items: center; gap: 10px; overflow: hidden; flex: 1; min-width: 0;">
             <div style="border: 2px {{ profile.avatar_border | default('solid') }} var(--team-color); border-radius: 8px; padding: 4px 8px; background: {{ profile.avatar_color | default('#1e3a8a') }}; flex-shrink: 0;">
                 <span style="font-size: 20px;">{{ profile.avatar_emoji | default('🏈') }}</span>
@@ -106,7 +105,7 @@
             </div>
         </div>
         <div style="text-align: right; flex-shrink: 0; background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); padding: 4px 10px; border-radius: 8px;">
-            <span style="font-family: 'Bebas Neue'; font-size: 22px; color: var(--team-color); line-height: 1;">{{ active_tokens | default(profile.tokens) }} 🪙</span>
+            <span style="font-family: 'Bebas Neue'; font-size: 22px; color: #fbbf24; line-height: 1;">{{ active_tokens | default(profile.tokens) }} 🪙</span>
             <div style="font-size: 8px; color: #94a3b8; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Tokens</div>
         </div>
     </div>
