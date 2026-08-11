@@ -108,7 +108,7 @@ async def render_dashboard_or_index(request: Request):
                 current_user_bets = sorted(current_user_bets, key=lambda x: int(x.get("question_number", 99)) if str(x.get("question_number")).isdigit() else 99)
                 personal_stats["total_bets"] = len(current_user_bets)
                 
-                share_lines = ["🏈 Weekly Lock-Ins Loaded 🏈\n"]
+                share_lines = [f"🏈 Weekly Lock-Ins (Week {latest_week}) 🏈\n"]
                 for b in current_user_bets:
                     share_lines.append(f"Q{b['question_number']}: {b['pick']} ({b['wager_amount']} 🪙)")
                 share_text = "\n".join(share_lines)
