@@ -69,20 +69,8 @@ async def get_profile_page(request: Request, supabase: Client = Depends(get_supa
 
         profile["unlocked_titles"] = unlocked_titles
 
-        # Fetch trophies ONLY earned within the user's mini-leagues context
-        user_leagues = supabase.table("league_members").select("league_id").eq("user_id", user.id).execute().data
-        league_ids = [l["league_id"] for l in user_leagues] if user_leagues else []
-
+        # Trophies placeholder list (avoids PGRST205 missing table error)
         trophies = []
-        if league_ids:
-            trophies_res = supabase.table("trophies") \
-                .select("*") \
-                .in_("league_id", league_ids) \
-                .eq("user_id", user.id) \
-                .execute()
-            trophies = trophies_res.data or []
-        else:
-            trophies = []
 
     except Exception as e:
         print(f"Profile fetch error: {e}")
@@ -201,7 +189,6 @@ async def update_email(
         if not user:
             raise HTTPException(status_code=401, detail="Invalid user session.")
 
-        # Request Supabase Auth to update user email
         supabase.auth.update_user({"email": new_email.strip()})
         
         return RedirectResponse(url="/profile?success=email_update_sent", status_code=303)
@@ -222,11 +209,9 @@ async def update_password(
         token_data = json.loads(session_cookie)
         acc_token = token_data.get("access_token")
         
-        # Set session context so Supabase knows precisely which user account to modify
         supabase.auth.set_session(acc_token, token_data.get("refresh_token"))
         supabase.postgrest.auth(acc_token)
         
-        # Execute password update
         supabase.auth.update_user({"password": new_password.strip()})
         
         return RedirectResponse(url="/profile/?success=password_updated", status_code=303)
