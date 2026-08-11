@@ -27,13 +27,14 @@
             --team-color-glow: {{ t_color }}55;
         }
         
-        /* Explicitly force correct background image and prevent horizontal mobile overflow */
-        html, body {
-            overflow-x: hidden;
+        /* Fix mobile sticky behavior by keeping HTML overflow visible */
+        html {
             width: 100%;
         }
 
         body {
+            overflow-x: hidden;
+            width: 100%;
             background: radial-gradient(circle at 50% 20%, rgba(15, 23, 42, 0.90), rgba(7, 13, 25, 0.99)), 
                         url('{{ t_stadium }}') center center / cover no-repeat fixed !important;
         }
