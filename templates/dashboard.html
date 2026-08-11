@@ -206,33 +206,56 @@
     {% endif %}
   </div>
 
-  <!-- Weekly Community Trends Section -->
-  <div style="background: rgba(30, 41, 59, 0.8); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 20px; margin-bottom: 25px; box-shadow: 0 8px 25px rgba(0,0,0,0.3);">
-    <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: #ffffff; letter-spacing: 1px; margin-top: 0; margin-bottom: 5px;">📊 COMMUNITY TRENDS & HEAVIEST ACTION</h3>
-    <p style="color: #94a3b8; font-size: 13px; margin-bottom: 16px;">A snapshot of the Top 3 most heavily bet matchups across the global league.</p>
+  <!-- Weekly Community Trends & Hot Topics Section (Top 3) -->
+  <div style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%); border: 1px solid rgba(251, 191, 36, 0.2); border-radius: 12px; padding: 20px; margin-bottom: 25px; box-shadow: 0 8px 25px rgba(0,0,0,0.4);">
     
-    <div id="community-trends-container" style="display: grid; gap: 12px;">
+    <!-- Section Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
+      <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: #ffffff; letter-spacing: 1px; margin: 0; display: flex; align-items: center; gap: 8px;">
+        <span>📊</span> COMMUNITY TRENDS & HOT TOPICS
+      </h3>
+      <span style="font-size: 11px; background: rgba(56, 189, 248, 0.15); color: #38bdf8; padding: 3px 8px; border-radius: 6px; font-weight: bold; border: 1px solid rgba(56, 189, 248, 0.3);">TOP 3 ACTION</span>
+    </div>
+    <p style="color: #94a3b8; font-size: 13px; margin-bottom: 18px;">The most heavily bet matchups capturing the global league's focus this week.</p>
+    
+    <div id="community-trends-container" style="display: grid; gap: 14px;">
       {% if not consensus_data %}
-        <div style="background-color: rgba(30, 41, 59, 0.5); padding: 20px; text-align: center; border-radius: 12px;">
-          <p style="color: #cbd5e1; font-size: 15px; margin: 0;">Not enough bets placed yet to calculate community trends.</p>
+        <div style="background: rgba(30, 41, 59, 0.5); padding: 20px; text-align: center; border-radius: 10px; border: 1px dashed rgba(255,255,255,0.1);">
+          <p style="color: #cbd5e1; font-size: 14px; margin: 0;">Not enough global action yet to calculate community trends.</p>
         </div>
       {% else %}
-        {% for stat in consensus_data %}
-          <div style="background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255,255,255,0.05); border-radius: 10px; padding: 12px 14px;">
-            <div style="font-size: 12px; color: #fbbf24; font-weight: bold; margin-bottom: 4px; text-transform: uppercase; display: flex; align-items: center; gap: 4px;">
-              Q{{ stat.q_num }} Total Tokens Wagered: {{ stat.total_wager }} 🪙
-            </div>
-            <div style="font-size: 14px; color: #f8fafc; margin-bottom: 10px; font-weight: 500; line-height: 1.3;">{{ stat.text }}</div>
+        {% for stat in consensus_data[:3] %}
+          {% set is_heavyweight = loop.first %}
+          {% set card_border = 'rgba(251, 191, 36, 0.4)' if is_heavyweight else 'rgba(255, 255, 255, 0.08)' %}
+          {% set card_bg = 'rgba(30, 41, 59, 0.7)' if is_heavyweight else 'rgba(30, 41, 59, 0.4)' %}
+          
+          <div style="background: {{ card_bg }}; border: 1px solid {{ card_border }}; border-radius: 10px; padding: 14px 16px; position: relative; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
             
-            <div style="display: flex; align-items: center; justify-content: space-between; font-size: 12px; font-weight: bold; margin-bottom: 4px;">
-              <span style="color: #10b981;">YES ({{ stat.yes_pct }}%)</span>
-              <span style="color: #ef4444;">NO ({{ stat.no_pct }}%)</span>
+            <!-- Top Tag row (Heavyweight badge for #1 slot) -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 11px;">
+              <span style="color: #fbbf24; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 4px;">
+                {% if is_heavyweight %}🔥 Heavyweight Action —{% endif %} Q{{ stat.q_num }} Matchup
+              </span>
+              <span style="background: rgba(0, 0, 0, 0.4); padding: 2px 8px; border-radius: 6px; color: #cbd5e1; font-family: 'Bebas Neue'; font-size: 14px; letter-spacing: 0.5px;">
+                {{ stat.total_wager }} 🪙 Wagered
+              </span>
+            </div>
+
+            <!-- Question Text -->
+            <div style="font-size: 15px; color: #f8fafc; margin-bottom: 12px; font-weight: 600; line-height: 1.35;">{{ stat.text }}</div>
+            
+            <!-- Percentage breakdown headers -->
+            <div style="display: flex; align-items: center; justify-content: space-between; font-size: 12px; font-weight: bold; margin-bottom: 6px;">
+              <span style="color: #34d399; display: flex; align-items: center; gap: 3px;">YES <span style="font-family: 'Bebas Neue'; font-size: 15px;">({{ stat.yes_pct }}%)</span></span>
+              <span style="color: #f87171; display: flex; align-items: center; gap: 3px;"><span style="font-family: 'Bebas Neue'; font-size: 15px;">({{ stat.no_pct }}%)</span> NO</span>
             </div>
             
-            <div style="display: flex; width: 100%; height: 10px; border-radius: 5px; overflow: hidden; background: #334155;">
-              <div style="width: {{ stat.yes_pct }}%; background: #10b981; transition: width 0.5s;"></div>
-              <div style="width: {{ stat.no_pct }}%; background: #ef4444; transition: width 0.5s;"></div>
+            <!-- Dual-tone custom progress bar with soft glow -->
+            <div style="display: flex; width: 100%; height: 12px; border-radius: 6px; overflow: hidden; background: rgba(15, 23, 42, 0.8); padding: 2px; border: 1px solid rgba(255,255,255,0.05);">
+              <div style="width: {{ stat.yes_pct }}%; background: linear-gradient(90deg, #059669, #34d399); border-radius: 4px; transition: width 0.6s ease; box-shadow: 0 0 8px rgba(52, 211, 153, 0.4);"></div>
+              <div style="width: {{ stat.no_pct }}%; background: linear-gradient(90deg, #dc2626, #f87171); border-radius: 4px; transition: width 0.6s ease; box-shadow: 0 0 8px rgba(248, 113, 113, 0.4); margin-left: 2px;"></div>
             </div>
+
           </div>
         {% endfor %}
       {% endif %}
