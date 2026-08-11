@@ -113,11 +113,11 @@
                   <div style="display: flex; gap: 8px; width: 100%;">
                     <label style="flex: 1; cursor: {% if is_week_closed %}default{% else %}pointer{% endif %}; margin: 0;">
                       <input type="radio" name="pick_{{ q.id }}" value="Yes" required style="display:none;" onchange="updateRadioStyles(this)" {% if q.user_pick == 'Yes' %}checked{% endif %} {% if is_week_closed %}disabled{% endif %}>
-                      <div class="toggle-btn yes-btn {% if q.user_pick == 'Yes' %}{% endif %}" style="text-align: center; padding: 12px 6px; border: 1px solid {% if q.user_pick == 'Yes' %}#10b981{% else %}rgba(255,255,255,0.2){% endif %}; border-radius: 10px; color: #fff; font-family: 'Teko', sans-serif; font-size: 20px; font-weight: bold; transition: 0.2s;">YES 👍</div>
+                      <div class="toggle-btn yes-btn {% if q.user_pick == 'Yes' %}yes-active{% endif %}" style="text-align: center; padding: 12px 6px; border: 1px solid {% if q.user_pick == 'Yes' %}#10b981{% else %}rgba(255,255,255,0.2){% endif %}; border-radius: 10px; color: #fff; font-family: 'Teko', sans-serif; font-size: 20px; font-weight: bold; transition: 0.2s;">YES 👍</div>
                     </label>
                     <label style="flex: 1; cursor: {% if is_week_closed %}default{% else %}pointer{% endif %}; margin: 0;">
                       <input type="radio" name="pick_{{ q.id }}" value="No" required style="display:none;" onchange="updateRadioStyles(this)" {% if q.user_pick == 'No' %}checked{% endif %} {% if is_week_closed %}disabled{% endif %}>
-                      <div class="toggle-btn no-btn {% if q.user_pick == 'No' %}{% endif %}" style="text-align: center; padding: 12px 6px; border: 1px solid {% if q.user_pick == 'No' %}#ef4444{% else %}rgba(255,255,255,0.2){% endif %}; border-radius: 10px; color: #fff; font-family: 'Teko', sans-serif; font-size: 20px; font-weight: bold; transition: 0.2s;">NO 👎</div>
+                      <div class="toggle-btn no-btn {% if q.user_pick == 'No' %}no-active{% endif %}" style="text-align: center; padding: 12px 6px; border: 1px solid {% if q.user_pick == 'No' %}#ef4444{% else %}rgba(255,255,255,0.2){% endif %}; border-radius: 10px; color: #fff; font-family: 'Teko', sans-serif; font-size: 20px; font-weight: bold; transition: 0.2s;">NO 👎</div>
                     </label>
                   </div>
 
@@ -322,6 +322,7 @@
     setTimeout(() => {
       document.querySelectorAll('.toggle-btn').forEach(btn => {
         btn.classList.remove('yes-active', 'no-active');
+        btn.style.borderColor = "rgba(255,255,255,0.2)";
       });
       document.querySelectorAll('input[name^="wager_"]').forEach(input => {
         input.value = 0;
@@ -337,10 +338,14 @@
     
     if(radio.value === 'Yes') {
       yesBtn.classList.add('yes-active');
+      yesBtn.style.borderColor = '#10b981';
       noBtn.classList.remove('no-active');
+      noBtn.style.borderColor = 'rgba(255,255,255,0.2)';
     } else {
       noBtn.classList.add('no-active');
+      noBtn.style.borderColor = '#ef4444';
       yesBtn.classList.remove('yes-active');
+      yesBtn.style.borderColor = 'rgba(255,255,255,0.2)';
     }
   }
 
