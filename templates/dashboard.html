@@ -9,9 +9,9 @@
     <div style="display: flex; align-items: center; gap: 10px;">
       <span style="font-size: 13px; white-space: nowrap; font-weight: bold; color: #fbbf24; letter-spacing: 1px;">⚡ RIVAL FEED:</span>
       
-      <!-- Sliding Marquee Track (Slowed down 5x from 40s to 200s) -->
+      <!-- Sliding Marquee Track (Optimized to 50s for immediate smooth flow) -->
       <div style="overflow: hidden; white-space: nowrap; width: 100%; position: relative;">
-        <div class="marquee-track" style="display: inline-block; animation: slideMarquee 200s linear infinite; color: #cbd5e1; font-size: 13px;">
+        <div class="marquee-track" style="display: inline-block; animation: slideMarquee 50s linear infinite; color: #cbd5e1; font-size: 13px;">
           {% for act in recent_league_activity %}
             <span style="margin-right: 50px;">
               {% if act.type == 'payout' %}
@@ -32,8 +32,8 @@
 
   <style>
   @keyframes slideMarquee {
-    0% { transform: translateX(100%); }
-    100% { transform: translateX(-100%); }
+    0% { transform: translateX(0%); }
+    100% { transform: translateX(-50%); }
   }
   /* Pause sliding on hover so users can easily read a specific update */
   .marquee-track:hover {
@@ -206,7 +206,7 @@
     {% endif %}
   </div>
 
-  <!-- Weekly Community Trends & Hot Topics Section (Modern Mini-Cards Grid with Fixed Volume Tiering) -->
+  <!-- Weekly Community Trends & Hot Topics Section (Modern Mini-Cards Grid with Fixed Layout & Borders) -->
   <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border: 1px solid rgba(251, 191, 36, 0.25); border-radius: 14px; padding: 22px; margin-bottom: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
     
     <!-- Section Header -->
@@ -226,42 +226,40 @@
       {% else %}
         {% for stat in consensus_data[:3] %}
           {% set is_heavyweight = loop.first %}
-          {% set card_border = 'rgba(251, 191, 36, 0.45)' if is_heavyweight else 'rgba(255, 255, 255, 0.08)' %}
-          {% set card_bg = 'rgba(30, 41, 59, 0.8)' if is_heavyweight else 'rgba(30, 41, 59, 0.5)' %}
           
           <!-- Strict Volume-Tier Categorization -->
           {% if is_heavyweight %}
-            {% set action_badge = '🔥 HEAVYWEIGHT ACTION' %}
+            {% set action_badge = '🔥 HEAVYWEIGHT' %}
             {% set action_desc = 'The single most heavily token-backed matchup of the week.' %}
             {% set badge_color = '#fbbf24' %}
           {% elif loop.index == 2 %}
-            {% set action_badge = '⚡ HIGH-VOLUME ACTION' %}
+            {% set action_badge = '⚡ HIGH-VOLUME' %}
             {% set action_desc = 'The second most active betting pool on the weekly slate.' %}
             {% set badge_color = '#38bdf8' %}
           {% else %}
-            {% set action_badge = '🎯 TRENDING BATTLE' %}
+            {% set action_badge = '🎯 TRENDING' %}
             {% set action_desc = 'Capturing steady community token volume and attention.' %}
             {% set badge_color = '#a78bfa' %}
           {% endif %}
           
-          <!-- Mini-Card Bubble Container -->
-          <div style="background: {{ card_bg }}; border: 1px solid {{ card_border }}; border-radius: 12px; padding: 18px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 4px 15px rgba(0,0,0,0.3); position: relative; overflow: hidden;">
+          <!-- Mini-Card Bubble Container with uniform gold-accented styling -->
+          <div style="background: rgba(30, 41, 59, 0.75); border: 1px solid rgba(251, 191, 36, 0.35); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 4px 15px rgba(0,0,0,0.3); position: relative; overflow: hidden;">
             
             <div>
-              <!-- Top Header Row (Badge & Distinct Question Number + Token Pill) -->
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 8px;">
-                <span style="background: rgba(15, 23, 42, 0.7); color: {{ badge_color }}; font-size: 10px; font-weight: bold; padding: 3px 8px; border-radius: 4px; border: 1px solid {{ badge_color }}; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap;">{{ action_badge }}</span>
+              <!-- Top Header Row: Clean Stacked Badges & Pill Counts to prevent overflow -->
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; gap: 6px;">
+                <span style="background: rgba(15, 23, 42, 0.8); color: {{ badge_color }}; font-size: 10px; font-weight: bold; padding: 3px 7px; border-radius: 4px; border: 1px solid {{ badge_color }}; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.2;">{{ action_badge }}</span>
                 
-                <div style="display: flex; align-items: center; gap: 4px;">
+                <div style="display: flex; align-items: center; gap: 4px; flex-shrink: 0;">
                   <span style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; font-size: 11px; padding: 2px 6px; border-radius: 4px; font-family: 'Bebas Neue'; border: 1px solid rgba(56, 189, 248, 0.3);">Q{{ stat.q_num }}</span>
-                  <span style="background: rgba(251, 191, 36, 0.15); color: #fbbf24; font-size: 11px; padding: 2px 8px; border-radius: 4px; font-family: 'Bebas Neue'; border: 1px solid rgba(251, 191, 36, 0.3); letter-spacing: 0.5px; white-space: nowrap;">🪙 {{ stat.total_wager }} WAGERED</span>
+                  <span style="background: rgba(251, 191, 36, 0.15); color: #fbbf24; font-size: 11px; padding: 2px 7px; border-radius: 4px; font-family: 'Bebas Neue'; border: 1px solid rgba(251, 191, 36, 0.3); letter-spacing: 0.5px;">🪙 {{ stat.total_wager }}</span>
                 </div>
               </div>
 
               <!-- Question Text -->
               <div style="font-size: 15px; color: #ffffff; margin-bottom: 6px; font-weight: 600; line-height: 1.35;">{{ stat.text }}</div>
               
-              <!-- Description Text Bubble Subtitle -->
+              <!-- Description Subtitle -->
               <div style="font-size: 11px; color: #94a3b8; margin-bottom: 16px; font-style: italic; line-height: 1.3;">{{ action_desc }}</div>
             </div>
 
