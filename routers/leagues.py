@@ -6,6 +6,7 @@ from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from typing import Optional
 from supabase import Client
+from database import NFL_TEAM_DATA
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
@@ -160,7 +161,8 @@ async def get_leagues_page(request: Request, league_id: Optional[str] = None, su
         "leaderboard": displayed_leaderboard,
         "trash_talk_messages": trash_talk_messages,
         "archived_seasons": archived_seasons,
-        "active_league_id": league_id or "global"
+        "active_league_id": league_id or "global",
+        "team_data": NFL_TEAM_DATA
     })
 
 @router.post("/set-default")
@@ -180,7 +182,7 @@ async def set_default_league(
             raise HTTPException(status_code=401, detail="Invalid user session.")
         
         supabase.table("profiles").update({"default_league_id": default_league_id}).eq("id", user.id).execute()
-        return RedirectResponse(url=f"/leagues?league_id={default_league_id}&success=default_updated", status_code=303)
+        return RedirectResponse(url=f"/leagues/?league_id={default_league_id}&success=default_updated", status_code=303)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -226,7 +228,7 @@ async def create_league(
                 "user_id": user.id
             }).execute()
 
-        return RedirectResponse(url=f"/leagues?league_id={new_league_id}&success=league_created", status_code=303)
+        return RedirectResponse(url=f"/leagues/?league_id={new_league_id}&success=league_created", status_code=303)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -251,29 +253,29 @@ async def join_league(
 
     clean_code = invite_code.strip().upper()
     if not clean_code:
-        return RedirectResponse(url="/leagues?error=blank_code", status_code=303)
+        return RedirectResponse(url="/leagues/?error=blank_code", status_code=303)
 
     try:
         found_league = supabase.table("leagues").select("id, league_name, name, league_password").eq("invite_code", clean_code).execute().data
         if not found_league:
-            return RedirectResponse(url="/leagues?error=invalid_code", status_code=303)
+            return RedirectResponse(url="/leagues/?error=invalid_code", status_code=303)
 
         target_league = found_league[0]
         if target_league.get("league_password", "") and target_league.get("league_password", "") != league_password.strip():
-            return RedirectResponse(url=f"/leagues?league_id={target_league['id']}&error=incorrect_password", status_code=303)
+            return RedirectResponse(url=f"/leagues/?league_id={target_league['id']}&error=incorrect_password", status_code=303)
 
         already_member = supabase.table("league_members").select("id").eq("league_id", target_league["id"]).eq("user_id", user.id).execute().data
         if already_member:
-            return RedirectResponse(url=f"/leagues?league_id={target_league['id']}&info=already_member", status_code=303)
+            return RedirectResponse(url=f"/leagues/?league_id={target_league['id']}&info=already_member", status_code=303)
 
         supabase.table("league_members").insert({
             "league_id": target_league["id"],
             "user_id": user.id
         }).execute()
 
-        return RedirectResponse(url=f"/leagues?league_id={target_league['id']}&success=joined_league", status_code=303)
+        return RedirectResponse(url=f"/leagues/?league_id={target_league['id']}&success=joined_league", status_code=303)
     except Exception as e:
-        return RedirectResponse(url=f"/leagues?error=server_error", status_code=303)
+        return RedirectResponse(url=f"/leagues/?error=server_error", status_code=303)
 
 @router.post("/announcement")
 async def post_mini_league_announcement(
@@ -287,7 +289,7 @@ async def post_mini_league_announcement(
         raise HTTPException(status_code=401, detail="Unauthorized session.")
     try:
         supabase.table("leagues").update({"announcement": announcement_text.strip()}).eq("id", league_id).execute()
-        return RedirectResponse(url=f"/leagues?league_id={league_id}&success=announcement_posted", status_code=303)
+        return RedirectResponse(url=f"/leagues/?league_id={league_id}&success=announcement_posted", status_code=303)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -321,7 +323,7 @@ async def post_trash_talk(
         }).execute()
 
         redirect_param = f"league_id={league_id}" if league_id != "00000000-0000-0000-0000-000000000001" else "league_id=global"
-        return RedirectResponse(url=f"/leagues?{redirect_param}&success=message_posted", status_code=303)
+        return RedirectResponse(url=f"/leagues/?{redirect_param}&success=message_posted", status_code=303)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -396,6 +398,6 @@ async def archive_season(
             "standings_json": snapshot
         }).execute()
 
-        return RedirectResponse(url=f"/leagues?league_id={league_id}&success=season_archived", status_code=303)
+        return RedirectResponse(url=f"/leagues/?league_id={league_id}&success=season_archived", status_code=303)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
