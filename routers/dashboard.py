@@ -162,8 +162,8 @@ async def render_dashboard_or_index(request: Request):
                         stats["yes_pct"], stats["no_pct"] = 0, 0
                     consensus_data.append(stats)
                 
+                # STRICTLY SORT BY TOKEN VOLUME DESCENDING FIRST (Heavyweight action first)
                 consensus_data = sorted(consensus_data, key=lambda x: x.get("total_wager", 0), reverse=True)[:3]
-                consensus_data = sorted(consensus_data, key=lambda x: int(x["q_num"]) if str(x["q_num"]).isdigit() else 99)
 
         graph_labels = []
         graph_values = []
@@ -228,7 +228,7 @@ async def render_dashboard_or_index(request: Request):
     except Exception as e:
         print(f"Bets Fetch Error: {e}")
 
-    # --- 3. RECENT MINI-LEAGUE ACTIVITY FEED FETCH (FULL SUITE WITH DYNAMIC LEADERBOARD RANKS) ---
+    # --- 3. RECENT MINI-LEAGUE ACTIVITY FEED FETCH (STRICTLY MINI-LEAGUE TEAMMATES ONLY) ---
     recent_league_activity = []
     try:
         my_leagues_res = supabase.table("league_members").select("league_id, leagues(name)").eq("user_id", user.id).execute()
@@ -237,11 +237,12 @@ async def render_dashboard_or_index(request: Request):
         league_name_map = {m["league_id"]: m["leagues"]["name"] for m in my_leagues if m.get("leagues")}
         
         target_week = available_weeks[-1] if available_weeks else 1
-        min_allowed_week = max(1, target_week - 1)  # Rolling 2-week window (drops anything older than the immediate previous week)
+        min_allowed_week = max(1, target_week - 1)  # Rolling 2-week window
         
         if my_league_ids:
+            # STRICTLY PULL TEAMMATES BELONGING TO YOUR MINI-LEAGUES ONLY (NO GLOBAL USERS)
             shared_members_res = supabase.table("league_members").select("user_id").in_("league_id", my_league_ids).execute()
-            shared_user_ids = list(set([m["user_id"] for m in shared_members_res.data])) if shared_members_res.data else []
+            shared_user_ids = list(set([m["user_id"] for m in shared_members_res.data])) if shared_members_res.data else [user.id]
             
             if shared_user_ids:
                 profiles_res = supabase.table("profiles").select("id, full_name").in_("id", shared_user_ids).execute()
@@ -253,7 +254,6 @@ async def render_dashboard_or_index(request: Request):
                     .in_("user_id", shared_user_ids) \
                     .gte("week_number", min_allowed_week) \
                     .gt("tokens_awarded", 0) \
-                    .order("created_at", desc=True) \
                     .limit(3) \
                     .execute()
                     
@@ -274,7 +274,6 @@ async def render_dashboard_or_index(request: Request):
                     .in_("user_id", shared_user_ids) \
                     .gte("week_number", min_allowed_week) \
                     .eq("is_correct", True) \
-                    .order("created_at", desc=True) \
                     .limit(3) \
                     .execute()
 
@@ -293,7 +292,6 @@ async def render_dashboard_or_index(request: Request):
                 joins_res = supabase.table("league_members") \
                     .select("user_id, league_id, joined_at") \
                     .in_("league_id", my_league_ids) \
-                    .order("joined_at", desc=True) \
                     .limit(2) \
                     .execute()
                 
@@ -308,7 +306,7 @@ async def render_dashboard_or_index(request: Request):
                             "type": "new_join"
                         })
 
-                # D. Leaderboard #1 Spot Dynamic Takeovers
+                # D. Leaderboard #1 Spot Dynamic Takeovers (Mini-League Scope Only)
                 leaders_res = supabase.rpc("get_mini_league_leaders").execute()
                 if leaders_res.data:
                     for leader in leaders_res.data:
