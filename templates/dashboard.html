@@ -3,19 +3,17 @@
 {% block content %}
 <div class="dashboard-container" style="max-width: 900px; margin: 0 auto; padding-bottom: 40px; padding-left: 8px; padding-right: 8px;">
 
-  <!-- 🏎️ Non-Intrusive Mini-League Payout Ticker Marquee -->
-  {% if recent_league_activity %}
+  <!-- 🏎️ Non-Intrusive News Marquee Ticker -->
+  {% if news_items %}
   <div style="background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(251, 191, 36, 0.25); border-left: 4px solid #fbbf24; border-radius: 12px; padding: 10px 16px; margin-bottom: 20px; overflow: hidden; position: relative; backdrop-filter: blur(10px); box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
     <div style="display: flex; align-items: center; gap: 10px;">
-      <span style="font-size: 13px; white-space: nowrap; font-weight: bold; color: #fbbf24; letter-spacing: 1px;">⚡ RIVAL FEED:</span>
+      <span style="font-size: 13px; white-space: nowrap; font-weight: bold; color: #fbbf24; letter-spacing: 1px;">📢 LEAGUE NEWS:</span>
       
       <!-- Sliding Marquee Track -->
       <div style="overflow: hidden; white-space: nowrap; width: 100%; position: relative;">
         <div class="marquee-track" style="display: inline-block; animation: slideMarquee 30s linear infinite; color: #cbd5e1; font-size: 13px;">
-          {% for act in recent_league_activity %}
-            <span style="margin-right: 50px;">
-              <b style="color: #fff;">{{ act.user_name }}</b> claimed <b style="color: #34d399;">+{{ act.tokens_won }} 🪙</b> in Week {{ act.week_number }}! 🏈
-            </span>
+          {% for message in news_items %}
+            <span style="margin-right: 50px;">{{ message }}</span>
           {% endfor %}
         </div>
       </div>
@@ -27,7 +25,7 @@
     0% { transform: translateX(100%); }
     100% { transform: translateX(-100%); }
   }
-  /* Pause sliding on hover so users can easily read a specific win */
+  /* Pause sliding on hover so users can easily read a specific announcement */
   .marquee-track:hover {
     animation-play-state: paused;
   }
