@@ -109,8 +109,9 @@ async def render_dashboard_or_index(request: Request):
                 personal_stats["total_bets"] = len(current_user_bets)
                 
                 share_lines = [f"🏈 Weekly Lock-Ins (Week {latest_week}) 🏈\n"]
-                for b in current_user_bets:
-                    share_lines.append(f"Q{b['question_number']}: {b['pick']} ({b['wager_amount']} 🪙)")
+                for idx, b in enumerate(current_user_bets, start=1):
+                    q_text = b.get('question_text', f"Question {idx}")
+                    share_lines.append(f"{idx}. {q_text}: {b['pick']} ({b['wager_amount']} 🪙)")
                 share_text = "\n".join(share_lines)
             
             td_res = supabase.table("touchdown_picks").select("*").eq("user_id", user.id).eq("week_number", latest_week).execute()
