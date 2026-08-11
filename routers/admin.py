@@ -8,7 +8,7 @@ from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from typing import Optional
 from supabase import Client
-from utils.email_notifications import send_weekly_reminders_to_all
+from utils.email_notifications import send_weekly_reminders, send_grading_notifications
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
@@ -459,8 +459,37 @@ async def trigger_weekly_reminders(
     except Exception:
         return RedirectResponse(url="/auth/login", status_code=303)
 
-    # Trigger the bulk email sender helper
-    sent_count = send_weekly_reminders_to_all(supabase, week_number)
+    # Trigger the pick submission email helper
+    sent_count = send_weekly_reminders(supabase, week_number)
 
     # Redirect back to admin panel with success count parameter
     return RedirectResponse(url=f"/admin?week={week_number}&success=reminders_sent_count_{sent_count}", status_code=303)
+
+@router.post("/send-grading-emails")
+async def trigger_grading_emails(
+    request: Request,
+    week_number: int = Form(...),
+    supabase: Client = Depends(get_supabase)
+):
+    # Verify admin session security
+    session_cookie = request.cookies.get("td_tokens_session")
+    if not session_cookie:
+        return RedirectResponse(url="/auth/login", status_code=303)
+    
+    try:
+        token_data = json.loads(session_cookie)
+        supabase.auth.set_session(token_data.get("access_token"), token_data.get("refresh_token"))
+        user = supabase.auth.get_user().user
+        
+        # Verify user is actually an admin in the database
+        profile_res = supabase.table("profiles").select("is_admin").eq("id", user.id).execute()
+        if not profile_res.data or not profile_res.data[0].get("is_admin"):
+            return RedirectResponse(url="/", status_code=303)
+    except Exception:
+        return RedirectResponse(url="/auth/login", status_code=303)
+
+    # Trigger the grading announcement email helper
+    sent_count = send_grading_notifications(supabase, week_number)
+
+    # Redirect back to admin panel with success count parameter
+    return RedirectResponse(url=f"/admin?week={week_number}&success=grading_sent_count_{sent_count}", status_code=303)
