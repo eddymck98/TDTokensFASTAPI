@@ -18,13 +18,14 @@
     <!-- Extract Team Info safely with robust fallbacks for logged-out users -->
     {% set current_team = profile.favorite_team if profile and profile.favorite_team else "🏈 Free Agent / Neutral" %}
     {% set t_color = team_data[current_team].color if team_data and current_team in team_data else "#fbbf24" %}
-    {% set t_logo = "https://github.com/eddymck98/TD-Tokens-Render-/blob/main/TD%20Tokens%207.png?raw=true" %}
+    {% set t_logo = team_data[current_team].logo if team_data and current_team in team_data and team_data[current_team].logo else "https://github.com/eddymck98/TD-Tokens-Render-/blob/main/TD%20Tokens%207.png?raw=true" %}
     {% set t_stadium = team_data[current_team].stadium if team_data and current_team in team_data and team_data[current_team].stadium else "https://images.unsplash.com/photo-1566577739112-5180d4bf9390?auto=format&fit=crop&w=1920&q=80" %}
 
     <style>
         :root {
             --team-color: {{ t_color }};
-            --team-color-glow: {{ t_color }}88;
+            --team-color-glow: {{ t_color }}55;
+            --team-logo-url: url('{{ t_logo }}');
         }
         .app-background {
             position: fixed;
@@ -34,7 +35,7 @@
             height: 100vh;
             z-index: -1;
             background: radial-gradient(circle at 50% 20%, rgba(15, 23, 42, 0.90), rgba(7, 13, 25, 0.99)), 
-                        url('https://images.unsplash.com/photo-1566577739112-5180d4bf9390?auto=format&fit=crop&w=1920&q=80') center center / cover no-repeat fixed;
+                        url('{{ t_stadium }}') center center / cover no-repeat fixed;
         }
     </style>
 </head>
