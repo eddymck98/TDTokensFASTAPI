@@ -164,6 +164,32 @@ async def update_profile(
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+@router.post("/update-email")
+async def update_email(
+    request: Request,
+    new_email: str = Form(...),
+    supabase: Client = Depends(get_supabase)
+):
+    session_cookie = request.cookies.get("td_tokens_session")
+    if not session_cookie:
+        raise HTTPException(status_code=401, detail="Unauthorized session.")
+    
+    try:
+        token_data = json.loads(session_cookie)
+        acc_token = token_data.get("access_token")
+        supabase.auth.set_session(acc_token, token_data.get("refresh_token"))
+        
+        user = supabase.auth.get_user().user
+        if not user:
+            raise HTTPException(status_code=401, detail="Invalid user session.")
+
+        # Request Supabase Auth to update user email
+        supabase.auth.update_user({"email": new_email.strip()})
+        
+        return RedirectResponse(url="/profile?success=email_update_sent", status_code=303)
+    except Exception as e:
+        return RedirectResponse(url=f"/profile?error={str(e)}", status_code=303)
+
 @router.post("/featured-badges")
 async def update_featured_badges(
     request: Request,
