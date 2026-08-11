@@ -97,7 +97,6 @@ async def verify_user_email(
 ):
     """Handles verification when a user clicks the authorization link in their email."""
     try:
-        # Verify OTP token generated during sign-up/recovery
         res = supabase.auth.verify_otp({"token_hash": token, "type": type})
         if res and res.session:
             response = RedirectResponse(url="/auth/login?verified=true", status_code=303)
@@ -159,15 +158,13 @@ async def signup_user(
     try:
         lock_check = supabase.table("weekly_questions").select("winning_answer").eq("week_number", 997).execute().data
         if lock_check and lock_check[0].get("winning_answer") == "LOCKED":
-            raise HTTPException(status_code=403, detail="New account registrations are currently locked by the administrator.")
-    except HTTPException as he:
-        raise he
+            return RedirectResponse(url="/auth/login?error=admin_locked", status_code=303)
     except Exception:
         pass
 
     combined_full_name = f"{first_name.strip()} {surname.strip()}"
     if contains_profanity(combined_full_name):
-        raise HTTPException(status_code=400, detail="Name contains restricted language.")
+        return RedirectResponse(url="/auth/login?error=profanity", status_code=303)
 
     clean_email = email.strip().lower()
 
@@ -176,16 +173,6 @@ async def signup_user(
         url = os.environ.get("SUPABASE_URL", "")
         admin_supabase = create_client(url, service_key) if service_key and url else supabase
 
-        # Check and clear out any lingering ghost auth records to allow a clean sign up
-        try:
-            existing_users = admin_supabase.auth.admin.list_users()
-            matching_user = next((u for u in existing_users if u.email.lower() == clean_email), None)
-            if matching_user:
-                admin_supabase.auth.admin.delete_user(matching_user.id)
-        except Exception:
-            pass
-
-        # Create user via Admin API to guarantee fresh state and token generation
         create_res = admin_supabase.auth.admin.create_user({
             "email": clean_email,
             "password": password,
@@ -224,7 +211,6 @@ async def signup_user(
             except Exception:
                 pass
 
-            # Generate proper verification token link via admin api pointing straight to our app callback route
             link_response = admin_supabase.auth.admin.generate_link({"type": "signup", "email": clean_email})
             verification_link = "https://tdtokens.co.uk/"
             
@@ -238,9 +224,12 @@ async def signup_user(
             send_verification_email(clean_email, verification_link)
             return RedirectResponse(url="/auth/login?reset=sent", status_code=303)
         else:
-            raise HTTPException(status_code=400, detail="Sign up failed.")
+            return RedirectResponse(url="/auth/login?error=signup_failed", status_code=303)
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        err_msg = str(e).lower()
+        if "already registered" in err_msg or "already exists" in err_msg or "duplicate" in err_msg:
+            return RedirectResponse(url="/auth/login?error=email_exists", status_code=303)
+        return RedirectResponse(url="/auth/login?error=signup_failed", status_code=303)
 
 @router.post("/logout")
 async def logout_user(request: Request, supabase: Client = Depends(get_supabase)):
@@ -270,7 +259,6 @@ async def request_password_reset(
             email_otp = props.get("email_otp") if isinstance(props, dict) else getattr(props, "email_otp", None)
             token_to_use = hashed_token or email_otp
             
-            # Direct link to bypass Supabase UI redirect stripping issues, pointing straight to login with flags
             recovery_link = f"https://tdtokens.co.uk/auth/login?token={token_to_use}&type=recovery" if token_to_use else f"https://tdtokens.co.uk/auth/login"
             
             if recovery_link:
@@ -321,6 +309,6 @@ async def request_password_reset(
                 """
                 resend.Emails.send({"from": "Touchdown Tokens <noreply@auth.tdtokens.co.uk>", "to": [email.strip()], "subject": "🔑 Reset Your Touchdown Tokens Password", "html": html_content})
                 return RedirectResponse(url="/auth/login?reset=sent", status_code=303)
-        raise HTTPException(status_code=400, detail="Could not generate recovery link.")
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        return RedirectResponse(url="/auth/login?error=signup_failed", status_code=303)
+    except Exception:
+        return RedirectResponse(url="/auth/login?error=signup_failed", status_code=303)
