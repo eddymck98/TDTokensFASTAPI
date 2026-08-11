@@ -182,6 +182,13 @@ document.addEventListener("DOMContentLoaded", function() {
     banner.style.color = '#34d399';
     alertMessage.textContent = '✅ Email verified successfully! Please log in with your credentials below.';
     banner.style.display = 'block';
+  } else if (errorType === 'email_exists') {
+    // Automatically shift to the signup tab so the user sees the error context clearly
+    const signupBtn = document.querySelectorAll('.auth-tab-btn')[1];
+    if (signupBtn) signupBtn.click();
+
+    alertMessage.textContent = '⚠️ This email address is already registered. Please log in instead or use a different email.';
+    banner.style.display = 'block';
   } else if (errorType === 'invalid_credentials') {
     alertMessage.textContent = '⚠️ Invalid login details. Please check your email and password and try again.';
     banner.style.display = 'block';
@@ -190,6 +197,18 @@ document.addEventListener("DOMContentLoaded", function() {
     banner.style.display = 'block';
   } else if (errorType === 'admin_locked') {
     alertMessage.textContent = '⚠️ Sign-in is currently locked by the administrator.';
+    banner.style.display = 'block';
+  } else if (errorType === 'profanity') {
+    const signupBtn = document.querySelectorAll('.auth-tab-btn')[1];
+    if (signupBtn) signupBtn.click();
+
+    alertMessage.textContent = '⚠️ Your name contains restricted language. Please choose a different name.';
+    banner.style.display = 'block';
+  } else if (errorType === 'signup_failed') {
+    const signupBtn = document.querySelectorAll('.auth-tab-btn')[1];
+    if (signupBtn) signupBtn.click();
+
+    alertMessage.textContent = '⚠️ Sign up failed. Please try again with valid details.';
     banner.style.display = 'block';
   } else if (resetType === 'sent') {
     banner.style.background = 'rgba(16, 185, 129, 0.15)';
