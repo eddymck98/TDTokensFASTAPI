@@ -153,6 +153,7 @@ document.addEventListener("DOMContentLoaded", function() {
   
   const errorType = urlParams.get('error');
   const resetType = urlParams.get('reset');
+  const verifiedType = urlParams.get('verified');
   const type = urlParams.get('type') || hashParams.get('type');
 
   const banner = document.getElementById('login-alert-banner');
@@ -175,7 +176,13 @@ document.addEventListener("DOMContentLoaded", function() {
     return;
   }
 
-  if (errorType === 'invalid_credentials') {
+  if (verifiedType === 'true') {
+    banner.style.background = 'rgba(16, 185, 129, 0.15)';
+    banner.style.borderColor = 'rgba(16, 185, 129, 0.4)';
+    banner.style.color = '#34d399';
+    alertMessage.textContent = '✅ Email verified successfully! Please log in with your credentials below.';
+    banner.style.display = 'block';
+  } else if (errorType === 'invalid_credentials') {
     alertMessage.textContent = '⚠️ Invalid login details. Please check your email and password and try again.';
     banner.style.display = 'block';
   } else if (errorType === 'email_unverified') {
