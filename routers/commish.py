@@ -4,6 +4,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from typing import Optional
 from supabase import Client
+from database import NFL_TEAM_DATA
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
@@ -41,7 +42,12 @@ async def commish_portal(request: Request, league_id: Optional[str] = None):
 
     if not managed_leagues:
         return templates.TemplateResponse(request, name="commish.html", context={
-            "request": request, "profile": current_profile, "managed_leagues": [], "selected_league": None, "league_members": []
+            "request": request, 
+            "profile": current_profile, 
+            "managed_leagues": [], 
+            "selected_league": None, 
+            "league_members": [],
+            "team_data": NFL_TEAM_DATA
         })
 
     # Select active league based on query param or default to the first one
@@ -71,7 +77,8 @@ async def commish_portal(request: Request, league_id: Optional[str] = None):
             "profile": current_profile,
             "managed_leagues": managed_leagues,
             "selected_league": selected_league,
-            "league_members": league_members
+            "league_members": league_members,
+            "team_data": NFL_TEAM_DATA
         }
     )
 
@@ -169,7 +176,7 @@ async def delete_league(
         if not user:
             raise HTTPException(status_code=401, detail="Invalid user session.")
 
-        # Fetch league details safely using select("*") to avoid single-row lookup column mismatches
+        # Fetch league details safely using select("*")
         league_res = supabase.table("leagues").select("*").eq("id", league_id).execute()
         if not league_res.data:
             raise HTTPException(status_code=404, detail="League not found.")
@@ -185,7 +192,7 @@ async def delete_league(
         # Execute league deletion
         supabase.table("leagues").delete().eq("id", league_id).execute()
 
-        return RedirectResponse(url="/leagues?success=league_deleted", status_code=303)
+        return RedirectResponse(url="/leagues/?success=league_deleted", status_code=303)
     except Exception as e:
         print(f"Error deleting league: {e}")
         raise HTTPException(status_code=400, detail=str(e))
