@@ -169,40 +169,46 @@ async def render_dashboard_or_index(request: Request):
         running_tokens = 10  
         
         all_user_matchup_bets = supabase.table("user_bets").select("question_id, pick, wager_amount, week_number").eq("user_id", user.id).execute().data or []
-        total_matchup_count = len(all_user_matchup_bets)
         won_matchup_count = 0
+        played_matchup_count = 0
 
         all_user_td_picks = supabase.table("touchdown_picks").select("is_correct, week_number").eq("user_id", user.id).execute().data or []
-        total_td_count = len(all_user_td_picks)
-        won_td_count = sum(1 for t in all_user_td_picks if t.get("is_correct") is True)
+        won_td_count = 0
+        played_td_count = 0
 
         for w in available_weeks:
             try:
                 status_res = supabase.table("weekly_questions").select("winning_answer").eq("week_number", w).eq("question_number", 98).execute()
                 is_closed = status_res.data and status_res.data[0].get("winning_answer") == "CLOSED"
                 
-                if is_closed:
-                    week_bets = [b for b in all_user_matchup_bets if b.get("week_number") == w]
-                    week_qs = {q["id"]: q.get("winning_answer") for q in supabase.table("weekly_questions").select("id, winning_answer").eq("week_number", w).execute().data}
-                    
-                    week_delta = 0
-                    if week_bets:
-                        for wb in week_bets:
-                            wager = wb.get("wager_amount", 0)
-                            pick = wb.get("pick")
-                            winning_ans = week_qs.get(wb.get("question_id"))
-                            
-                            if winning_ans in ["Yes", "No"]:
-                                if pick == winning_ans:
-                                    week_delta += wager
-                                    won_matchup_count += 1
-                                else:
-                                    week_delta -= wager
-                    
-                    td_record = [t for t in all_user_td_picks if t.get("week_number") == w]
-                    if td_record and td_record[0].get("is_correct") is True:
-                        week_delta += 5
+                week_bets = [b for b in all_user_matchup_bets if b.get("week_number") == w]
+                week_qs = {q["id"]: q.get("winning_answer") for q in supabase.table("weekly_questions").select("id, winning_answer").eq("week_number", w).execute().data}
+                
+                week_delta = 0
+                if week_bets:
+                    for wb in week_bets:
+                        wager = wb.get("wager_amount", 0)
+                        pick = wb.get("pick")
+                        winning_ans = week_qs.get(wb.get("question_id"))
                         
+                        if winning_ans in ["Yes", "No"]:
+                            played_matchup_count += 1
+                            if pick == winning_ans:
+                                week_delta += wager
+                                won_matchup_count += 1
+                            else:
+                                week_delta -= wager
+                
+                td_record = [t for t in all_user_td_picks if t.get("week_number") == w]
+                if td_record:
+                    td_status = td_record[0].get("is_correct")
+                    if td_status is True or td_status is False:
+                        played_td_count += 1
+                        if td_status is True:
+                            week_delta += 5
+                            won_td_count += 1
+
+                if is_closed:
                     running_tokens += week_delta
                     graph_labels.append(f"Week {w}")
                     graph_values.append(running_tokens)
@@ -211,18 +217,12 @@ async def render_dashboard_or_index(request: Request):
                 
         token_history_data = {"labels": graph_labels, "values": graph_values}
 
-        # Updated to track cumulative total across all played weeks cleanly
-        if total_matchup_count > 0:
-            prediction_wins = won_matchup_count
-            prediction_total = total_matchup_count
-        else:
-            prediction_wins, prediction_total = 0, 0
+        # Season Running Totals assignment
+        prediction_wins = won_matchup_count
+        prediction_total = played_matchup_count
 
-        if total_td_count > 0:
-            td_wins = won_td_count
-            td_total = total_td_count
-        else:
-            td_wins, td_total = 0, 0
+        td_wins = won_td_count
+        td_total = played_td_count
 
     except Exception as e:
         print(f"Bets Fetch Error: {e}")
