@@ -228,6 +228,39 @@ async def render_dashboard_or_index(request: Request):
     except Exception as e:
         print(f"Bets Fetch Error: {e}")
 
+    # --- 3. RECENT MINI-LEAGUE ACTIVITY FEED FETCH (SAFE PAYOUTS ONLY) ---
+    recent_league_activity = []
+    try:
+        # A. Find all mini-leagues the current user belongs to
+        my_leagues_res = supabase.table("league_members").select("league_id, leagues(name)").eq("user_id", user.id).execute()
+        my_league_ids = [m["league_id"] for m in my_leagues_res.data] if my_leagues_res.data else []
+        
+        if my_league_ids:
+            # B. Find other user IDs who share these same mini-leagues
+            shared_members_res = supabase.table("league_members").select("user_id").in_("league_id", my_league_ids).execute()
+            shared_user_ids = list(set([m["user_id"] for m in shared_members_res.data])) if shared_members_res.data else []
+            
+            # C. Fetch ONLY token payouts/wins from shared users (NO specific pick/question details leaked)
+            if shared_user_ids:
+                payouts_res = supabase.table("user_bets") \
+                    .select("user_id, tokens_awarded, week_number, profiles(full_name)") \
+                    .in_("user_id", shared_user_ids) \
+                    .gt("tokens_awarded", 0) \
+                    .order("created_at", desc=True) \
+                    .limit(8) \
+                    .execute()
+                    
+                if payouts_res.data:
+                    for p in payouts_res.data:
+                        p_info = p.get("profiles") or {}
+                        recent_league_activity.append({
+                            "user_name": p_info.get("full_name", "A rival player"),
+                            "tokens_won": p.get("tokens_awarded", 0),
+                            "week_number": p.get("week_number", 1)
+                        })
+    except Exception as e:
+        print(f"Activity Feed Error: {e}")
+
     return templates.TemplateResponse(
         request=request, 
         name="dashboard.html", 
@@ -246,6 +279,7 @@ async def render_dashboard_or_index(request: Request):
             "prediction_total": prediction_total,
             "td_wins": td_wins,
             "td_total": td_total,
+            "recent_league_activity": recent_league_activity,
             "team_data": NFL_TEAM_DATA
         }
     )
