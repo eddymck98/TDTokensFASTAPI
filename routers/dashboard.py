@@ -1,6 +1,7 @@
 import json
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
+from database import NFL_TEAM_DATA
 
 router = APIRouter()
 
@@ -10,12 +11,12 @@ async def dashboard_root(request: Request):
     return await render_dashboard_or_index(request)
 
 async def render_dashboard_or_index(request: Request):
-    """Core logic to render either the dashboard (если logged in) or index (if logged out)."""
+    """Core logic to render either the dashboard (if logged in) or index (if logged out)."""
     session_cookie = request.cookies.get("td_tokens_session")
     templates = request.app.state.templates
     
     if not session_cookie:
-        return templates.TemplateResponse(request=request, name="index.html", context={"request": request})
+        return templates.TemplateResponse(request=request, name="index.html", context={"request": request, "team_data": NFL_TEAM_DATA})
     
     supabase = request.app.state.supabase
     
@@ -25,9 +26,9 @@ async def render_dashboard_or_index(request: Request):
         supabase.auth.set_session(access_token, token_data.get("refresh_token"))
         user = supabase.auth.get_user(access_token).user
         if not user:
-            return templates.TemplateResponse(request=request, name="index.html", context={"request": request})
+            return templates.TemplateResponse(request=request, name="index.html", context={"request": request, "team_data": NFL_TEAM_DATA})
     except Exception:
-        return templates.TemplateResponse(request=request, name="index.html", context={"request": request})
+        return templates.TemplateResponse(request=request, name="index.html", context={"request": request, "team_data": NFL_TEAM_DATA})
 
     # --- 1. ISOLATED PROFILE FETCH ---
     try:
@@ -242,6 +243,7 @@ async def render_dashboard_or_index(request: Request):
             "prediction_wins": prediction_wins,
             "prediction_total": prediction_total,
             "td_wins": td_wins,
-            "td_total": td_total
+            "td_total": td_total,
+            "team_data": NFL_TEAM_DATA
         }
     )
