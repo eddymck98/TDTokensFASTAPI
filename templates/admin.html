@@ -7,6 +7,25 @@
     <p class="nfl-subtitle">Platform Control Hub</p>
   </div>
 
+  <!-- Live Lockdown Status Banner -->
+  {% if global_signins_locked %}
+    <div style="background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.5); border-left: 5px solid #ef4444; padding: 14px 18px; border-radius: 12px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="font-size: 22px;">🔒</span>
+        <div>
+          <h4 style="margin: 0; color: #fca5a5; font-family: 'Bebas Neue'; font-size: 20px; letter-spacing: 1px;">GLOBAL SIGN-INS ARE CURRENTLY LOCKED</h4>
+          <p style="margin: 2px 0 0 0; color: #cbd5e1; font-size: 13px;">New sign-ins and registrations are blocked across the platform.</p>
+        </div>
+      </div>
+      <a href="#access" onclick="switchAdminTab(event, 'access')" style="background: #ef4444; color: #fff; padding: 6px 14px; border-radius: 8px; font-family: 'Teko', sans-serif; font-size: 18px; font-weight: bold; text-decoration: none;">Manage Control ⚙️</a>
+    </div>
+  {% else %}
+    <div style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); border-left: 5px solid #10b981; padding: 12px 18px; border-radius: 12px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+      <span style="font-size: 20px;">🟢</span>
+      <span style="color: #34d399; font-size: 13px; font-weight: 600;">System Status: Global Sign-ins are Active & Open.</span>
+    </div>
+  {% endif %}
+
   <!-- Admin Navigation Tabs -->
   <div class="admin-tabs" style="display: flex; gap: 8px; margin-bottom: 25px; overflow-x: auto; padding-bottom: 5px;">
     <button class="admin-tab-btn active" onclick="switchAdminTab(event, 'questions')">📋 Questions</button>
@@ -379,7 +398,7 @@
       </div>
     {% endif %}
 
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-bottom: 25px;">
       
       <!-- Box 1: Pick Reminders -->
       <div style="background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 24px;">
@@ -410,6 +429,40 @@
       </div>
 
     </div>
+
+    <!-- Email Broadcast History Section -->
+    <div style="background: rgba(30, 41, 59, 0.8); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.3);">
+      <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: #fbbf24; letter-spacing: 1px; margin-top: 0; margin-bottom: 10px;">📧 EMAIL BROADCAST AUDIT LOG</h3>
+      <p style="color: #94a3b8; font-size: 13px; margin-bottom: 15px;">Recent reminder and grading emails dispatched through Resend.</p>
+
+      <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px;">
+          <thead>
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); color: #94a3b8;">
+              <th style="padding: 10px;">Timestamp</th>
+              <th style="padding: 10px;">Admin Email</th>
+              <th style="padding: 10px;">Broadcast Type</th>
+              <th style="padding: 10px;">Recipients</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if not email_logs %}
+              <tr><td colspan="4" style="padding: 15px; text-align: center; color: #94a3b8;">No email broadcasts recorded yet.</td></tr>
+            {% else %}
+              {% for log in email_logs %}
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                  <td style="padding: 10px; color: #cbd5e1;">{{ log.created_at[:19].replace('T', ' ') }}</td>
+                  <td style="padding: 10px; color: #fff;">{{ log.admin_email }}</td>
+                  <td style="padding: 10px;"><span style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; padding: 3px 8px; border-radius: 6px;">{{ log.broadcast_type }}</span></td>
+                  <td style="padding: 10px; color: #fbbf24; font-weight: bold;">{{ log.recipient_count }} users</td>
+                </tr>
+              {% endfor %}
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
   </div>
 
   <!-- Tab 6: Access Control -->
@@ -419,9 +472,9 @@
       <p style="color: #cbd5e1; font-size: 14px; margin: 0;">Lock or unlock sign-ins and new account registrations across the platform.</p>
     </div>
 
-    <form action="/admin/control" method="POST">
+    <form action="/admin/control" method="POST" style="margin-bottom: 30px;">
       <div style="margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
-        <input type="checkbox" id="signin_locked" name="signin_locked" value="true" style="width: 20px; height: 20px;">
+        <input type="checkbox" id="signin_locked" name="signin_locked" value="true" style="width: 20px; height: 20px;" {% if global_signins_locked %}checked{% endif %}>
         <label for="signin_locked" style="font-weight: 600; color: #f8fafc;">Lock All Sign-Ins (Prevent users from logging in)</label>
       </div>
       <div style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
@@ -430,6 +483,40 @@
       </div>
       <button type="submit" style="background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%); color: #000; padding: 12px 24px; font-family: 'Teko', sans-serif; font-size: 20px; font-weight: bold; border-radius: 12px; border: none; cursor: pointer;">Save Access Control Settings 🔒</button>
     </form>
+
+    <!-- Automated Safety Audit Log Section -->
+    <div style="background: rgba(30, 41, 59, 0.8); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.3);">
+      <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: #ef4444; letter-spacing: 1px; margin-top: 0; margin-bottom: 10px;">🛡️ AUTOMATED SAFETY AUDIT LOG</h3>
+      <p style="color: #94a3b8; font-size: 13px; margin-bottom: 15px;">Secure tracking of critical administrative actions, token overrides, and week lockouts.</p>
+
+      <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px;">
+          <thead>
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); color: #94a3b8;">
+              <th style="padding: 10px;">Timestamp</th>
+              <th style="padding: 10px;">Admin</th>
+              <th style="padding: 10px;">Action Type</th>
+              <th style="padding: 10px;">Details</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if not safety_audit_logs %}
+              <tr><td colspan="4" style="padding: 15px; text-align: center; color: #94a3b8;">No security events recorded yet.</td></tr>
+            {% else %}
+              {% for audit in safety_audit_logs %}
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                  <td style="padding: 10px; color: #cbd5e1;">{{ audit.created_at[:19].replace('T', ' ') }}</td>
+                  <td style="padding: 10px; color: #fff;">{{ audit.admin_email }}</td>
+                  <td style="padding: 10px;"><b style="color: #fbbf24;">{{ audit.action_type }}</b></td>
+                  <td style="padding: 10px; color: #cbd5e1; font-family: monospace; font-size: 12px;">{{ audit.details }}</td>
+                </tr>
+              {% endfor %}
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
   </div>
 </div>
 
