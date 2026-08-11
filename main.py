@@ -10,6 +10,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 # Import your modular routers (including dashboard and contact)
 from routers import auth, bets, leagues, profile, admin, commish, contact, dashboard
+from database import NFL_TEAM_DATA
 
 class CommissionerCheckMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
@@ -123,7 +124,12 @@ async def rules_page(request: Request):
     return templates.TemplateResponse(
         request=request, 
         name="rules.html", 
-        context={"request": request, "profile": profile, "active_tokens": active_tokens}
+        context={
+            "request": request, 
+            "profile": profile, 
+            "active_tokens": active_tokens,
+            "team_data": NFL_TEAM_DATA
+        }
     )
 
 @app.get("/rules/", response_class=HTMLResponse)
