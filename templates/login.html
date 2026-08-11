@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="login-container" style="max-width: 600px; margin: 0 auto; padding-bottom: 40px; padding-left: 10px; padding-right: 10px;">
+<div class="login-container" style="max-width: 600px; margin: 0 auto; padding-bottom: 40px; padding-left: 10px; padding-right: 10px; box-sizing: border-box; width: 100%;">
 
   <!-- Hero Welcome Banner -->
-  <div style="background: linear-gradient(135deg, rgba(30, 58, 138, 0.85) 0%, rgba(15, 23, 42, 0.95) 100%); border: 1px solid rgba(255, 255, 255, 0.15); border-top: 4px solid var(--team-color); border-radius: 20px; padding: 24px; margin-bottom: 25px; backdrop-filter: blur(16px); box-shadow: 0 12px 35px rgba(0,0,0,0.6); text-align: center;">
+  <div style="background: linear-gradient(135deg, rgba(30, 58, 138, 0.85) 0%, rgba(15, 23, 42, 0.95) 100%); border: 1px solid rgba(255, 255, 255, 0.15); border-top: 4px solid var(--team-color); border-radius: 20px; padding: 24px; margin-bottom: 25px; backdrop-filter: blur(16px); box-shadow: 0 12px 35px rgba(0,0,0,0.6); text-align: center; box-sizing: border-box;">
     <h1 style="font-family: 'Bebas Neue', sans-serif; font-size: 36px; color: var(--team-color); letter-spacing: 2px; margin-top: 0; margin-bottom: 8px;">TOUCHDOWN TOKENS PORTAL</h1>
     <p style="color: #cbd5e1; font-size: 14px; line-height: 1.5; margin: 0;">
       Log in to your account or sign up to start making weekly NFL predictions and wagers.
@@ -12,18 +12,18 @@
   </div>
 
   <!-- Notification Alert Banner -->
-  <div id="login-alert-banner" style="display: none; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #ef4444; padding: 12px 16px; border-radius: 12px; font-size: 13px; margin-bottom: 20px; text-align: center; font-weight: 500;">
+  <div id="login-alert-banner" style="display: none; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #ef4444; padding: 12px 16px; border-radius: 12px; font-size: 13px; margin-bottom: 20px; text-align: center; font-weight: 500; box-sizing: border-box;">
     <span id="alert-message"></span>
   </div>
 
   <!-- Navigation Tabs for Login / Signup -->
-  <div class="auth-tabs" style="display: flex; gap: 8px; margin-bottom: 25px;">
+  <div class="auth-tabs" style="display: flex; gap: 8px; margin-bottom: 25px; box-sizing: border-box;">
     <button class="auth-tab-btn active" onclick="switchAuthTab(event, 'login-section')">🔒 Log In</button>
     <button class="auth-tab-btn" onclick="switchAuthTab(event, 'signup-section')">📝 Sign Up</button>
   </div>
 
   <!-- Tab 1: Log In Section -->
-  <div id="login-section" class="auth-tab-content" style="display: block; background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px; padding: 20px; backdrop-filter: blur(14px);">
+  <div id="login-section" class="auth-tab-content" style="display: block; background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px; padding: 20px; backdrop-filter: blur(14px); box-sizing: border-box;">
     <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: #ffffff; letter-spacing: 1px; margin-top: 0; margin-bottom: 15px;">Login to Your Account</h3>
 
     <form action="/auth/login" method="POST">
@@ -37,7 +37,7 @@
         <input type="password" id="login-password" name="password" required placeholder="Enter your password..." style="width: 100%; padding: 12px; background: rgba(30, 41, 59, 0.9); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; font-size: 15px; box-sizing: border-box;">
       </div>
 
-      <button type="submit" style="background: linear-gradient(135deg, var(--team-color) 0%, #d97706 100%); color: #000; padding: 12px 24px; font-family: 'Teko', sans-serif; font-size: 22px; font-weight: bold; border-radius: 10px; border: none; cursor: pointer; width: 100%; box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3);">Log In 🚀</button>
+      <button type="submit" style="background: linear-gradient(135deg, var(--team-color) 0%, #d97706 100%); color: #000; padding: 12px 24px; font-family: 'Teko', sans-serif; font-size: 22px; font-weight: bold; border-radius: 10px; border: none; cursor: pointer; width: 100%; box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3); box-sizing: border-box;">Log In 🚀</button>
     </form>
 
     <!-- Forgot Password Accordion / Form -->
@@ -50,7 +50,7 @@
             <div style="margin-bottom: 10px;">
               <input type="email" name="email" required placeholder="Your account email..." style="width: 100%; padding: 10px; background: rgba(30, 41, 59, 0.9); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; font-size: 14px; box-sizing: border-box;">
             </div>
-            <button type="submit" style="background: rgba(30, 41, 59, 0.9); color: #fff; padding: 8px 16px; font-family: 'Teko', sans-serif; font-size: 18px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; width: 100%;">Send Reset Link ✉️</button>
+            <button type="submit" style="background: rgba(30, 41, 59, 0.9); color: #fff; padding: 8px 16px; font-family: 'Teko', sans-serif; font-size: 18px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; width: 100%; box-sizing: border-box;">Send Reset Link ✉️</button>
           </form>
         </div>
       </details>
@@ -58,17 +58,17 @@
   </div>
 
   <!-- Tab 2: Sign Up Section -->
-  <div id="signup-section" class="auth-tab-content" style="display: none; background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px; padding: 20px; backdrop-filter: blur(14px);">
+  <div id="signup-section" class="auth-tab-content" style="display: none; background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px; padding: 20px; backdrop-filter: blur(14px); box-sizing: border-box;">
     <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: #ffffff; letter-spacing: 1px; margin-top: 0; margin-bottom: 5px;">Create an Account</h3>
     <p style="color: #94a3b8; font-size: 13px; margin-bottom: 20px;">New players start with 10 free virtual tokens!</p>
 
     <form action="/auth/signup" method="POST">
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px;">
-        <div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 15px;">
+        <div style="box-sizing: border-box;">
           <label for="first_name" style="font-weight: 600; font-size: 13px; color: #f8fafc; display: block; margin-bottom: 4px;">First Name:</label>
           <input type="text" id="first_name" name="first_name" required placeholder="First name" style="width: 100%; padding: 10px; background: rgba(30, 41, 59, 0.9); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; font-size: 14px; box-sizing: border-box;">
         </div>
-        <div>
+        <div style="box-sizing: border-box;">
           <label for="surname" style="font-weight: 600; font-size: 13px; color: #f8fafc; display: block; margin-bottom: 4px;">Surname:</label>
           <input type="text" id="surname" name="surname" required placeholder="Surname" style="width: 100%; padding: 10px; background: rgba(30, 41, 59, 0.9); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; font-size: 14px; box-sizing: border-box;">
         </div>
@@ -86,7 +86,7 @@
 
       <!-- Professional Terms of Service Accordion -->
       <div style="margin-bottom: 15px;">
-        <details style="color: #94a3b8; font-size: 13px; background: rgba(30, 41, 59, 0.5); padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08); cursor: pointer;">
+        <details style="color: #94a3b8; font-size: 13px; background: rgba(30, 41, 59, 0.5); padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08); cursor: pointer; box-sizing: border-box;">
           <summary style="font-weight: 600; color: #38bdf8; outline: none;">📖 Read Touchdown Tokens Terms of Service</summary>
           <div style="margin-top: 10px; max-height: 160px; overflow-y: auto; color: #cbd5e1; font-size: 12px; line-height: 1.5; padding-right: 5px;">
             <p style="margin: 0 0 8px 0;"><strong style="color: #fff;">1. Acceptance of Terms:</strong> By registering an account, you agree to be bound by these Terms of Service.</p>
@@ -97,21 +97,20 @@
         </details>
       </div>
 
-      <div style="margin-bottom: 20px; display: flex; align-items: flex-start; gap: 10px;">
+      <div style="margin-bottom: 20px; display: flex; align-items: flex-start; gap: 10px; box-sizing: border-box;">
         <input type="checkbox" id="tc_accepted" name="tc_accepted" required style="width: 18px; height: 18px; margin-top: 2px; flex-shrink: 0;">
         <label for="tc_accepted" style="font-size: 13px; color: #cbd5e1; line-height: 1.4;">I agree to the Touchdown Tokens Terms of Service & User Agreement</label>
       </div>
 
-      <button type="submit" style="background: linear-gradient(135deg, var(--team-color) 0%, #d97706 100%); color: #000; padding: 12px 24px; font-family: 'Teko', sans-serif; font-size: 22px; font-weight: bold; border-radius: 10px; border: none; cursor: pointer; width: 100%; box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3);">Sign Up & Claim Tokens 📝</button>
+      <button type="submit" style="background: linear-gradient(135deg, var(--team-color) 0%, #d97706 100%); color: #000; padding: 12px 24px; font-family: 'Teko', sans-serif; font-size: 22px; font-weight: bold; border-radius: 10px; border: none; cursor: pointer; width: 100%; box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3); box-sizing: border-box;">Sign Up & Claim Tokens 📝</button>
     </form>
   </div>
 
-  <!-- Tab 3: Password Recovery Screen (Triggered automatically when clicked from Email Reset Link) -->
-  <div id="recovery-section" class="auth-tab-content" style="display: none; background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(251, 191, 36, 0.4); border-top: 4px solid #fbbf24; border-radius: 16px; padding: 24px; backdrop-filter: blur(14px); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+  <!-- Tab 3: Password Recovery Screen -->
+  <div id="recovery-section" class="auth-tab-content" style="display: none; background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(251, 191, 36, 0.4); border-top: 4px solid #fbbf24; border-radius: 16px; padding: 24px; backdrop-filter: blur(14px); box-shadow: 0 10px 30px rgba(0,0,0,0.5); box-sizing: border-box;">
     <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: #fbbf24; letter-spacing: 1px; margin-top: 0; margin-bottom: 5px;">🔑 RESET YOUR PASSWORD</h3>
     <p style="color: #cbd5e1; font-size: 14px; margin-bottom: 20px;">Enter your account email and your new secure password below.</p>
 
-    <!-- Pointed directly to backend POST route /auth/update-password with email field added -->
     <form action="/auth/update-password" method="POST" onsubmit="return validatePasswordMatch(event)">
       <div style="margin-bottom: 15px;">
         <label for="reset-email" style="font-weight: 600; font-size: 14px; color: #f8fafc; display: block; margin-bottom: 6px;">Account Email Address:</label>
@@ -128,7 +127,7 @@
         <input type="password" id="confirm-password" name="confirm_password" required minlength="6" placeholder="Confirm new password..." style="width: 100%; padding: 12px; background: rgba(30, 41, 59, 0.9); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; font-size: 15px; box-sizing: border-box;">
       </div>
 
-      <button type="submit" style="background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000; padding: 12px 24px; font-family: 'Teko', sans-serif; font-size: 22px; font-weight: bold; border-radius: 10px; border: none; cursor: pointer; width: 100%; box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3);">Update Password 🔐</button>
+      <button type="submit" style="background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000; padding: 12px 24px; font-family: 'Teko', sans-serif; font-size: 22px; font-weight: bold; border-radius: 10px; border: none; cursor: pointer; width: 100%; box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3); box-sizing: border-box;">Update Password 🔐</button>
     </form>
   </div>
 
@@ -165,7 +164,6 @@ document.addEventListener("DOMContentLoaded", function() {
   const banner = document.getElementById('login-alert-banner');
   const alertMessage = document.getElementById('alert-message');
 
-  // Robustly catch recovery type whether passed via query parameters or hash fragments (#type=recovery)
   if (type === 'recovery' || hashString.includes('type=recovery')) {
     const authTabs = document.querySelector('.auth-tabs');
     if (authTabs) authTabs.style.display = 'none';
@@ -251,6 +249,7 @@ function validatePasswordMatch(evt) {
   cursor: pointer;
   transition: all 0.25s ease;
   text-align: center;
+  box-sizing: border-box;
 }
 .auth-tab-btn.active {
   background: linear-gradient(135deg, rgba(30, 58, 138, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%);
@@ -261,7 +260,6 @@ function validatePasswordMatch(evt) {
   box-shadow: 0 6px 20px rgba(251, 191, 36, 0.3);
 }
 
-/* Mobile responsive adjustments */
 @media (max-width: 480px) {
   .login-container {
     padding-left: 5px;
