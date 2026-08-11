@@ -44,7 +44,7 @@
     
     <!-- Matchup Predictions W/L (Out of 10) -->
     <div style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 10px; padding: 12px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
-      <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 4px;">Matchup Record (/10)</div>
+      <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 4px;">Matchup Record </div>
       <div style="font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: #fbbf24;">
         {{ prediction_wins | default(0) }} / {{ prediction_total | default(10) }}
       </div>
@@ -52,7 +52,7 @@
 
     <!-- Touchdown Scorer W/L (Out of 10) -->
     <div style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 10px; padding: 12px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
-      <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 4px;">TD Scorer Record (/10)</div>
+      <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 4px;">TD Scorer Record </div>
       <div style="font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: #fbbf24;">
         {{ td_wins | default(0) }} / {{ td_total | default(10) }}
       </div>
