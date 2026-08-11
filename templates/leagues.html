@@ -5,12 +5,12 @@
 
   <!-- Header Section -->
   <div style="margin-bottom: 20px;">
-    <h2 style="font-family: 'Bebas Neue', sans-serif; font-size: 32px; color: #fbbf24; letter-spacing: 2px; margin: 0;">LEAGUE STANDINGS & MINI-LEAGUES</h2>
+    <h2 style="font-family: 'Bebas Neue', sans-serif; font-size: 32px; color: var(--team-color); letter-spacing: 2px; margin: 0;">LEAGUE STANDINGS & MINI-LEAGUES</h2>
     <p style="color: #94a3b8; font-size: 13px; margin: 0;">Track your standings across the Global Leaderboard and your custom mini-leagues.</p>
   </div>
 
   <!-- Standings View Selection & Default League Setter -->
-  <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-left: 4px solid #fbbf24; border-radius: 14px; padding: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 12px;">
+  <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-left: 4px solid var(--team-color); border-radius: 14px; padding: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 12px;">
     <div style="flex: 1; min-width: 100%;">
       <label for="league-view-select" style="font-weight: 600; font-size: 14px; color: #f8fafc; display: block; margin-bottom: 6px;">Select Standings View:</label>
       <select id="league-view-select" onchange="window.location.href='/leagues?league_id=' + this.value" style="width: 100%; padding: 10px; background: rgba(30, 41, 59, 0.9); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; font-size: 14px; font-weight: bold;">
@@ -25,7 +25,7 @@
     <div style="width: 100%;">
       <form action="/leagues/set-default" method="POST" style="display: flex; gap: 8px; align-items: center; width: 100%;">
         <input type="hidden" name="default_league_id" value="{{ active_league_id }}">
-        <button type="submit" style="width: 100%; background: rgba(251, 191, 36, 0.15); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.4); padding: 10px 14px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 12px; text-align: center;">
+        <button type="submit" style="width: 100%; background: rgba(251, 191, 36, 0.15); color: var(--team-color); border: 1px solid var(--team-color); padding: 10px 14px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 12px; text-align: center;">
           ⭐ {% if profile.default_league_id == active_league_id or (is_global and not profile.default_league_id) %}Default View Set{% else %}Set as Default View{% endif %}
         </button>
       </form>
@@ -33,8 +33,8 @@
   </div>
 
   <!-- Standings Table Container -->
-  <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 14px; padding: 12px; margin-bottom: 20px;">
-    <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: #fbbf24; letter-spacing: 1px; margin-top: 0; margin-bottom: 12px;">Leaderboard Rankings</h3>
+  <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-left: 4px solid var(--team-color); border-radius: 14px; padding: 12px; margin-bottom: 20px;">
+    <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: var(--team-color); letter-spacing: 1px; margin-top: 0; margin-bottom: 12px;">Leaderboard Rankings</h3>
     
     <div id="standings-list-container">
       {% if leaderboard %}
@@ -63,7 +63,7 @@
                   </div>
 
                   <!-- Avatar Box -->
-                  <div style="width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; background-color: {{ row.avatar_color | default('#1e3a8a') }}; border: 2px solid {% if row.avatar_border == 'gold' %}#fbbf24{% elif row.avatar_border == 'neon' %}#38bdf8{% elif row.avatar_border == 'fire' %}#ef4444{% else %}rgba(255,255,255,0.3)%}{% endif %}; flex-shrink: 0; box-shadow: 0 0 6px rgba(0,0,0,0.3);">
+                  <div style="width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; background-color: {{ row.avatar_color | default('#1e3a8a') }}; border: 2px solid {% if row.avatar_border == 'gold' %}#fbbf24{% elif row.avatar_border == 'neon' %}var(--team-color);{% elif row.avatar_border == 'fire' %}#ef4444{% else %}rgba(255,255,255,0.3)%}{% endif %}; flex-shrink: 0; box-shadow: 0 0 6px rgba(0,0,0,0.3);">
                     {{ row.avatar_emoji | default('👤') }}
                   </div>
 
@@ -72,17 +72,17 @@
                     <div style="display: flex; align-items: center; gap: 5px; flex-wrap: wrap; line-height: 1.2;">
                       <b style="font-size: 13px; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px;">{{ row.full_name }}</b>
                       {% if row.selected_title %}
-                        <span style="background: rgba(251, 191, 36, 0.15); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.3); border-radius: 4px; padding: 0px 4px; font-size: 8px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.3px; white-space: nowrap;">{{ row.selected_title }}</span>
+                        <span style="background: rgba(251, 191, 36, 0.15); color: var(--team-color); border: 1px solid var(--team-color); border-radius: 4px; padding: 0px 4px; font-size: 8px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.3px; white-space: nowrap;">{{ row.selected_title }}</span>
                       {% endif %}
                       {% if row.user_id == user.id %}
-                        <span style="color: #38bdf8; font-size: 10px; font-weight: bold;">(You)</span>
+                        <span style="color: var(--team-color); font-size: 10px; font-weight: bold;">(You)</span>
                       {% endif %}
                     </div>
 
                     <div style="display: flex; flex-wrap: wrap; gap: 4px; align-items: center;">
                       <span style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 1px 5px; font-size: 9px; font-weight: 600; color: #cbd5e1;">🏈 {{ row.favorite_team | replace('🏈 ', '') | replace('Team ', '') }}</span>
                       {% if row.favorite_player %}
-                        <span style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(251, 191, 36, 0.2); border-radius: 6px; padding: 1px 5px; font-size: 9px; font-weight: 600; color: #fbbf24;">⭐ {{ row.favorite_player }}</span>
+                        <span style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(251, 191, 36, 0.2); border-radius: 6px; padding: 1px 5px; font-size: 9px; font-weight: 600; color: var(--team-color);">⭐ {{ row.favorite_player }}</span>
                       {% endif %}
                     </div>
                   </div>
@@ -90,8 +90,8 @@
 
                 <!-- Right: Token Count & TDs stacked cleanly underneath -->
                 <div style="text-align: right; flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; min-width: 55px;">
-                  <span style="font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: #fbbf24; line-height: 1;">{{ row.tokens }} 🪙</span>
-                  <span style="background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 6px; padding: 1px 5px; font-size: 9px; font-weight: 600; color: #38bdf8; margin-top: 3px; white-space: nowrap;">🎯 TDs: {{ row.correct_tds }}</span>
+                  <span style="font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: var(--team-color); line-height: 1;">{{ row.tokens }} 🪙</span>
+                  <span style="background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 6px; padding: 1px 5px; font-size: 9px; font-weight: 600; color: var(--team-color); margin-top: 3px; white-space: nowrap;">🎯 TDs: {{ row.correct_tds }}</span>
                 </div>
 
               </div>
@@ -106,14 +106,14 @@
 
   <!-- Trash Talk / League Chat Feed Section (Hidden on Global Leaderboard) -->
   {% if not is_global %}
-  <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 14px; padding: 15px; margin-bottom: 20px;">
+  <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-left: 4px solid var(--team-color); border-radius: 14px; padding: 15px; margin-bottom: 20px;">
     <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: #ffffff; letter-spacing: 1px; margin-top: 0; margin-bottom: 12px;">💬 League Trash Talk Feed</h3>
     
     <form action="/leagues/chat" method="POST" style="margin-bottom: 15px;">
       <input type="hidden" name="league_id" value="{{ active_league_id }}">
       <div style="display: flex; gap: 8px; flex-direction: column;">
         <input type="text" name="message" placeholder="Post a message to this league's feed..." required style="width: 100%; padding: 10px; background: rgba(15, 23, 42, 0.92); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; font-size: 13px;">
-        <button type="submit" style="width: 100%; background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000; padding: 8px 16px; font-family: 'Teko', sans-serif; font-size: 18px; font-weight: bold; border-radius: 10px; border: none; cursor: pointer;">Post Message 💬</button>
+        <button type="submit" class="team-btn-gradient" style="width: 100%; padding: 8px 16px; font-family: 'Teko', sans-serif; font-size: 18px; font-weight: bold; border-radius: 10px; border: none; cursor: pointer;">Post Message 💬</button>
       </div>
     </form>
 
@@ -122,7 +122,7 @@
         {% for chat in trash_talk_messages %}
           <div style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255,255,255,0.08); padding: 8px 12px; border-radius: 8px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px;">
-              <span style="font-weight: bold; color: #38bdf8; font-size: 12px;">{{ chat.profiles.avatar_emoji | default('🏈') if chat.profiles else '🏈' }} {{ chat.profiles.full_name | default('Member') if chat.profiles else 'Member' }}</span>
+              <span style="font-weight: bold; color: var(--team-color); font-size: 12px;">{{ chat.profiles.avatar_emoji | default('🏈') if chat.profiles else '🏈' }} {{ chat.profiles.full_name | default('Member') if chat.profiles else 'Member' }}</span>
               <span style="color: #64748b; font-size: 10px;">{{ chat.created_at[:10] }}</span>
             </div>
             <p style="color: #e2e8f0; font-size: 13px; margin: 0; word-break: break-word;">{{ chat.message }}</p>
@@ -136,48 +136,45 @@
     {% endif %}
   </div>
 
-  <!-- Hall of Fame Archives Section (Interactive Collapsible Dropdown underneath Trash Talk) -->
-  <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 14px; padding: 15px; margin-bottom: 20px;">
+  <!-- Hall of Fame Archives Section -->
+  <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-left: 4px solid var(--team-color); border-radius: 14px; padding: 15px; margin-bottom: 20px;">
     <details style="cursor: pointer;">
-      <summary style="font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: #fbbf24; letter-spacing: 1px; outline: none; display: flex; align-items: center; justify-content: space-between; user-select: none;">
+      <summary style="font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: var(--team-color); letter-spacing: 1px; outline: none; display: flex; align-items: center; justify-content: space-between; user-select: none;">
         <span>🏆 Hall of Fame Archives</span>
         <span style="font-size: 13px; font-family: 'Inter', sans-serif; color: #94a3b8; font-weight: normal; background: rgba(30, 41, 59, 0.8); padding: 2px 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.08);">View Past Seasons ➔</span>
       </summary>
 
       <div style="margin-top: 15px; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 15px;">
         
-        <!-- Render Archived Seasons List with interactive accordion selectors -->
         {% if archived_seasons %}
           <div style="display: flex; flex-direction: column; gap: 10px;">
             {% for archive in archived_seasons %}
               <div style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; overflow: hidden; transition: all 0.2s ease;">
                 
-                <!-- Season Accordion Toggle Header -->
                 <details style="cursor: pointer;">
                   <summary style="padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; outline: none; user-select: none; background: rgba(15, 23, 42, 0.5);">
                     <div style="display: flex; align-items: center; gap: 8px;">
                       <span style="font-size: 18px;">🏛️</span>
-                      <b style="color: #fbbf24; font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 0.5px;">{{ archive.season_label }}</b>
+                      <b style="color: var(--team-color); font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 0.5px;">{{ archive.season_label }}</b>
                     </div>
                     <div style="display: flex; align-items: center; gap: 10px;">
                       <span style="color: #64748b; font-size: 11px;">Archived: {{ archive.archived_at[:10] if archive.archived_at else '' }}</span>
-                      <span style="font-size: 11px; color: #38bdf8; background: rgba(56, 189, 248, 0.1); padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(56, 189, 248, 0.2);">Standings ▾</span>
+                      <span style="font-size: 11px; color: var(--team-color); background: rgba(251, 191, 36, 0.1); padding: 2px 6px; border-radius: 4px; border: 1px solid var(--team-color);">Standings ▾</span>
                     </div>
                   </summary>
 
-                  <!-- Compact Clean Standings Breakdown Inside Accordion -->
                   <div style="padding: 12px; background: rgba(15, 23, 42, 0.85); border-top: 1px solid rgba(255, 255, 255, 0.08);">
                     {% if archive.standings_json %}
                       <div style="display: flex; flex-direction: column; gap: 6px; max-height: 250px; overflow-y: auto; padding-right: 4px;">
                         {% for entry in archive.standings_json %}
                           <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(30, 41, 59, 0.7); padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.05);">
                             <div style="display: flex; align-items: center; gap: 10px;">
-                              <span style="font-family: 'Bebas Neue', sans-serif; font-size: 16px; min-width: 24px; text-align: center; color: {% if '🥇' in entry.Rank %}#fbbf24{% elif '🥈' in entry.Rank %}#cbd5e1{% elif '🥉' in entry.Rank %}#d97706{% else %}#38bdf8{% endif %};">
+                              <span style="font-family: 'Bebas Neue', sans-serif; font-size: 16px; min-width: 24px; text-align: center; color: {% if '🥇' in entry.Rank %}#fbbf24{% elif '🥈' in entry.Rank %}#cbd5e1{% elif '🥉' in entry.Rank %}#d97706{% else %}var(--team-color);{% endif %};">
                                 {{ entry.Rank | default('#') }}
                               </span>
                               <span style="color: #ffffff; font-weight: 600; font-size: 13px;">{{ entry.full_name | default('Member') }}</span>
                             </div>
-                            <div style="color: #fbbf24; font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 0.5px;">
+                            <div style="color: var(--team-color); font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 0.5px;">
                               {{ entry.tokens | default(0) }} 🪙
                             </div>
                           </div>
@@ -207,8 +204,8 @@
   <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 15px; margin-bottom: 20px;">
     
     <!-- Create League Box -->
-    <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-left: 4px solid #38bdf8; border-radius: 14px; padding: 15px;">
-      <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: #38bdf8; margin-top: 0; margin-bottom: 10px;">Create a League</h3>
+    <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-left: 4px solid var(--team-color); border-radius: 14px; padding: 15px;">
+      <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--team-color); margin-top: 0; margin-bottom: 10px;">Create a League</h3>
       <form action="/leagues/create" method="POST">
         <div style="margin-bottom: 10px;">
           <label style="font-size: 11px; color: #94a3b8; display: block; margin-bottom: 3px;">League Name:</label>
@@ -218,13 +215,13 @@
           <label style="font-size: 11px; color: #94a3b8; display: block; margin-bottom: 3px;">League Password (Optional):</label>
           <input type="password" name="league_password" placeholder="Secure access code" style="width: 100%; padding: 9px; background: rgba(30, 41, 59, 0.9); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; font-size: 13px;">
         </div>
-        <button type="submit" style="background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%); color: #000; padding: 9px 16px; font-family: 'Teko', sans-serif; font-size: 18px; font-weight: bold; border-radius: 8px; border: none; cursor: pointer; width: 100%;">Create League 🚀</button>
+        <button type="submit" class="team-btn-gradient" style="width: 100%; padding: 9px 16px; font-family: 'Teko', sans-serif; font-size: 18px; font-weight: bold; border-radius: 8px; border: none; cursor: pointer;">Create League 🚀</button>
       </form>
     </div>
 
     <!-- Join League Box -->
-    <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-left: 4px solid #fbbf24; border-radius: 14px; padding: 15px;">
-      <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: #fbbf24; margin-top: 0; margin-bottom: 10px;">Join a League</h3>
+    <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-left: 4px solid var(--team-color); border-radius: 14px; padding: 15px;">
+      <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--team-color); margin-top: 0; margin-bottom: 10px;">Join a League</h3>
       <form action="/leagues/join" method="POST">
         <div style="margin-bottom: 10px;">
           <label style="font-size: 11px; color: #94a3b8; display: block; margin-bottom: 3px;">Invite Code:</label>
@@ -234,24 +231,24 @@
           <label style="font-size: 11px; color: #94a3b8; display: block; margin-bottom: 3px;">League Password (if required):</label>
           <input type="password" name="league_password" placeholder="Enter password" style="width: 100%; padding: 9px; background: rgba(30, 41, 59, 0.9); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; font-size: 13px;">
         </div>
-        <button type="submit" style="background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000; padding: 9px 16px; font-family: 'Teko', sans-serif; font-size: 18px; font-weight: bold; border-radius: 8px; border:none; cursor: pointer; width: 100%;">Join League 🤝</button>
+        <button type="submit" class="team-btn-gradient" style="width: 100%; padding: 9px 16px; font-family: 'Teko', sans-serif; font-size: 18px; font-weight: bold; border-radius: 8px; border: none; cursor: pointer;">Join League 🤝</button>
       </form>
     </div>
 
   </div>
 
   <!-- Your Joined Mini-Leagues Roster List -->
-  <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 14px; padding: 15px;">
+  <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-left: 4px solid var(--team-color); border-radius: 14px; padding: 15px;">
     <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: #ffffff; letter-spacing: 1px; margin-top: 0; margin-bottom: 12px;">📋 Your Joined Mini-Leagues</h3>
     
     {% if user_leagues %}
       {% for l in user_leagues %}
-        <div style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255,255,255,0.1); border-left: 3px solid #38bdf8; padding: 10px 12px; border-radius: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+        <div style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255,255,255,0.1); border-left: 3px solid var(--team-color); padding: 10px 12px; border-radius: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
           <div style="overflow: hidden; flex: 1; min-width: 150px;">
             <b style="color: #fff; font-size: 14px; word-break: break-word;">🛡️ {{ l.name }}</b>
-            <div style="color: #94a3b8; font-size: 11px; margin-top: 1px;">Invite Code: <span style="color: #38bdf8; font-weight: bold; letter-spacing: 1px;">{{ l.invite_code }}</span></div>
+            <div style="color: #94a3b8; font-size: 11px; margin-top: 1px;">Invite Code: <span style="color: var(--team-color); font-weight: bold; letter-spacing: 1px;">{{ l.invite_code }}</span></div>
           </div>
-          <a href="/leagues?league_id={{ l.id }}" style="width: 100%; text-align: center; background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); padding: 6px 12px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: bold;">View Standings ➔</a>
+          <a href="/leagues?league_id={{ l.id }}" style="width: 100%; text-align: center; background: rgba(251, 191, 36, 0.15); color: var(--team-color); border: 1px solid var(--team-color); padding: 6px 12px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: bold;">View Standings ➔</a>
         </div>
       {% endfor %}
     {% else %}
