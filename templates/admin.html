@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="admin-portal-container" style="max-width: 1000px; margin: 0 auto; padding-bottom: 40px;">
+<div class="admin-portal-container" style="max-width: 1000px; margin: 0 auto; padding-bottom: 40px; padding-left: 8px; padding-right: 8px;">
   <div class="nfl-header">
     <h1 style="font-family: 'Bebas Neue', sans-serif; color: #fbbf24; font-size: 38px; letter-spacing: 2px; margin-bottom: 5px;">SYSTEM ADMIN MANAGEMENT PORTAL</h1>
     <p class="nfl-subtitle">Platform Control Hub</p>
@@ -27,7 +27,7 @@
   {% endif %}
 
   <!-- Admin Navigation Tabs -->
-  <div class="admin-tabs" style="display: flex; gap: 8px; margin-bottom: 25px; overflow-x: auto; padding-bottom: 5px;">
+  <div class="admin-tabs" style="display: flex; gap: 8px; margin-bottom: 25px; overflow-x: auto; padding-bottom: 5px; -webkit-overflow-scrolling: touch;">
     <button class="admin-tab-btn active" onclick="switchAdminTab(event, 'questions')">📋 Questions</button>
     <button class="admin-tab-btn" onclick="switchAdminTab(event, 'lockout')">⏳ Lockout Scheduler</button>
     <button class="admin-tab-btn" onclick="switchAdminTab(event, 'grading')">🏈 Grade Week</button>
@@ -51,16 +51,16 @@
     </div>
 
     <!-- Week Selector Pills & Create New Week Button -->
-    <div style="display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; align-items: center;">
+    <div style="display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; align-items: center; -webkit-overflow-scrolling: touch;">
       {% if available_weeks %}
         {% for w in available_weeks %}
-          <a href="/admin?week={{ w }}" style="padding: 8px 18px; border-radius: 8px; font-family: 'Teko', sans-serif; font-size: 20px; text-decoration: none; font-weight: bold; letter-spacing: 1px; transition: all 0.2s ease; {% if w == target_week %}background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000; box-shadow: 0 4px 12px rgba(251,191,36,0.3);{% else %}background: rgba(15, 23, 42, 0.75); color: #94a3b8; border: 1px solid rgba(255,255,255,0.08);{% endif %}">
+          <a href="/admin?week={{ w }}" style="padding: 8px 18px; border-radius: 8px; font-family: 'Teko', sans-serif; font-size: 20px; text-decoration: none; font-weight: bold; letter-spacing: 1px; white-space: nowrap; transition: all 0.2s ease; {% if w == target_week %}background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000; box-shadow: 0 4px 12px rgba(251,191,36,0.3);{% else %}background: rgba(15, 23, 42, 0.75); color: #94a3b8; border: 1px solid rgba(255,255,255,0.08);{% endif %}">
             Week {{ w }}
           </a>
         {% endfor %}
       {% endif %}
-      <form action="/admin/create-week" method="POST" style="margin: 0;">
-        <button type="submit" style="padding: 8px 16px; border-radius: 8px; font-family: 'Teko', sans-serif; font-size: 20px; background: #10b981; color: #000; font-weight: bold; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
+      <form action="/admin/create-week" method="POST" style="margin: 0; flex-shrink: 0;">
+        <button type="submit" style="padding: 8px 16px; border-radius: 8px; font-family: 'Teko', sans-serif; font-size: 20px; background: #10b981; color: #000; font-weight: bold; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); white-space: nowrap;">
           ➕ Create New Week (Draft)
         </button>
       </form>
@@ -101,7 +101,7 @@
       {% set q = questions_map.get(i, {}) if questions_map else {} %}
       <div style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255,255,255,0.08); border-left: 3px solid #38bdf8; padding: 16px; border-radius: 12px; margin-bottom: 16px;">
         <span style="font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: #38bdf8; letter-spacing: 1px;">QUESTION {{ i }} CONFIGURATION</span>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; margin-bottom: 10px;">
+        <div class="team-select-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; margin-bottom: 10px;">
           <div>
             <label style="font-size: 13px; color: #94a3b8;">Away Team (Q{{ i }})</label>
             <select name="away_{{ i }}" style="width: 100%; padding: 8px; background: #0f172a; color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px;" {% if is_week_closed %}disabled{% endif %}>
@@ -149,6 +149,7 @@
               <option value="Arizona Cardinals">Arizona Cardinals</option>
               <option value="Atlanta Falcons">Atlanta Falcons</option>
               <option value="Baltimore Ravens">Baltimore Ravens</option>
+              <option value="Baltimore Ravens">Baltimore Ravens</option>
               <option value="Buffalo Bills">Buffalo Bills</option>
               <option value="Carolina Panthers">Carolina Panthers</option>
               <option value="Chicago Bears">Chicago Bears</option>
@@ -182,7 +183,7 @@
           </div>
         </div>
         <div>
-          <input type="text" id="prompt-input-{{ i }}" name="prompt_{{ i }}" value="{{ q.get('question_text', '') }}" placeholder="Enter scenario prompt text (e.g., Will QB throw for 250+ yards?)..." required style="width: 100%; padding: 10px; background: rgba(15, 23, 42, 0.92); color: #fff; border: 1px solid rgba(255,255,255,0.15); border-radius: 12px;" {% if is_week_closed %}disabled{% endif %}>
+          <input type="text" id="prompt-input-{{ i }}" name="prompt_{{ i }}" value="{{ q.get('question_text', '') }}" placeholder="Enter scenario prompt text..." required style="width: 100%; padding: 10px; background: rgba(15, 23, 42, 0.92); color: #fff; border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; box-sizing: border-box;" {% if is_week_closed %}disabled{% endif %}>
         </div>
       </div>
       {% endfor %}
@@ -193,46 +194,45 @@
     </form>
   </div>
 
-  <!-- Tab 2: Lockout Scheduler (Text Inputs for Easy Typing) -->
+  <!-- Tab 2: Lockout Scheduler -->
   <div id="lockout" class="admin-tab-content" style="display: none;">
     <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255,255,255,0.12); border-left: 4px solid #38bdf8; padding: 20px; border-radius: 16px; margin-bottom: 20px;">
       <h3 style="color: #38bdf8; font-family: 'Bebas Neue', sans-serif; font-size: 28px; margin: 0 0 5px 0;">KICKOFF LOCKOUT SCHEDULER (UK TIME)</h3>
       <p style="color: #cbd5e1; font-size: 14px; margin: 0;">Type the date and UK time directly into the boxes below.</p>
     </div>
 
-    <!-- Week Selector Pills & Create New Week Button -->
-    <div style="display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; align-items: center;">
+    <!-- Week Selector Pills -->
+    <div style="display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; align-items: center; -webkit-overflow-scrolling: touch;">
       {% if available_weeks %}
         {% for w in available_weeks %}
-          <a href="/admin?week={{ w }}" style="padding: 8px 18px; border-radius: 8px; font-family: 'Teko', sans-serif; font-size: 20px; text-decoration: none; font-weight: bold; letter-spacing: 1px; transition: all 0.2s ease; {% if w == target_week %}background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000; box-shadow: 0 4px 12px rgba(251,191,36,0.3);{% else %}background: rgba(15, 23, 42, 0.75); color: #94a3b8; border: 1px solid rgba(255,255,255,0.08);{% endif %}">
+          <a href="/admin?week={{ w }}" style="padding: 8px 18px; border-radius: 8px; font-family: 'Teko', sans-serif; font-size: 20px; text-decoration: none; font-weight: bold; letter-spacing: 1px; white-space: nowrap; transition: all 0.2s ease; {% if w == target_week %}background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000; box-shadow: 0 4px 12px rgba(251,191,36,0.3);{% else %}background: rgba(15, 23, 42, 0.75); color: #94a3b8; border: 1px solid rgba(255,255,255,0.08);{% endif %}">
             Week {{ w }}
           </a>
         {% endfor %}
       {% endif %}
-      <form action="/admin/create-week" method="POST" style="margin: 0;">
-        <button type="submit" style="padding: 8px 16px; border-radius: 8px; font-family: 'Teko', sans-serif; font-size: 20px; background: #10b981; color: #000; font-weight: bold; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
+      <form action="/admin/create-week" method="POST" style="margin: 0; flex-shrink: 0;">
+        <button type="submit" style="padding: 8px 16px; border-radius: 8px; font-family: 'Teko', sans-serif; font-size: 20px; background: #10b981; color: #000; font-weight: bold; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); white-space: nowrap;">
           ➕ Create New Week
         </button>
       </form>
     </div>
 
-    <!-- Fully editable text boxes for UK date and time -->
     <div style="background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 24px;">
       <form action="/admin/week/set-lockout" method="POST">
         <input type="hidden" name="week_number" value="{{ target_week }}">
         
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+        <div class="lockout-inputs-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
           <div>
             <label for="lockout_date" style="font-weight: 600; color: #f8fafc; font-family: 'Bebas Neue'; font-size: 18px; letter-spacing: 1px; display: block; margin-bottom: 6px;">Lockout Date (YYYY-MM-DD):</label>
-            <input type="text" id="lockout_date" name="lockout_date" value="{{ lockout_date_val }}" placeholder="2026-09-13" required style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.95); color: #fff; border: 1px solid rgba(56, 189, 248, 0.4); border-radius: 10px; font-size: 15px; outline: none;">
+            <input type="text" id="lockout_date" name="lockout_date" value="{{ lockout_date_val }}" placeholder="2026-09-13" required style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.95); color: #fff; border: 1px solid rgba(56, 189, 248, 0.4); border-radius: 10px; font-size: 15px; outline: none; box-sizing: border-box;">
           </div>
           <div>
             <label for="lockout_time_val" style="font-weight: 600; color: #f8fafc; font-family: 'Bebas Neue'; font-size: 18px; letter-spacing: 1px; display: block; margin-bottom: 6px;">UK Time (HH:MM 24hr):</label>
-            <input type="text" id="lockout_time_val" name="lockout_time_val" value="{{ lockout_time_val }}" placeholder="18:00" required style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.95); color: #fff; border: 1px solid rgba(56, 189, 248, 0.4); border-radius: 10px; font-size: 15px; outline: none;">
+            <input type="text" id="lockout_time_val" name="lockout_time_val" value="{{ lockout_time_val }}" placeholder="18:00" required style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.95); color: #fff; border: 1px solid rgba(56, 189, 248, 0.4); border-radius: 10px; font-size: 15px; outline: none; box-sizing: border-box;">
           </div>
         </div>
 
-        <p style="color: #94a3b8; font-size: 12px; margin-bottom: 20px;">🇬🇧 You can now freely click and type into both fields (e.g., Date: <code>2026-09-13</code>, Time: <code>18:00</code>).</p>
+        <p style="color: #94a3b8; font-size: 12px; margin-bottom: 20px;">🇬🇧 You can freely click and type into both fields (e.g., Date: <code>2026-09-13</code>, Time: <code>18:00</code>).</p>
 
         <div style="display: flex; gap: 12px; flex-wrap: wrap;">
           <button type="submit" style="background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%); color: #000; padding: 12px 24px; font-family: 'Teko', sans-serif; font-size: 20px; font-weight: bold; border-radius: 12px; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);">Update / Override Schedule 🕒</button>
@@ -249,23 +249,23 @@
       <p style="color: #cbd5e1; font-size: 14px; margin: 0;">Set winning answers for questions to evaluate user token balances instantly.</p>
     </div>
 
-    <!-- Week Selector Pills & Create New Week Button -->
-    <div style="display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; align-items: center;">
+    <!-- Week Selector Pills -->
+    <div style="display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; align-items: center; -webkit-overflow-scrolling: touch;">
       {% if available_weeks %}
         {% for w in available_weeks %}
-          <a href="/admin?week={{ w }}" style="padding: 8px 18px; border-radius: 8px; font-family: 'Teko', sans-serif; font-size: 20px; text-decoration: none; font-weight: bold; letter-spacing: 1px; transition: all 0.2s ease; {% if w == target_week %}background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000; box-shadow: 0 4px 12px rgba(251,191,36,0.3);{% else %}background: rgba(15, 23, 42, 0.75); color: #94a3b8; border: 1px solid rgba(255,255,255,0.08);{% endif %}">
+          <a href="/admin?week={{ w }}" style="padding: 8px 18px; border-radius: 8px; font-family: 'Teko', sans-serif; font-size: 20px; text-decoration: none; font-weight: bold; letter-spacing: 1px; white-space: nowrap; transition: all 0.2s ease; {% if w == target_week %}background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000; box-shadow: 0 4px 12px rgba(251,191,36,0.3);{% else %}background: rgba(15, 23, 42, 0.75); color: #94a3b8; border: 1px solid rgba(255,255,255,0.08);{% endif %}">
             Week {{ w }}
           </a>
         {% endfor %}
       {% endif %}
-      <form action="/admin/create-week" method="POST" style="margin: 0;">
-        <button type="submit" style="padding: 8px 16px; border-radius: 8px; font-family: 'Teko', sans-serif; font-size: 20px; background: #10b981; color: #000; font-weight: bold; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
+      <form action="/admin/create-week" method="POST" style="margin: 0; flex-shrink: 0;">
+        <button type="submit" style="padding: 8px 16px; border-radius: 8px; font-family: 'Teko', sans-serif; font-size: 20px; background: #10b981; color: #000; font-weight: bold; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); white-space: nowrap;">
           ➕ Create New Week
         </button>
       </form>
     </div>
 
-    <!-- Week Status Banner & Toggle Control (Close / Reopen) -->
+    <!-- Week Status Banner -->
     <div style="background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(255,255,255,0.12); border-left: 4px solid {% if is_week_closed %}#ef4444{% else %}#10b981{% endif %}; padding: 16px 20px; border-radius: 14px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
       <div>
         <h4 style="margin: 0; font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: #fff;">WEEK {{ target_week }} STATUS: 
@@ -358,7 +358,7 @@
     <form action="/admin/adjust" method="POST">
       <div style="margin-bottom: 15px;">
         <label style="font-weight: 600; color: #f8fafc; display: block; margin-bottom: 5px;">Select Player:</label>
-        <select name="user_id" required style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.92); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; font-size: 15px;">
+        <select name="user_id" required style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.92); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; font-size: 15px; box-sizing: border-box;">
           <option value="" disabled selected>-- Choose a player --</option>
           {% for p in all_profiles %}
             <option value="{{ p.id }}">{{ p.full_name | default(p.email) }} ({{ p.email }})</option>
@@ -367,7 +367,7 @@
       </div>
       <div style="margin-bottom: 15px;">
         <label style="font-weight: 600; color: #f8fafc; display: block; margin-bottom: 5px;">Adjustment Type:</label>
-        <select name="adjustment_type" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.92); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; font-size: 15px;">
+        <select name="adjustment_type" style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.92); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; font-size: 15px; box-sizing: border-box;">
           <option value="add">Add Tokens (+)</option>
           <option value="subtract">Subtract Tokens (-)</option>
           <option value="set">Set Absolute Value</option>
@@ -375,13 +375,13 @@
       </div>
       <div style="margin-bottom: 20px;">
         <label style="font-weight: 600; color: #f8fafc; display: block; margin-bottom: 5px;">Token Amount:</label>
-        <input type="number" name="amount" value="10" min="0" required style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.92); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; font-size: 15px;">
+        <input type="number" name="amount" value="10" min="0" required style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.92); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; font-size: 15px; box-sizing: border-box;">
       </div>
       <button type="submit" style="background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000; padding: 12px 24px; font-family: 'Teko', sans-serif; font-size: 20px; font-weight: bold; border-radius: 12px; border: none; cursor: pointer;">Apply Token Adjustment 💾</button>
     </form>
   </div>
 
-  <!-- Tab 5: Email Center (Split into Pick Reminders & Graded Results Announcements) -->
+  <!-- Tab 5: Email Center -->
   <div id="emails" class="admin-tab-content" style="display: none;">
     <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255,255,255,0.12); border-left: 4px solid #38bdf8; padding: 20px; border-radius: 16px; margin-bottom: 25px;">
       <h3 style="color: #38bdf8; font-family: 'Bebas Neue', sans-serif; font-size: 28px; margin: 0 0 5px 0;">📢 MANUAL EMAIL BROADCAST CENTER</h3>
@@ -398,7 +398,7 @@
       </div>
     {% endif %}
 
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-bottom: 25px;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 25px;">
       
       <!-- Box 1: Pick Reminders -->
       <div style="background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 24px;">
@@ -408,7 +408,7 @@
         <form action="/admin/send-reminders" method="POST" onsubmit="return confirm('Broadcast Pick Submission reminders for Week ' + document.getElementById('remind_week').value + '?');">
           <div style="margin-bottom: 15px;">
             <label for="remind_week" style="font-weight: 600; color: #f8fafc; font-size: 13px; display: block; margin-bottom: 5px;">Target Week Number:</label>
-            <input type="number" id="remind_week" name="week_number" value="{{ target_week }}" min="1" required style="width: 100%; padding: 10px; background: rgba(15, 23, 42, 0.95); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; font-size: 14px;">
+            <input type="number" id="remind_week" name="week_number" value="{{ target_week }}" min="1" required style="width: 100%; padding: 10px; background: rgba(15, 23, 42, 0.95); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; font-size: 14px; box-sizing: border-box;">
           </div>
           <button type="submit" style="width: 100%; background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000; padding: 10px 16px; font-family: 'Teko', sans-serif; font-size: 20px; font-weight: bold; border-radius: 10px; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(251,191,36,0.3);">Send Pick Reminders 🚀</button>
         </form>
@@ -422,7 +422,7 @@
         <form action="/admin/send-grading-emails" method="POST" onsubmit="return confirm('Broadcast Graded Results emails for Week ' + document.getElementById('grade_week').value + '?');">
           <div style="margin-bottom: 15px;">
             <label for="grade_week" style="font-weight: 600; color: #f8fafc; font-size: 13px; display: block; margin-bottom: 5px;">Target Week Number:</label>
-            <input type="number" id="grade_week" name="week_number" value="{{ target_week }}" min="1" required style="width: 100%; padding: 10px; background: rgba(15, 23, 42, 0.95); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; font-size: 14px;">
+            <input type="number" id="grade_week" name="week_number" value="{{ target_week }}" min="1" required style="width: 100%; padding: 10px; background: rgba(15, 23, 42, 0.95); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; font-size: 14px; box-sizing: border-box;">
           </div>
           <button type="submit" style="width: 100%; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; padding: 10px 16px; font-family: 'Teko', sans-serif; font-size: 20px; font-weight: bold; border-radius: 10px; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(16,185,129,0.3);">Send Grading Updates 📊</button>
         </form>
@@ -435,8 +435,8 @@
       <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: #fbbf24; letter-spacing: 1px; margin-top: 0; margin-bottom: 10px;">📧 EMAIL BROADCAST AUDIT LOG</h3>
       <p style="color: #94a3b8; font-size: 13px; margin-bottom: 15px;">Recent reminder and grading emails dispatched through Resend.</p>
 
-      <div style="overflow-x: auto;">
-        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px;">
+      <div style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; min-width: 450px;">
           <thead>
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); color: #94a3b8;">
               <th style="padding: 10px;">Timestamp</th>
@@ -451,10 +451,10 @@
             {% else %}
               {% for log in email_logs %}
                 <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                  <td style="padding: 10px; color: #cbd5e1;">{{ log.created_at[:19].replace('T', ' ') }}</td>
+                  <td style="padding: 10px; color: #cbd5e1; white-space: nowrap;">{{ log.created_at[:19].replace('T', ' ') }}</td>
                   <td style="padding: 10px; color: #fff;">{{ log.admin_email }}</td>
-                  <td style="padding: 10px;"><span style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; padding: 3px 8px; border-radius: 6px;">{{ log.broadcast_type }}</span></td>
-                  <td style="padding: 10px; color: #fbbf24; font-weight: bold;">{{ log.recipient_count }} users</td>
+                  <td style="padding: 10px;"><span style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; padding: 3px 8px; border-radius: 6px; white-space: nowrap;">{{ log.broadcast_type }}</span></td>
+                  <td style="padding: 10px; color: #fbbf24; font-weight: bold; white-space: nowrap;">{{ log.recipient_count }} users</td>
                 </tr>
               {% endfor %}
             {% endif %}
@@ -462,7 +462,6 @@
         </table>
       </div>
     </div>
-
   </div>
 
   <!-- Tab 6: Access Control -->
@@ -489,8 +488,8 @@
       <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: #ef4444; letter-spacing: 1px; margin-top: 0; margin-bottom: 10px;">🛡️ AUTOMATED SAFETY AUDIT LOG</h3>
       <p style="color: #94a3b8; font-size: 13px; margin-bottom: 15px;">Secure tracking of critical administrative actions, token overrides, and week lockouts.</p>
 
-      <div style="overflow-x: auto;">
-        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px;">
+      <div style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; min-width: 500px;">
           <thead>
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); color: #94a3b8;">
               <th style="padding: 10px;">Timestamp</th>
@@ -505,9 +504,9 @@
             {% else %}
               {% for audit in safety_audit_logs %}
                 <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                  <td style="padding: 10px; color: #cbd5e1;">{{ audit.created_at[:19].replace('T', ' ') }}</td>
+                  <td style="padding: 10px; color: #cbd5e1; white-space: nowrap;">{{ audit.created_at[:19].replace('T', ' ') }}</td>
                   <td style="padding: 10px; color: #fff;">{{ audit.admin_email }}</td>
-                  <td style="padding: 10px;"><b style="color: #fbbf24;">{{ audit.action_type }}</b></td>
+                  <td style="padding: 10px;"><b style="color: #fbbf24; white-space: nowrap;">{{ audit.action_type }}</b></td>
                   <td style="padding: 10px; color: #cbd5e1; font-family: monospace; font-size: 12px;">{{ audit.details }}</td>
                 </tr>
               {% endfor %}
@@ -516,7 +515,6 @@
         </table>
       </div>
     </div>
-
   </div>
 </div>
 
@@ -545,7 +543,7 @@ const templatePools = [
   "Will both teams successfully convert a 4th-down attempt?",
   "Will a 50+ yard field goal be successfully kicked during the matchup?",
   "Will the team commit more than 5.5 total penalties in the match?",
-  "Will the trailing team at halftime complete a second-half comeback wm?"
+  "Will the trailing team at halftime complete a second-half comeback?"
 ];
 
 function loadRandomTemplates() {
@@ -570,6 +568,7 @@ function loadRandomTemplates() {
   letter-spacing: 1.2px;
   color: #94a3b8;
   cursor: pointer;
+  white-space: nowrap;
   transition: all 0.25s ease;
 }
 .admin-tab-btn.active {
@@ -579,6 +578,14 @@ function loadRandomTemplates() {
   color: #fff;
   font-weight: 700;
   box-shadow: 0 6px 20px rgba(251, 191, 36, 0.3);
+}
+
+/* Mobile responsive media query adjustments */
+@media (max-width: 650px) {
+  .team-select-grid,
+  .lockout-inputs-grid {
+    grid-template-columns: 1fr !important;
+  }
 }
 </style>
 {% endblock %}
