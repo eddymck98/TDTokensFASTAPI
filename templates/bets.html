@@ -60,9 +60,9 @@
 
     {% if not is_published %}
       <!-- Unpublished Week Notice Banner -->
-      <div class="team-themed-card team-watermark-bg" style="border-top: 4px solid var(--team-color); padding: 40px 20px; text-align: center; margin-top: 20px;">
+      <div class="team-themed-card team-watermark-bg" style="border-top: 4px solid #fbbf24; padding: 40px 20px; text-align: center; margin-top: 20px;">
         <div style="font-size: 48px; margin-bottom: 10px;">⏳</div>
-        <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 32px; color: var(--team-color); margin: 0 0 10px 0; letter-spacing: 1px;">WEEKLY LINEUPS COOKING...</h3>
+        <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 32px; color: #fbbf24; margin: 0 0 10px 0; letter-spacing: 1px;">WEEKLY LINEUPS COOKING...</h3>
         <p style="color: #94a3b8; font-size: 15px; max-width: 450px; margin: 0 auto; line-height: 1.5;">This week has been created, but the matchups haven't been published yet. Come back later once the slate is locked in!</p>
       </div>
     {% else %}
@@ -77,7 +77,7 @@
       <form action="/bets/submit" method="POST" id="weekly-bets-form">
         <input type="hidden" name="week_number" id="form-week-number" value="{{ target_week }}">
 
-        <div class="team-themed-card" style="padding: 14px 18px; margin-bottom: 20px; border-left: 4px solid {% if is_week_closed %}#ef4444{% else %}var(--team-color){% endif %};">
+        <div class="team-themed-card" style="padding: 14px 18px; margin-bottom: 20px; border-left: 4px solid {% if is_week_closed %}#ef4444{% else %}#fbbf24{% endif %};">
           <b style="color: #fff; font-size: 15px;">{% if is_week_closed %}WEEK {{ target_week }} FINAL RESULTS & PICKS{% else %}MATCHUP PREDICTION SLATE{% endif %}</b>
           <p style="color: #94a3b8; font-size: 13px; margin: 4px 0 0 0;">{% if is_week_closed %}Review your performance and winning answers for this week's slate.{% else %}Configure your Yes/No picks and assign token stakes for each matchup below.{% endif %}</p>
         </div>
@@ -94,7 +94,7 @@
                     <img src="{{ q.away_logo }}" alt="Away Logo" style="width: 28px; height: 28px; object-fit: contain;">
                     <span style="color: #ffffff; font-weight: 600; font-size: 14px;">{{ q.away_team }}</span>
                   </div>
-                  <span style="font-family: 'Bebas Neue', sans-serif; color: var(--team-color); font-size: 20px; letter-spacing: 1px;">@</span>
+                  <span style="font-family: 'Bebas Neue', sans-serif; color: #fbbf24; font-size: 20px; letter-spacing: 1px;">@</span>
                   <div style="display: flex; align-items: center; gap: 8px;">
                     <span style="color: #ffffff; font-weight: 600; font-size: 14px;">{{ q.home_team }}</span>
                     <img src="{{ q.home_logo }}" alt="Home Logo" style="width: 28px; height: 28px; object-fit: contain;">
@@ -113,33 +113,33 @@
                   <div style="display: flex; gap: 8px; width: 100%;">
                     <label style="flex: 1; cursor: {% if is_week_closed %}default{% else %}pointer{% endif %}; margin: 0;">
                       <input type="radio" name="pick_{{ q.id }}" value="Yes" required style="display:none;" onchange="updateRadioStyles(this)" {% if q.user_pick == 'Yes' %}checked{% endif %} {% if is_week_closed %}disabled{% endif %}>
-                      <div class="toggle-btn yes-btn {% if q.user_pick == 'Yes' %}yes-active{% endif %}" style="text-align: center; padding: 12px 6px; border: 1px solid {% if q.user_pick == 'Yes' %}#10b981{% else %}rgba(255,255,255,0.2){% endif %}; border-radius: 10px; color: #fff; font-family: 'Teko', sans-serif; font-size: 20px; font-weight: bold; transition: 0.2s;">YES 👍</div>
+                      <div class="toggle-btn yes-btn {% if q.user_pick == 'Yes' %}{% endif %}" style="text-align: center; padding: 12px 6px; border: 1px solid {% if q.user_pick == 'Yes' %}#10b981{% else %}rgba(255,255,255,0.2){% endif %}; border-radius: 10px; color: #fff; font-family: 'Teko', sans-serif; font-size: 20px; font-weight: bold; transition: 0.2s;">YES 👍</div>
                     </label>
                     <label style="flex: 1; cursor: {% if is_week_closed %}default{% else %}pointer{% endif %}; margin: 0;">
                       <input type="radio" name="pick_{{ q.id }}" value="No" required style="display:none;" onchange="updateRadioStyles(this)" {% if q.user_pick == 'No' %}checked{% endif %} {% if is_week_closed %}disabled{% endif %}>
-                      <div class="toggle-btn no-btn {% if q.user_pick == 'No' %}no-active{% endif %}" style="text-align: center; padding: 12px 6px; border: 1px solid {% if q.user_pick == 'No' %}#ef4444{% else %}rgba(255,255,255,0.2){% endif %}; border-radius: 10px; color: #fff; font-family: 'Teko', sans-serif; font-size: 20px; font-weight: bold; transition: 0.2s;">NO 👎</div>
+                      <div class="toggle-btn no-btn {% if q.user_pick == 'No' %}{% endif %}" style="text-align: center; padding: 12px 6px; border: 1px solid {% if q.user_pick == 'No' %}#ef4444{% else %}rgba(255,255,255,0.2){% endif %}; border-radius: 10px; color: #fff; font-family: 'Teko', sans-serif; font-size: 20px; font-weight: bold; transition: 0.2s;">NO 👎</div>
                     </label>
                   </div>
 
                   {% if not is_week_closed %}
                   <!-- Redesigned High-Visibility Token Controls -->
-                  <div style="display: flex; align-items: center; gap: 8px; background: rgba(30, 41, 59, 0.95); padding: 8px 14px; border-radius: 12px; border: 2px solid var(--team-color); box-shadow: 0 4px 15px var(--team-color-glow);">
-                    <span style="font-size: 12px; color: var(--team-color); font-family: 'Bebas Neue'; letter-spacing: 1px;">WAGER:</span>
+                  <div style="display: flex; align-items: center; gap: 8px; background: rgba(30, 41, 59, 0.95); padding: 8px 14px; border-radius: 12px; border: 2px solid #fbbf24; box-shadow: 0 4px 15px rgba(251, 191, 36, 0.15);">
+                    <span style="font-size: 12px; color: #fbbf24; font-family: 'Bebas Neue'; letter-spacing: 1px;">WAGER:</span>
                     <button type="button" onclick="adjustWager('{{ q.id }}', -1)" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.25); color: #fff; font-size: 16px; font-weight: bold; cursor: pointer; padding: 4px 10px; border-radius: 6px; transition: background 0.2s;">-</button>
                     
                     <div style="display: flex; align-items: center; gap: 2px;">
-                      <input class="token-input" type="number" id="wager_{{ q.id }}" name="wager_{{ q.id }}" value="{{ q.user_wager | default(0) }}" min="0" max="{{ profile.tokens | default(10) }}" oninput="updateTokenAllocation()" style="width: 45px; background: transparent; border: none; color: var(--team-color); font-family: 'Bebas Neue'; font-size: 22px; text-align: center; padding: 0;">
+                      <input class="token-input" type="number" id="wager_{{ q.id }}" name="wager_{{ q.id }}" value="{{ q.user_wager | default(0) }}" min="0" max="{{ profile.tokens | default(10) }}" oninput="updateTokenAllocation()" style="width: 45px; background: transparent; border: none; color: #fbbf24; font-family: 'Bebas Neue'; font-size: 22px; text-align: center; padding: 0;">
                       <span style="font-size: 14px;">🪙</span>
                     </div>
 
                     <button type="button" onclick="adjustWager('{{ q.id }}', 1)" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.25); color: #fff; font-size: 16px; font-weight: bold; cursor: pointer; padding: 4px 10px; border-radius: 6px; transition: background 0.2s;">+</button>
-                    <button type="button" onclick="setMaxWager('{{ q.id }}')" class="team-btn-gradient" style="border: none; color: #000; font-size: 12px; font-weight: bold; padding: 8px 10px; border-radius: 6px; cursor: pointer;">MAX 🔥</button>
+                    <button type="button" onclick="setMaxWager('{{ q.id }}')" style="border: none; color: #000; font-size: 12px; font-weight: bold; padding: 8px 10px; border-radius: 6px; cursor: pointer; background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3);">MAX 🔥</button>
                   </div>
                   {% else %}
                   <!-- Disabled view for closed weeks -->
                   <div style="display: flex; align-items: center; background: rgba(30, 41, 59, 0.9); padding: 8px 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2);">
                     <span style="font-size: 12px; color: #94a3b8; margin-right: 6px;">Wager:</span>
-                    <span style="color: var(--team-color); font-size: 16px; font-weight: bold;">{{ q.user_wager | default(0) }} 🪙</span>
+                    <span style="color: #fbbf24; font-size: 16px; font-weight: bold;">{{ q.user_wager | default(0) }} 🪙</span>
                   </div>
                   {% endif %}
 
@@ -148,7 +148,7 @@
                 {% if is_week_closed %}
                   <div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; align-items: center; font-size: 13px; flex-wrap: wrap; gap: 6px;">
                     <span style="color: #94a3b8;">Winning Answer: <b style="color: #fff;">{{ q.winning_answer }}</b></span>
-                    <span style="font-weight: bold; {% if q.winning_answer == q.user_pick %}color: #4ade80;{% elif q.winning_answer == 'Pending' %}color: var(--team-color);{% else %}color: #f87171;{% endif %}">
+                    <span style="font-weight: bold; {% if q.winning_answer == q.user_pick %}color: #4ade80;{% elif q.winning_answer == 'Pending' %}color: #fbbf24;{% else %}color: #f87171;{% endif %}">
                       {% if q.winning_answer == 'Pending' %}
                         ⏳ Graded Pending
                       {% elif q.winning_answer == q.user_pick %}
@@ -178,7 +178,7 @@
             </div>
             
             <div style="background: rgba(251, 191, 36, 0.15); border: 1px solid rgba(251, 191, 36, 0.3); padding: 8px 14px; border-radius: 10px; text-align: center;">
-              <span style="font-family: 'Bebas Neue'; font-size: 18px; color: var(--team-color); display: block;">POTENTIAL REWARD</span>
+              <span style="font-family: 'Bebas Neue'; font-size: 18px; color: #fbbf24; display: block;">POTENTIAL REWARD</span>
               <span style="font-size: 20px; font-weight: bold; color: #fff;">+5 🪙</span>
             </div>
           </div>
@@ -198,7 +198,7 @@
                     <span style="color: #f87171;">Lost ❌</span>
                   {% endif %}
                 {% else %}
-                  <span style="color: var(--team-color);">⏳ Graded Pending</span>
+                  <span style="color: #fbbf24;">⏳ Graded Pending</span>
                 {% endif %}
               </span>
             </div>
@@ -213,7 +213,7 @@
               <span><b id="allocated-tokens-count">0</b> / <span id="max-tokens-available">{{ profile.tokens | default(10) }}</span> Tokens</span>
             </div>
             <div style="background: rgba(255,255,255,0.1); height: 8px; border-radius: 4px; overflow: hidden;">
-              <div id="token-progress-bar" style="background: var(--team-color); width: 0%; height: 100%; transition: width 0.3s ease;"></div>
+              <div id="token-progress-bar" style="background: #fbbf24; width: 0%; height: 100%; transition: width 0.3s ease;"></div>
             </div>
           </div>
 
@@ -221,7 +221,7 @@
 
           <!-- Submit & Clear Buttons -->
           <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-            <button id="submit-bets-btn" type="submit" class="team-btn-gradient" style="flex: 2; min-width: 200px; color: #fff; padding: 14px 20px; font-family: 'Teko', sans-serif; font-size: 22px; border-radius: 12px; border: none; cursor: pointer; letter-spacing: 1px;">Submit Weekly Bets 🚀</button>
+            <button id="submit-bets-btn" type="submit" style="flex: 2; min-width: 200px; color: #000; padding: 14px 20px; font-family: 'Teko', sans-serif; font-size: 22px; border-radius: 12px; border: none; cursor: pointer; letter-spacing: 1px; background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3);">Submit Weekly Bets 🚀</button>
             <button type="reset" onclick="resetWagers()" style="flex: 1; min-width: 120px; background: rgba(30, 41, 59, 0.9); color: #fff; padding: 14px 15px; font-family: 'Teko', sans-serif; font-size: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); cursor: pointer;">Clear Choices 🗑️</button>
           </div>
         {% endif %}
