@@ -228,13 +228,16 @@ async def render_dashboard_or_index(request: Request):
     except Exception as e:
         print(f"Bets Fetch Error: {e}")
 
-    # --- 3. RECENT MINI-LEAGUE ACTIVITY FEED FETCH (STRICTLY MINI-LEAGUE TEAMMATES ONLY) ---
+    # --- 3. RECENT MINI-LEAGUE ACTIVITY FEED FETCH (STRICTLY MINI-LEAGUE TEAMMATES ONLY, EXCLUDING GLOBAL) ---
     recent_league_activity = []
     try:
         my_leagues_res = supabase.table("league_members").select("league_id, leagues(name)").eq("user_id", user.id).execute()
         my_leagues = my_leagues_res.data if my_leagues_res.data else []
-        my_league_ids = [m["league_id"] for m in my_leagues]
-        league_name_map = {m["league_id"]: m["leagues"]["name"] for m in my_leagues if m.get("leagues")}
+        
+        # Filter out any league memberships pointing to the global leaderboard if applicable
+        valid_my_leagues = [m for m in my_leagues if m.get("leagues") and m["leagues"].get("name") != "Global Leaderboard"]
+        my_league_ids = [m["league_id"] for m in valid_my_leagues]
+        league_name_map = {m["league_id"]: m["leagues"]["name"] for m in valid_my_leagues}
         
         target_week = available_weeks[-1] if available_weeks else 1
         min_allowed_week = max(1, target_week - 1)  # Rolling 2-week window
@@ -288,7 +291,7 @@ async def render_dashboard_or_index(request: Request):
                             "type": "td_bonus"
                         })
 
-                # C. New Mini-League Joins (Evergreen)
+                # C. New Mini-League Joins (Evergreen - Restricted to Mini-Leagues)
                 joins_res = supabase.table("league_members") \
                     .select("user_id, league_id, joined_at") \
                     .in_("league_id", my_league_ids) \
@@ -299,24 +302,27 @@ async def render_dashboard_or_index(request: Request):
                     for j in joins_res.data:
                         uid = j.get("user_id")
                         user_name = profile_map.get(uid, "A player")
-                        l_name = league_name_map.get(j.get("league_id"), "a mini-league")
-                        recent_league_activity.append({
-                            "user_name": user_name,
-                            "league_name": l_name,
-                            "type": "new_join"
-                        })
+                        l_name = league_name_map.get(j.get("league_id"))
+                        if l_name:
+                            recent_league_activity.append({
+                                "user_name": user_name,
+                                "league_name": l_name,
+                                "type": "new_join"
+                            })
 
-                # D. Leaderboard #1 Spot Dynamic Takeovers (Mini-League Scope Only)
+                # D. Leaderboard #1 Spot Dynamic Takeovers (Mini-League Scope Only, Exclude Global)
                 leaders_res = supabase.rpc("get_mini_league_leaders").execute()
                 if leaders_res.data:
                     for leader in leaders_res.data:
-                        if leader.get("league_id") in my_league_ids:
+                        l_id = leader.get("league_id")
+                        if l_id in my_league_ids:
                             uid = leader.get("user_id")
                             user_name = profile_map.get(uid)
-                            if user_name:
+                            league_name = leader.get("league_name")
+                            if user_name and league_name and league_name != "Global Leaderboard":
                                 recent_league_activity.append({
                                     "user_name": user_name,
-                                    "league_name": leader.get("league_name"),
+                                    "league_name": league_name,
                                     "type": "rank_jump"
                                 })
     except Exception as e:
