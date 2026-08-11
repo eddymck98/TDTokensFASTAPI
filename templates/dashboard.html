@@ -11,10 +11,18 @@
       
       <!-- Sliding Marquee Track -->
       <div style="overflow: hidden; white-space: nowrap; width: 100%; position: relative;">
-        <div class="marquee-track" style="display: inline-block; animation: slideMarquee 35s linear infinite; color: #cbd5e1; font-size: 13px;">
+        <div class="marquee-track" style="display: inline-block; animation: slideMarquee 40s linear infinite; color: #cbd5e1; font-size: 13px;">
           {% for act in recent_league_activity %}
             <span style="margin-right: 50px;">
-              <b style="color: #fff;">{{ act.user_name }}</b> claimed <b style="color: #34d399;">+{{ act.tokens_won }} 🪙</b> in Week {{ act.week_number }}! 🏈
+              {% if act.type == 'payout' %}
+                <b style="color: #fff;">{{ act.user_name }}</b> claimed <b style="color: #34d399;">+{{ act.tokens_won }} 🪙</b> in <b style="color: #fbbf24;">Week {{ act.week_number }}</b>! 🏈
+              {% elif act.type == 'td_bonus' %}
+                <b style="color: #fff;">{{ act.user_name }}</b> unlocked <b style="color: #34d399;">+5 🪙</b> for nailing the <b style="color: #fbbf24;">Week {{ act.week_number }}</b> Touchdown Bonus (<b style="color: #fbbf24;">{{ act.player_name }}</b>)! 🎯
+              {% elif act.type == 'new_join' %}
+                <b style="color: #fff;">{{ act.user_name }}</b> just joined <b style="color: #38bdf8;">{{ act.league_name }}</b>! 👋
+              {% elif act.type == 'rank_jump' %}
+                👑 <b style="color: #fff;">{{ act.user_name }}</b> just climbed to <b style="color: #fbbf24;">#1</b> in <b style="color: #38bdf8;">{{ act.league_name }}</b>! 🔥
+              {% endif %}
             </span>
           {% endfor %}
         </div>
