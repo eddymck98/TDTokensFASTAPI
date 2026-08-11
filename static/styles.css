@@ -225,6 +225,11 @@ main.container {
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
 
+/* Site-wide automated team styling inheritance for cards/boxes */
+.summary-box, .rule-card, .profile-card, .league-card {
+    border-left: 4px solid var(--team-color, #fbbf24) !important;
+}
+
 /* Leaderboard & Podium Ranks */
 .leaderboard-row {
     background: rgba(15, 23, 42, 0.85);
