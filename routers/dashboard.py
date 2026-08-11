@@ -69,7 +69,7 @@ async def render_dashboard_or_index(request: Request):
     td_total = 0
     
     try:
-        weeks_res = supabase.table("weekly_questions").select("week_number").neq("week_number", 999).neq("week_number", 998).neq("week_number", 997).neq("week_number", 96).execute()
+        weeks_res = supabase.table("weekly_questions").select("week_number").neq("week_number", 998).neq("week_number", 997).neq("week_number", 96).execute()
         if weeks_res.data:
             available_weeks = sorted(list(set([r["week_number"] for r in weeks_res.data])))
         
@@ -263,6 +263,15 @@ async def render_dashboard_or_index(request: Request):
     except Exception as e:
         print(f"Activity Feed Error: {e}")
 
+    # --- 4. NEWS TICKER FETCH ---
+    news_items = []
+    try:
+        news_res = supabase.table("news_announcements").select("message").eq("is_active", True).order("created_at", desc=True).limit(5).execute()
+        if news_res.data:
+            news_items = [n["message"] for n in news_res.data]
+    except Exception as e:
+        print(f"News Fetch Error: {e}")
+
     return templates.TemplateResponse(
         request=request, 
         name="dashboard.html", 
@@ -282,6 +291,7 @@ async def render_dashboard_or_index(request: Request):
             "td_wins": td_wins,
             "td_total": td_total,
             "recent_league_activity": recent_league_activity,
+            "news_items": news_items,
             "team_data": NFL_TEAM_DATA
         }
     )
