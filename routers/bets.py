@@ -105,7 +105,6 @@ async def get_bets_page(request: Request, week: Optional[int] = None, supabase: 
             target_week = week if week and week in available_weeks else available_weeks[-1]
 
             # Check publication status: Look for a meta question row in weekly_questions (e.g., question_number == 96 indicating publication status)
-            # Alternatively checks if your admin tool saves publication state as question 96 or via a weeks table flag.
             try:
                 pub_check = supabase.table("weekly_questions").select("winning_answer").eq("week_number", target_week).eq("question_number", 96).execute()
                 if pub_check.data:
@@ -317,7 +316,7 @@ async def submit_weekly_bets(
                 "is_correct": current_is_correct
             }).execute()
 
-        return RedirectResponse(url=f"/bets?week={week_number}&success=bets_locked", status_code=303)
+        return RedirectResponse(url=f"/bets?week={week_number}&success=submitted", status_code=303)
     except Exception as e:
         print(f"Bet Submission Error: {e}")
         raise HTTPException(status_code=400, detail=str(e))
