@@ -68,7 +68,7 @@ def recalculate_all_user_balances(supabase_client: Client):
     except Exception: pass
 
 @router.get("/", response_class=HTMLResponse)
-async def admin_portal_landing(request: Request, week: Optional[int] = None):
+async def admin_portal_landing(request: Request, week: Optional[int] = None, tab: Optional[str] = "questions"):
     session_cookie = request.cookies.get("td_tokens_session")
     if not session_cookie:
         return RedirectResponse(url="/auth/login", status_code=303)
@@ -169,13 +169,14 @@ async def admin_portal_landing(request: Request, week: Optional[int] = None):
     except Exception as e:
         print(f"Error fetching profiles for admin: {e}")
 
-    # Fetch Existing Questions for Target Week
+    # Fetch Existing Questions for Target Week (Explicitly ordered by question_number to maintain sequence)
     existing_questions = []
     try:
         q_res = (
             supabase.table("weekly_questions")
             .select("*")
             .eq("week_number", target_week)
+            .order("question_number", desc=False)
             .execute()
         )
         existing_questions = q_res.data if q_res.data else []
