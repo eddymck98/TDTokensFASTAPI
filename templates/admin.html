@@ -17,7 +17,7 @@
           <p style="margin: 2px 0 0 0; color: #cbd5e1; font-size: 13px;">New sign-ins and registrations are blocked across the platform.</p>
         </div>
       </div>
-      <a href="#access" onclick="switchAdminTab(event, 'access')" style="background: #ef4444; color: #fff; padding: 6px 14px; border-radius: 8px; font-family: 'Teko', sans-serif; font-size: 18px; font-weight: bold; text-decoration: none;">Manage Control ⚙️</a>
+      <a href="#access" onclick="switchAdminTab(event, 'access')" class="admin-mobile-btn" style="background: #ef4444; color: #fff; padding: 6px 14px; border-radius: 8px; font-family: 'Teko', sans-serif; font-size: 18px; font-weight: bold; text-decoration: none;">Manage Control ⚙️</a>
     </div>
   {% else %}
     <div style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); border-left: 5px solid #10b981; padding: 12px 18px; border-radius: 12px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
@@ -44,24 +44,24 @@
         <p style="color: #cbd5e1; font-size: 14px; margin: 0;">Configure and save the 10 weekly prediction prompts and match pairings for Week {{ target_week }} as drafts, or publish them live.</p>
       </div>
       {% if not is_week_closed %}
-      <button type="button" onclick="loadRandomTemplates()" style="background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%); color: #fff; border: none; padding: 10px 18px; border-radius: 10px; font-family: 'Teko', sans-serif; font-size: 18px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);">
-        ✨ Load Random Templates
+      <button type="button" onclick="loadRandomTemplates()" class="admin-mobile-btn" style="background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%); color: #fff; border: none; padding: 8px 14px; border-radius: 10px; font-family: 'Teko', sans-serif; font-size: 17px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);">
+        ✨ Load Templates
       </button>
       {% endif %}
     </div>
 
-    <!-- Week Selector Pills & Create New Week Button -->
+    <!-- Week Selector Pills (Tab-Aware) -->
     <div style="display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; align-items: center; -webkit-overflow-scrolling: touch;">
       {% if available_weeks %}
         {% for w in available_weeks %}
-          <a href="/admin?week={{ w }}" style="padding: 8px 18px; border-radius: 8px; font-family: 'Teko', sans-serif; font-size: 20px; text-decoration: none; font-weight: bold; letter-spacing: 1px; white-space: nowrap; transition: all 0.2s ease; {% if w == target_week %}background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000; box-shadow: 0 4px 12px rgba(251,191,36,0.3);{% else %}background: rgba(15, 23, 42, 0.75); color: #94a3b8; border: 1px solid rgba(255,255,255,0.08);{% endif %}">
+          <a href="/admin?week={{ w }}&tab=questions" class="week-pill-link week-pill-questions" data-week-tab="questions" data-week-num="{{ w }}" style="padding: 6px 14px; border-radius: 8px; font-family: 'Teko', sans-serif; font-size: 18px; text-decoration: none; font-weight: bold; letter-spacing: 1px; white-space: nowrap; transition: all 0.2s ease; {% if w == target_week %}background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000; box-shadow: 0 4px 12px rgba(251,191,36,0.3);{% else %}background: rgba(15, 23, 42, 0.75); color: #94a3b8; border: 1px solid rgba(255,255,255,0.08);{% endif %}">
             Week {{ w }}
           </a>
         {% endfor %}
       {% endif %}
       <form action="/admin/create-week" method="POST" style="margin: 0; flex-shrink: 0;">
-        <button type="submit" style="padding: 8px 16px; border-radius: 8px; font-family: 'Teko', sans-serif; font-size: 20px; background: #10b981; color: #000; font-weight: bold; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); white-space: nowrap;">
-          ➕ Create New Week (Draft)
+        <button type="submit" class="admin-mobile-btn" style="padding: 6px 12px; border-radius: 8px; font-family: 'Teko', sans-serif; font-size: 18px; background: #10b981; color: #000; font-weight: bold; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); white-space: nowrap;">
+          ➕ Create New Week
         </button>
       </form>
     </div>
@@ -80,9 +80,9 @@
         <form action="{% if is_published %}/admin/week/unpublish{% else %}/admin/week/publish{% endif %}" method="POST" style="margin: 0;">
           <input type="hidden" name="week_number" value="{{ target_week }}">
           {% if is_published %}
-            <button type="submit" style="background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.4); color: #fca5a5; padding: 8px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; font-family: 'Teko', sans-serif; font-size: 18px;">🔒 Unpublish to Draft</button>
+            <button type="submit" class="admin-mobile-btn" style="background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.4); color: #fca5a5; padding: 6px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-family: 'Teko', sans-serif; font-size: 17px;">🔒 Unpublish</button>
           {% else %}
-            <button type="submit" style="background: #10b981; color: #fff; border: none; padding: 8px 18px; border-radius: 8px; font-weight: bold; cursor: pointer; font-family: 'Teko', sans-serif; font-size: 18px;">🚀 Publish Week Live</button>
+            <button type="submit" class="admin-mobile-btn" style="background: #10b981; color: #fff; border: none; padding: 6px 14px; border-radius: 8px; font-weight: bold; cursor: pointer; font-family: 'Teko', sans-serif; font-size: 17px;">🚀 Publish Week</button>
           {% endif %}
         </form>
       </div>
@@ -149,7 +149,6 @@
               <option value="Arizona Cardinals">Arizona Cardinals</option>
               <option value="Atlanta Falcons">Atlanta Falcons</option>
               <option value="Baltimore Ravens">Baltimore Ravens</option>
-              <option value="Baltimore Ravens">Baltimore Ravens</option>
               <option value="Buffalo Bills">Buffalo Bills</option>
               <option value="Carolina Panthers">Carolina Panthers</option>
               <option value="Chicago Bears">Chicago Bears</option>
@@ -189,7 +188,7 @@
       {% endfor %}
 
       {% if not is_week_closed %}
-      <button type="submit" style="background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000; padding: 14px 28px; font-family: 'Teko', sans-serif; font-size: 22px; font-weight: bold; border-radius: 12px; border: none; cursor: pointer; width: 100%; margin-top: 15px;">Save Question Drafts 💾</button>
+      <button type="submit" class="admin-mobile-btn" style="background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000; padding: 12px 20px; font-family: 'Teko', sans-serif; font-size: 20px; font-weight: bold; border-radius: 12px; border: none; cursor: pointer; width: 100%; margin-top: 15px;">Save Question Drafts 💾</button>
       {% endif %}
     </form>
   </div>
@@ -201,17 +200,17 @@
       <p style="color: #cbd5e1; font-size: 14px; margin: 0;">Type the date and UK time directly into the boxes below.</p>
     </div>
 
-    <!-- Week Selector Pills -->
+    <!-- Week Selector Pills (Tab-Aware) -->
     <div style="display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; align-items: center; -webkit-overflow-scrolling: touch;">
       {% if available_weeks %}
         {% for w in available_weeks %}
-          <a href="/admin?week={{ w }}" style="padding: 8px 18px; border-radius: 8px; font-family: 'Teko', sans-serif; font-size: 20px; text-decoration: none; font-weight: bold; letter-spacing: 1px; white-space: nowrap; transition: all 0.2s ease; {% if w == target_week %}background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000; box-shadow: 0 4px 12px rgba(251,191,36,0.3);{% else %}background: rgba(15, 23, 42, 0.75); color: #94a3b8; border: 1px solid rgba(255,255,255,0.08);{% endif %}">
+          <a href="/admin?week={{ w }}&tab=lockout" class="week-pill-link week-pill-lockout" data-week-tab="lockout" data-week-num="{{ w }}" style="padding: 6px 14px; border-radius: 8px; font-family: 'Teko', sans-serif; font-size: 18px; text-decoration: none; font-weight: bold; letter-spacing: 1px; white-space: nowrap; transition: all 0.2s ease; {% if w == target_week %}background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000; box-shadow: 0 4px 12px rgba(251,191,36,0.3);{% else %}background: rgba(15, 23, 42, 0.75); color: #94a3b8; border: 1px solid rgba(255,255,255,0.08);{% endif %}">
             Week {{ w }}
           </a>
         {% endfor %}
       {% endif %}
       <form action="/admin/create-week" method="POST" style="margin: 0; flex-shrink: 0;">
-        <button type="submit" style="padding: 8px 16px; border-radius: 8px; font-family: 'Teko', sans-serif; font-size: 20px; background: #10b981; color: #000; font-weight: bold; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); white-space: nowrap;">
+        <button type="submit" class="admin-mobile-btn" style="padding: 6px 12px; border-radius: 8px; font-family: 'Teko', sans-serif; font-size: 18px; background: #10b981; color: #000; font-weight: bold; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); white-space: nowrap;">
           ➕ Create New Week
         </button>
       </form>
@@ -234,9 +233,9 @@
 
         <p style="color: #94a3b8; font-size: 12px; margin-bottom: 20px;">🇬🇧 You can freely click and type into both fields (e.g., Date: <code>2026-09-13</code>, Time: <code>18:00</code>).</p>
 
-        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-          <button type="submit" style="background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%); color: #000; padding: 12px 24px; font-family: 'Teko', sans-serif; font-size: 20px; font-weight: bold; border-radius: 12px; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);">Update / Override Schedule 🕒</button>
-          <button type="submit" formaction="/admin/week/clear-lockout" style="background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.4); color: #fca5a5; padding: 12px 20px; font-family: 'Teko', sans-serif; font-size: 20px; font-weight: bold; border-radius: 12px; cursor: pointer;">Clear / Remove Lockout ❌</button>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <button type="submit" class="admin-mobile-btn" style="background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%); color: #000; padding: 10px 18px; font-family: 'Teko', sans-serif; font-size: 18px; font-weight: bold; border-radius: 10px; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);">Update Schedule 🕒</button>
+          <button type="submit" formaction="/admin/week/clear-lockout" class="admin-mobile-btn" style="background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.4); color: #fca5a5; padding: 10px 16px; font-family: 'Teko', sans-serif; font-size: 18px; font-weight: bold; border-radius: 10px; cursor: pointer;">Clear Lockout ❌</button>
         </div>
       </form>
     </div>
@@ -249,17 +248,17 @@
       <p style="color: #cbd5e1; font-size: 14px; margin: 0;">Set winning answers for questions to evaluate user token balances instantly.</p>
     </div>
 
-    <!-- Week Selector Pills -->
+    <!-- Week Selector Pills (Tab-Aware) -->
     <div style="display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; align-items: center; -webkit-overflow-scrolling: touch;">
       {% if available_weeks %}
         {% for w in available_weeks %}
-          <a href="/admin?week={{ w }}" style="padding: 8px 18px; border-radius: 8px; font-family: 'Teko', sans-serif; font-size: 20px; text-decoration: none; font-weight: bold; letter-spacing: 1px; white-space: nowrap; transition: all 0.2s ease; {% if w == target_week %}background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000; box-shadow: 0 4px 12px rgba(251,191,36,0.3);{% else %}background: rgba(15, 23, 42, 0.75); color: #94a3b8; border: 1px solid rgba(255,255,255,0.08);{% endif %}">
+          <a href="/admin?week={{ w }}&tab=grading" class="week-pill-link week-pill-grading" data-week-tab="grading" data-week-num="{{ w }}" style="padding: 6px 14px; border-radius: 8px; font-family: 'Teko', sans-serif; font-size: 18px; text-decoration: none; font-weight: bold; letter-spacing: 1px; white-space: nowrap; transition: all 0.2s ease; {% if w == target_week %}background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000; box-shadow: 0 4px 12px rgba(251,191,36,0.3);{% else %}background: rgba(15, 23, 42, 0.75); color: #94a3b8; border: 1px solid rgba(255,255,255,0.08);{% endif %}">
             Week {{ w }}
           </a>
         {% endfor %}
       {% endif %}
       <form action="/admin/create-week" method="POST" style="margin: 0; flex-shrink: 0;">
-        <button type="submit" style="padding: 8px 16px; border-radius: 8px; font-family: 'Teko', sans-serif; font-size: 20px; background: #10b981; color: #000; font-weight: bold; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); white-space: nowrap;">
+        <button type="submit" class="admin-mobile-btn" style="padding: 6px 12px; border-radius: 8px; font-family: 'Teko', sans-serif; font-size: 18px; background: #10b981; color: #000; font-weight: bold; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); white-space: nowrap;">
           ➕ Create New Week
         </button>
       </form>
@@ -278,10 +277,10 @@
           <input type="hidden" name="week_number" value="{{ target_week }}">
           {% if is_week_closed %}
             <input type="hidden" name="action" value="reopen">
-            <button type="submit" style="background: #10b981; color: #000; padding: 10px 20px; border-radius: 10px; font-weight: bold; border: none; cursor: pointer; font-family: 'Teko', sans-serif; font-size: 18px;">🔓 Reopen Week</button>
+            <button type="submit" class="admin-mobile-btn" style="background: #10b981; color: #000; padding: 8px 16px; border-radius: 10px; font-weight: bold; border: none; cursor: pointer; font-family: 'Teko', sans-serif; font-size: 17px;">🔓 Reopen Week</button>
           {% else %}
             <input type="hidden" name="action" value="close">
-            <button type="submit" style="background: #ef4444; color: #fff; padding: 10px 20px; border-radius: 10px; font-weight: bold; border: none; cursor: pointer; font-family: 'Teko', sans-serif; font-size: 18px;">🔒 Close & Lock Week</button>
+            <button type="submit" class="admin-mobile-btn" style="background: #ef4444; color: #fff; padding: 8px 16px; border-radius: 10px; font-weight: bold; border: none; cursor: pointer; font-family: 'Teko', sans-serif; font-size: 17px;">🔒 Close & Lock Week</button>
           {% endif %}
         </form>
       </div>
@@ -344,7 +343,7 @@
         {% endif %}
       </div>
 
-      <button type="submit" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; padding: 14px 28px; font-family: 'Teko', sans-serif; font-size: 22px; font-weight: bold; border-radius: 12px; border: none; cursor: pointer; margin-top: 10px;">Save Live Results & Recalculate Tokens 🚀</button>
+      <button type="submit" class="admin-mobile-btn" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; padding: 12px 20px; font-family: 'Teko', sans-serif; font-size: 20px; font-weight: bold; border-radius: 12px; border: none; cursor: pointer; margin-top: 10px;">Save Live Results & Recalculate Tokens 🚀</button>
     </form>
   </div>
 
@@ -377,7 +376,7 @@
         <label style="font-weight: 600; color: #f8fafc; display: block; margin-bottom: 5px;">Token Amount:</label>
         <input type="number" name="amount" value="10" min="0" required style="width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.92); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; font-size: 15px; box-sizing: border-box;">
       </div>
-      <button type="submit" style="background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000; padding: 12px 24px; font-family: 'Teko', sans-serif; font-size: 20px; font-weight: bold; border-radius: 12px; border: none; cursor: pointer;">Apply Token Adjustment 💾</button>
+      <button type="submit" class="admin-mobile-btn" style="background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000; padding: 10px 20px; font-family: 'Teko', sans-serif; font-size: 19px; font-weight: bold; border-radius: 10px; border: none; cursor: pointer;">Apply Token Adjustment 💾</button>
     </form>
   </div>
 
@@ -410,7 +409,7 @@
             <label for="remind_week" style="font-weight: 600; color: #f8fafc; font-size: 13px; display: block; margin-bottom: 5px;">Target Week Number:</label>
             <input type="number" id="remind_week" name="week_number" value="{{ target_week }}" min="1" required style="width: 100%; padding: 10px; background: rgba(15, 23, 42, 0.95); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; font-size: 14px; box-sizing: border-box;">
           </div>
-          <button type="submit" style="width: 100%; background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000; padding: 10px 16px; font-family: 'Teko', sans-serif; font-size: 20px; font-weight: bold; border-radius: 10px; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(251,191,36,0.3);">Send Pick Reminders 🚀</button>
+          <button type="submit" class="admin-mobile-btn" style="width: 100%; background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000; padding: 10px 16px; font-family: 'Teko', sans-serif; font-size: 19px; font-weight: bold; border-radius: 10px; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(251,191,36,0.3);">Send Pick Reminders 🚀</button>
         </form>
       </div>
 
@@ -424,7 +423,7 @@
             <label for="grade_week" style="font-weight: 600; color: #f8fafc; font-size: 13px; display: block; margin-bottom: 5px;">Target Week Number:</label>
             <input type="number" id="grade_week" name="week_number" value="{{ target_week }}" min="1" required style="width: 100%; padding: 10px; background: rgba(15, 23, 42, 0.95); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; font-size: 14px; box-sizing: border-box;">
           </div>
-          <button type="submit" style="width: 100%; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; padding: 10px 16px; font-family: 'Teko', sans-serif; font-size: 20px; font-weight: bold; border-radius: 10px; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(16,185,129,0.3);">Send Grading Updates 📊</button>
+          <button type="submit" class="admin-mobile-btn" style="width: 100%; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; padding: 10px 16px; font-family: 'Teko', sans-serif; font-size: 19px; font-weight: bold; border-radius: 10px; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(16,185,129,0.3);">Send Grading Updates 📊</button>
         </form>
       </div>
 
@@ -480,7 +479,7 @@
         <input type="checkbox" id="signup_locked" name="signup_locked" value="true" style="width: 20px; height: 20px;">
         <label for="signup_locked" style="font-weight: 600; color: #f8fafc;">Lock All New Sign-Ups (Prevent new account registrations)</label>
       </div>
-      <button type="submit" style="background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%); color: #000; padding: 12px 24px; font-family: 'Teko', sans-serif; font-size: 20px; font-weight: bold; border-radius: 12px; border: none; cursor: pointer;">Save Access Control Settings 🔒</button>
+      <button type="submit" class="admin-mobile-btn" style="background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%); color: #000; padding: 10px 20px; font-family: 'Teko', sans-serif; font-size: 19px; font-weight: bold; border-radius: 10px; border: none; cursor: pointer;">Save Access Control Settings 🔒</button>
     </form>
 
     <!-- Automated Safety Audit Log Section -->
@@ -530,8 +529,38 @@ function switchAdminTab(evt, tabName) {
     tabBtns[i].className = tabBtns[i].className.replace(" active", "");
   }
   document.getElementById(tabName).style.display = "block";
-  evt.currentTarget.className += " active";
+  if (evt && evt.currentTarget) {
+    evt.currentTarget.className += " active";
+  }
+
+  // Dynamically update week pill links to preserve the active tab when changing weeks
+  const weekPills = document.querySelectorAll('.week-pill-link');
+  weekPills.forEach(pill => {
+    const wNum = pill.getAttribute('data-week-num');
+    pill.href = `/admin?week=${wNum}&tab=${tabName}`;
+  });
 }
+
+// Automatically restore active tab from URL query parameter on page load
+document.addEventListener("DOMContentLoaded", function() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const activeTab = urlParams.get('tab');
+  if (activeTab && document.getElementById(activeTab)) {
+    const tabButtonMap = {
+      'questions': 0,
+      'lockout': 1,
+      'grading': 2,
+      'tokens': 3,
+      'emails': 4,
+      'access': 5
+    };
+    const btnIndex = tabButtonMap[activeTab];
+    const tabBtns = document.getElementsByClassName("admin-tab-btn");
+    if (tabBtns[btnIndex]) {
+      switchAdminTab({ currentTarget: tabBtns[btnIndex] }, activeTab);
+    }
+  }
+});
 
 const templatePools = [
   "Will the total combined score in this game exceed 48.5 points?",
@@ -585,6 +614,12 @@ function loadRandomTemplates() {
   .team-select-grid,
   .lockout-inputs-grid {
     grid-template-columns: 1fr !important;
+  }
+  
+  /* Shrink admin action buttons on mobile to avoid horizontal overflow */
+  .admin-mobile-btn {
+    font-size: 15px !important;
+    padding: 6px 10px !important;
   }
 }
 </style>
