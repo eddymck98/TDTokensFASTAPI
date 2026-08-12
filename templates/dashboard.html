@@ -7,7 +7,7 @@
   {% if recent_league_activity %}
   <div style="background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(251, 191, 36, 0.25); border-left: 4px solid #fbbf24; border-radius: 12px; padding: 10px 16px; margin-bottom: 20px; overflow: hidden; position: relative; backdrop-filter: blur(10px); box-shadow: 0 4px 15px rgba(0,0,0,0.3); box-sizing: border-box;">
     <div style="display: flex; align-items: center; gap: 10px;">
-      <span style="font-size: 13px; white-space: nowrap; font-weight: bold; color: #fbbf24; letter-spacing: 1px;">⚡ RIVAL FEED:</span>
+      <span class="rival-feed-label" style="font-size: 13px; white-space: nowrap; font-weight: bold; color: #fbbf24; letter-spacing: 1px;">⚡ RIVAL FEED:</span>
       
       <!-- Sliding Marquee Track -->
       <div style="overflow: hidden; white-space: nowrap; width: 100%; position: relative;">
@@ -37,6 +37,16 @@
   }
   .marquee-track:hover {
     animation-play-state: paused;
+  }
+
+  /* Shrink rival feed ticker on mobile viewports */
+  @media (max-width: 650px) {
+    .marquee-track {
+      font-size: 11px !important;
+    }
+    .rival-feed-label {
+      font-size: 11px !important;
+    }
   }
   </style>
   {% endif %}
